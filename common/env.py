@@ -18,7 +18,9 @@ def worker(remote, env_fn_wrapper):
     env = env_fn_wrapper.x()
     while True:
         cmd, data = remote.recv()
-        if cmd == 'step':
+        if cmd == 'spec':
+            remote.send((env.observation_spec(), env.action_spec()))
+        elif cmd == 'step':
             obs = env.step([data])
             if obs[0].last():
                 # TODO am I throwing away last step rewards?
@@ -61,6 +63,13 @@ class EnvPool(object):
             for (work_remote, env_fn) in zip(self.work_remotes, env_fns)]
         for p in self.ps:
             p.start()
+
+    def spec(self):
+        for remote in self.remotes:
+            remote.send(('spec', None))
+        results = [remote.recv() for remote in self.remotes]
+        # todo maybe support running different envs / specs in the future?
+        return results[0]
 
     def step(self, actions):
         for remote, action in zip(self.remotes, actions):

@@ -11,6 +11,7 @@ class Runner(object):
 
     def run(self, agent, max_frames=0):
         envs = EnvPool([make_env(self.map_name, **self.env_params) for _ in range(self.n_envs)])
+        agent.setup(*envs.spec())
 
         total_frames = 0
         start_time = time.time()
