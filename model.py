@@ -1,31 +1,35 @@
-import keras
 import tensorflow as tf
-from keras.models import Model
-from keras.layers import Input, Conv2D, Concatenate, Dense, Flatten, Activation, Reshape
+from tensorflow.contrib import layers
 
 
 def cnn_block(cat_channels_in, cat_channels_out, num_channels):
-    cat_inputs = Input(shape=(64, 64, cat_channels_in))
-    num_inputs = Input(shape=(64, 64, num_channels))
-    embed = Conv2D(cat_channels_out, 1)(cat_inputs)
-    inputs = Concatenate(axis=3)([embed, num_inputs])
-    conv1 = Conv2D(16, 5, padding='same', activation='relu')(inputs)
-    conv2 = Conv2D(32, 3, padding='same', activation='relu')(conv1)
+    cat_inputs = tf.placeholder(tf.float32, [None, 64, 64, cat_channels_in])
+    num_inputs = tf.placeholder(tf.float32, [None, 64, 64, num_channels])
+
+    embed = layers.conv2d(inputs=cat_inputs, num_outputs=cat_channels_out, kernel_size=1)
+    inputs = tf.concat([embed, num_inputs], axis=3)
+
+    conv1 = layers.conv2d(inputs=inputs, num_outputs=16, kernel_size=5)
+    conv2 = layers.conv2d(inputs=conv1, num_outputs=32, kernel_size=3)
+
     return conv2, cat_inputs, num_inputs
 
 
-def simple(screen_channels, minimap_channels):
+def fully_conv(screen_channels, minimap_channels):
     # todo non-spatial features, policy
     screen, s_cat_in, s_num_in = cnn_block(*screen_channels)
     minimap, m_cat_in, m_num_in = cnn_block(*minimap_channels)
-    state = Concatenate(axis=3)([screen, minimap])
-    spatial_action = Conv2D(1, 1, name='action_spatial')(state)
-    spatial_action = Flatten()(spatial_action)
-    spatial_action = Activation('softmax')(spatial_action)
-    # spatial_action = Reshape((64, 64))(spatial_action)
+    state = tf.concat([screen, minimap], axis=3)
+    spatial_policy = layers.conv2d(inputs=state, num_outputs=1, kernel_size=1, activation_fn=None)
+    spatial_policy = tf.nn.softmax(layers.flatten(spatial_policy))
 
-    flat = Flatten()(state)
-    fc1 = Dense(256, activation='relu')(flat)
-    value = Dense(1, name='value')(fc1)
+    flat_state = layers.flatten(state)
+    fc1 = layers.fully_connected(flat_state, num_outputs=256)
+    value = tf.squeeze(layers.fully_connected(fc1, num_outputs=1, activation_fn=None), axis=1)
 
-    return Model(inputs=[s_cat_in, s_num_in, m_cat_in, m_num_in], outputs=[spatial_action, value])
+    # based on https://github.com/pekaalto/sc2aibot/blob/master/common/util.py#L5-L11
+    # TODO does it really do what it's supposed to?
+    u = tf.random_uniform(tf.shape(spatial_policy))
+    spatial_action = tf.argmax(tf.log(u) / spatial_policy, axis=1)
+
+    return [s_cat_in, s_num_in, m_cat_in, m_num_in], [spatial_policy, spatial_action, value]

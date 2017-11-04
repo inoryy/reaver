@@ -1,4 +1,6 @@
 import numpy as np
+import tensorflow as tf
+
 from pysc2.lib import features
 
 
@@ -20,7 +22,7 @@ def n_channels_type(type, feat_names):
 
 
 def preprocess_inputs(x, feats):
-    return preprocess_type(x, 'screen', feats), preprocess_type(x, 'minimap', feats)
+    return preprocess_type(x, 'screen', feats) + preprocess_type(x, 'minimap', feats)
 
 
 def preprocess_type(x, type, feats):
@@ -49,3 +51,7 @@ def one_hot(x, n_classes):
     out[np.arange(x.size), x.ravel()] = 1
     out.shape = x.shape + (n_classes,)
     return out
+
+
+def unravel_coords(action, sz=(64, 64)):
+    return list(zip(*np.unravel_index(action, dims=sz)))
