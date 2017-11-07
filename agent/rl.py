@@ -30,8 +30,8 @@ class RLAgent(BaseAgent):
         self.inputs, (self.spatial_policy, self.value) = fully_conv(*n_channels(feats))
         self.spatial_action = sample(self.spatial_policy)
         loss_fn, self.loss_inputs = self.loss_func()
-        self.train_op = layers.optimize_loss(loss=loss_fn, optimizer=tf.train.AdamOptimizer(),
-                                             global_step=tf.train.get_global_step(), learning_rate=None)
+        self.train_op = layers.optimize_loss(loss=loss_fn, optimizer=tf.train.AdamOptimizer(), learning_rate=None,
+                                             global_step=tf.train.get_global_step(), clip_gradients=500.)
         self.sess.run(tf.global_variables_initializer())
         self.rewards = []
 
@@ -74,7 +74,7 @@ class RLAgent(BaseAgent):
 
         policy_loss = -tf.reduce_mean(logli * adv)
         value_loss = tf.reduce_mean(tf.pow(adv, 2))
-        entropy_loss = 1e-6 * tf.reduce_mean(entropy)
+        entropy_loss = 1e-3 * tf.reduce_mean(entropy)
 
         return policy_loss + value_loss + entropy_loss, [returns]
 
