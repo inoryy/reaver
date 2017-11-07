@@ -70,11 +70,13 @@ class RLAgent(BaseAgent):
         returns = tf.placeholder(tf.float32, [None])
         adv = tf.stop_gradient(returns - self.value)
         logli = select(tf.log(self.spatial_policy), self.spatial_action)
+        entropy = tf.reduce_sum(self.spatial_policy * tf.log(self.spatial_policy), axis=1)
 
         policy_loss = -tf.reduce_mean(logli * adv)
         value_loss = tf.reduce_mean(tf.pow(adv, 2))
+        entropy_loss = 1e-6 * tf.reduce_mean(entropy)
 
-        return policy_loss + value_loss, [returns]
+        return policy_loss + value_loss + entropy_loss, [returns]
 
     def train(self):
         self.sess.run(self.train_op, dict(zip(self.inputs + self.loss_inputs, self.rollouts.inputs())))
