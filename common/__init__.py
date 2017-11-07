@@ -47,7 +47,7 @@ def preprocess_obs(obs, type, feat_names):
 
 
 def one_hot(x, n_classes):
-    out = np.zeros( (x.size, n_classes), dtype=np.uint8)
+    out = np.zeros((x.size, n_classes), dtype=np.uint8)
     out[np.arange(x.size), x.ravel()] = 1
     out.shape = x.shape + (n_classes,)
     return out
