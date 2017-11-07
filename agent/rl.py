@@ -62,8 +62,8 @@ class RLAgent(BaseAgent):
                 acts.append(actions.FunctionCall(7, [[0]]))
                 continue
             # https://github.com/deepmind/pysc2/issues/103
-            x, y = coords[i]
-            acts.append(actions.FunctionCall(12, [[0], (y, x)]))
+            y, x = coords[i]
+            acts.append(actions.FunctionCall(12, [[0], (x, y)]))
         return acts
 
     def loss_func(self):
