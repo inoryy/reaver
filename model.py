@@ -27,9 +27,4 @@ def fully_conv(screen_channels, minimap_channels):
     fc1 = layers.fully_connected(flat_state, num_outputs=256)
     value = tf.squeeze(layers.fully_connected(fc1, num_outputs=1, activation_fn=None), axis=1)
 
-    # based on https://github.com/pekaalto/sc2aibot/blob/master/common/util.py#L5-L11
-    # TODO does it really do what it's supposed to?
-    u = tf.random_uniform(tf.shape(spatial_policy))
-    spatial_action = tf.argmax(tf.log(u) / spatial_policy, axis=1)
-
-    return [s_cat_in, s_num_in, m_cat_in, m_num_in], [spatial_policy, spatial_action, value]
+    return [s_cat_in, s_num_in, m_cat_in, m_num_in], [spatial_policy, value]
