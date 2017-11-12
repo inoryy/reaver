@@ -1,5 +1,5 @@
 import sys, importlib
-import gflags as flags
+from absl import flags
 from common.runner import Runner
 
 FLAGS = flags.FLAGS
