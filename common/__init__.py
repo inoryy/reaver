@@ -18,6 +18,11 @@ def n_channels_type(type, feat_names):
             cat_channels_in += f.scale
         else:
             num_channels += 1
+
+        # ignore background noise
+        # TODO do this abstractly
+        if f.name == 'player_relative':
+            cat_channels_in -= 1
     return cat_channels_in, cat_channels_out, num_channels
 
 
@@ -37,6 +42,10 @@ def preprocess_obs(obs, type, feat_names):
         f = getattr(feats, f_name)
         if f.type == features.FeatureType.CATEGORICAL:
             cat.append(one_hot(obs.observation[type][f.index], f.scale))
+            # ignore background noise
+            # TODO do this abstractly
+            if f.name == 'player_relative':
+                cat[-1] = cat[-1][:, :, 1:]
         else:
             num.append(obs.observation[type][f.index])
 

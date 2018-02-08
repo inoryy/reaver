@@ -7,7 +7,7 @@ from multiprocessing import Process, Pipe
 # TODO seed, logger, wrappers
 def make_env(map_name, **params):
     def _thunk():
-        env = sc2_env.SC2Env(map_name=map_name, step_mul=8, **params)
+        env = sc2_env.SC2Env(map_name=map_name, step_mul=8, screen_size_px=(32, 32), minimap_size_px=(32, 32), **params)
         return env
     return _thunk
 

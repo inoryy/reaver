@@ -47,7 +47,7 @@ class RolloutStorage(object):
         self.rewards = np.array(self.rewards)
         self.returns = np.array(self.returns)
         for step in reversed(range(self.rewards.shape[0])):
-            self.returns[step] = self.returns[step+1] * gamma * (1 - self.dones[step]) + self.rewards[step]
+            self.returns[step] = self.rewards[step] + gamma * self.returns[step+1] * (1 - self.dones[step])
         self.returns = self.returns[:-1]
         self.flatten()
 

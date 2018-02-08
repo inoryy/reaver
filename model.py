@@ -3,11 +3,14 @@ from tensorflow.contrib import layers
 
 
 def cnn_block(cat_channels_in, cat_channels_out, num_channels):
-    cat_inputs = tf.placeholder(tf.float32, [None, 64, 64, cat_channels_in])
-    num_inputs = tf.placeholder(tf.float32, [None, 64, 64, num_channels])
+    cat_inputs = tf.placeholder(tf.float32, [None, 32, 32, cat_channels_in])
+    # num_inputs = tf.placeholder(tf.float32, [None, 32, 32, num_channels])
+    num_inputs = None
 
-    embed = layers.conv2d(inputs=cat_inputs, num_outputs=cat_channels_out, kernel_size=1)
-    inputs = tf.concat([embed, num_inputs], axis=3)
+    # embed = layers.conv2d(inputs=cat_inputs, num_outputs=cat_channels_out, kernel_size=1)
+    embed = cat_inputs
+    # inputs = tf.concat([embed, num_inputs], axis=3)
+    inputs = embed
 
     conv1 = layers.conv2d(inputs=inputs, num_outputs=16, kernel_size=5)
     conv2 = layers.conv2d(inputs=conv1, num_outputs=32, kernel_size=3)
