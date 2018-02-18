@@ -1,13 +1,17 @@
-import numpy as np
-from pysc2.env import sc2_env, environment
+from pysc2.env import sc2_env
 from multiprocessing import Process, Pipe
 
 
+def make_envs(args):
+    env_args = dict(map_name=args.map, step_mul=8, game_steps_per_episode=0)
+    return EnvPool([make_env(args.sz, **dict(env_args, visualize=i < args.render)) for i in range(args.envs)])
+
+
 # based on https://github.com/ikostrikov/pytorch-a2c-ppo-acktr/blob/master/envs.py
-# TODO seed, logger, wrappers
-def make_env(map_name, **params):
+def make_env(sz=32, **params):
     def _thunk():
-        env = sc2_env.SC2Env(map_name=map_name, step_mul=8, screen_size_px=(32, 32), minimap_size_px=(32, 32), **params)
+        params['screen_size_px'] = params['minimap_size_px'] = (sz, sz)
+        env = sc2_env.SC2Env(**params)
         return env
     return _thunk
 
@@ -22,9 +26,6 @@ def worker(remote, env_fn_wrapper):
             remote.send((env.observation_spec(), env.action_spec()))
         elif cmd == 'step':
             obs = env.step([data])
-            if obs[0].last():
-                # TODO am I throwing away last step rewards?
-                obs = env.reset()
             remote.send(obs[0])
         elif cmd == 'reset':
             obs = env.reset()
@@ -37,9 +38,6 @@ def worker(remote, env_fn_wrapper):
 
 
 class CloudpickleWrapper(object):
-    """
-    Uses cloudpickle to serialize contents (otherwise multiprocessing tries to use pickle)
-    """
     def __init__(self, x):
         self.x = x
 
@@ -54,9 +52,6 @@ class CloudpickleWrapper(object):
 
 class EnvPool(object):
     def __init__(self, env_fns):
-        """
-        envs: list of gym environments to run in subprocesses
-        """
         nenvs = len(env_fns)
         self.remotes, self.work_remotes = zip(*[Pipe() for _ in range(nenvs)])
         self.ps = [Process(target=worker, args=(work_remote, CloudpickleWrapper(env_fn)))
