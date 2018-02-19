@@ -15,15 +15,15 @@ class A2CAgent:
         opt = tf.train.RMSPropOptimizer(learning_rate=lr, decay=0.99)
         self.train_op = layers.optimize_loss(loss=loss_fn, optimizer=opt, learning_rate=None,
                                              global_step=tf.train.get_global_step(), clip_gradients=clip_grads)
+        self.sess.run(tf.global_variables_initializer())
 
         self.saver = tf.train.Saver()
         if restore:
-            self.saver.restore(self.sess, tf.train.latest_checkpoint('weights'))
-        self.sess.run(tf.global_variables_initializer())
+            self.saver.restore(self.sess, tf.train.latest_checkpoint('weights/' + self.config.map_id()))
 
     def train(self, step, states, actions, rewards, dones, last_value):
         if step % 500 == 0:
-            self.saver.save(self.sess, 'weights/a2c', global_step=step)
+            self.saver.save(self.sess, 'weights/%s/a2c' % self.config.map_id(), global_step=step)
         returns = self._compute_returns(rewards, dones, last_value)
         return self.sess.run([self.train_op], dict(zip(self.inputs + self.loss_inputs, states + actions + [returns])))
 

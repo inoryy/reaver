@@ -14,9 +14,9 @@ class Runner:
         self.reset()
         try:
             for i in range(num_updates):
+                self.logs['updates'] += 1
                 rollout = self.collect_rollout()
                 if train:
-                    self.logs['updates'] += 1
                     self.agent.train(i, *rollout)
         except KeyboardInterrupt:
             pass

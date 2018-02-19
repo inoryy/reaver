@@ -31,7 +31,9 @@ if __name__ == '__main__':
     tf.reset_default_graph()
     sess = tf.Session()
 
-    config = Config(args.sz, {'non_spatial': ['player', 'available_actions']})
+    config = Config(args.sz, args.map, {'non_spatial': ['player', 'available_actions']})
+    os.makedirs('weights/' + config.map_id(), exist_ok=True)
+
     envs = EnvWrapper(make_envs(args), config)
     agent = A2CAgent(sess, fully_conv, config, args.restore, args.discount, args.lr, args.vf_coef, args.ent_coef, args.clip_grads)
 
