@@ -17,7 +17,7 @@ class Runner:
                 rollout = self.collect_rollout()
                 if train:
                     self.logs['updates'] += 1
-                    self.agent.train(*rollout)
+                    self.agent.train(i, *rollout)
         except KeyboardInterrupt:
             pass
         finally:
@@ -61,6 +61,7 @@ class Runner:
         logger.logkv('elapsed_time', int(elapsed_time))
         logger.logkv('n_eps', self.logs['eps'])
         logger.logkv('n_samples', frames)
+        logger.logkv('n_updates', self.logs['updates'])
         logger.logkv('rew_best_mean', self.logs['rew_best'])
         logger.logkv('rew_max', np.max(self.logs['ep_rew']))
         logger.logkv('rew_mean', np.mean(self.logs['ep_rew']))

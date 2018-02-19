@@ -23,6 +23,8 @@ if __name__ == '__main__':
     parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--clip_grads', type=float, default=1.)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
+    parser.add_argument("--test", type=bool, nargs='?', const=True, default=False)
+    parser.add_argument("--restore", type=bool, nargs='?', const=True, default=False)
     args = parser.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
@@ -31,8 +33,8 @@ if __name__ == '__main__':
 
     config = Config(args.sz, {'non_spatial': ['player', 'available_actions']})
     envs = EnvWrapper(make_envs(args), config)
-    agent = A2CAgent(sess, fully_conv, config, args.discount, args.lr, args.vf_coef, args.ent_coef, args.clip_grads)
+    agent = A2CAgent(sess, fully_conv, config, args.restore, args.discount, args.lr, args.vf_coef, args.ent_coef, args.clip_grads)
 
     runner = Runner(envs, agent, args.steps)
-    runner.run(args.updates)
+    runner.run(args.updates, not args.test)
 

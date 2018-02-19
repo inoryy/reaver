@@ -4,7 +4,7 @@ from tensorflow.contrib import layers
 
 
 class A2CAgent:
-    def __init__(self, sess, model_fn, config, discount=0.99, lr=1e-4, vf_coef=0.25, ent_coef=1e-3, clip_grads=1.0):
+    def __init__(self, sess, model_fn, config, restore=False, discount=0.99, lr=1e-4, vf_coef=0.25, ent_coef=1e-3, clip_grads=1.0):
         self.sess, self.config, self.discount = sess, config, discount
         self.vf_coef, self.ent_coef = vf_coef, ent_coef
 
@@ -16,9 +16,14 @@ class A2CAgent:
         self.train_op = layers.optimize_loss(loss=loss_fn, optimizer=opt, learning_rate=None,
                                              global_step=tf.train.get_global_step(), clip_gradients=clip_grads)
 
+        self.saver = tf.train.Saver()
+        if restore:
+            self.saver.restore(self.sess, tf.train.latest_checkpoint('weights'))
         self.sess.run(tf.global_variables_initializer())
 
-    def train(self, states, actions, rewards, dones, last_value):
+    def train(self, step, states, actions, rewards, dones, last_value):
+        if step % 500 == 0:
+            self.saver.save(self.sess, 'weights/a2c', global_step=step)
         returns = self._compute_returns(rewards, dones, last_value)
         return self.sess.run([self.train_op], dict(zip(self.inputs + self.loss_inputs, states + actions + [returns])))
 
