@@ -35,7 +35,7 @@ class Runner:
             states[step], actions[step] = self.state, action
             self.state, rewards[step], dones[step] = self.envs.step(action)
 
-            self.log(rewards[step], values[step], dones[step][0])
+            self.log(rewards[step], dones[step])
 
         last_value = self.agent.get_value(self.state)
 
@@ -43,13 +43,13 @@ class Runner:
 
     def reset(self):
         self.state, *_ = self.envs.reset()
-        if not self.logs:
-            self.logs = {'updates': 0, 'eps': 0, 'ep_rew': np.zeros(self.envs.num_envs), 'rew_best': 0, 'start_time': time.time()}
+        self.logs = {'updates': 0, 'eps': 0, 'rew_best': 0, 'start_time': time.time(),
+                     'ep_rew': np.zeros(self.envs.num_envs), 'dones': np.zeros(self.envs.num_envs)}
 
-    # TODO properly handle async ep ending between envs
-    def log(self, rewards, values, last=False):
+    def log(self, rewards, dones):
         self.logs['ep_rew'] += rewards
-        if not last:
+        self.logs['dones'] = np.maximum(self.logs['dones'], dones)
+        if sum(self.logs['dones']) < self.envs.num_envs:
             return
         self.logs['eps'] += self.envs.num_envs
         self.logs['rew_best'] = max(self.logs['rew_best'], np.mean(self.logs['ep_rew']))
@@ -68,4 +68,5 @@ class Runner:
         logger.logkv('rew_min', np.min(self.logs['ep_rew']))
         logger.dumpkvs()
 
+        self.logs['dones'] = np.zeros(self.envs.num_envs)
         self.logs['ep_rew'] = np.zeros(self.envs.num_envs)
