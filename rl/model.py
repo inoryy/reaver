@@ -12,6 +12,7 @@ def fully_conv(config):
     value = tf.squeeze(layers.fully_connected(fc1, num_outputs=1, activation_fn=None), axis=1)
 
     # TODO mask unused args
+    # inspired by https://github.com/simonmeister/pysc2-rl-agents/blob/master/rl/networks/fully_conv.py#L131-L137
     policy = []
     for dim, is_spatial in config.policy_dims():
         if is_spatial:
