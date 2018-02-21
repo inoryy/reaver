@@ -12,7 +12,7 @@ class A2CAgent:
         self.action = [sample(p) for p in self.policy]
         loss_fn, self.loss_inputs = self._loss_func()
 
-        opt = tf.train.RMSPropOptimizer(learning_rate=lr, decay=0.99)
+        opt = tf.train.RMSPropOptimizer(learning_rate=lr, decay=0.99, epsilon=1e-5)
         self.train_op = layers.optimize_loss(loss=loss_fn, optimizer=opt, learning_rate=None,
                                              global_step=tf.train.get_global_step(), clip_gradients=clip_grads)
         self.sess.run(tf.global_variables_initializer())
