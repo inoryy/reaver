@@ -4,7 +4,7 @@ from tensorflow.contrib import layers
 
 
 class A2CAgent:
-    def __init__(self, sess, model_fn, config, restore=False, discount=0.99, lr=1e-4, vf_coef=0.25, ent_coef=1e-3, clip_grads=1.0):
+    def __init__(self, sess, model_fn, config, restore=False, discount=0.99, lr=1e-4, vf_coef=0.25, ent_coef=1e-3, clip_grads=0.5):
         self.sess, self.config, self.discount = sess, config, discount
         self.vf_coef, self.ent_coef = vf_coef, ent_coef
 
