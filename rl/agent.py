@@ -4,7 +4,7 @@ from tensorflow.contrib import layers
 
 
 class A2CAgent:
-    def __init__(self, sess, model_fn, config, restore=False, discount=0.99, lr=1e-4, vf_coef=0.25, ent_coef=1e-3, clip_grads=0.5):
+    def __init__(self, sess, model_fn, config, restore=False, discount=0.99, lr=1e-4, vf_coef=0.25, ent_coef=1e-3, clip_grads=1.):
         self.sess, self.config, self.discount = sess, config, discount
         self.vf_coef, self.ent_coef = vf_coef, ent_coef
 
@@ -42,10 +42,10 @@ class A2CAgent:
         entropy = sum([-tf.reduce_sum(p * clip_log(p), axis=-1) for p in self.policy])
 
         policy_loss = -tf.reduce_mean(logli * adv)
-        value_loss = self.vf_coef * tf.reduce_mean(tf.square(returns - self.value))
         entropy_loss = -self.ent_coef * tf.reduce_mean(entropy)
+        value_loss = self.vf_coef * tf.reduce_mean(tf.square(returns - self.value))
 
-        return policy_loss + value_loss + entropy_loss, actions + [returns]
+        return policy_loss + entropy_loss + value_loss, actions + [returns]
 
     def _compute_returns(self, rewards, dones, last_value):
         returns = np.zeros((dones.shape[0]+1, dones.shape[1]))
