@@ -1,3 +1,4 @@
+import json
 import numpy as np
 from s2clientprotocol import ui_pb2 as sc_ui
 from s2clientprotocol import spatial_pb2 as sc_spatial
@@ -38,7 +39,7 @@ NON_SPATIAL_FEATURES = dict(
 
 
 class Config:
-    def __init__(self, sz, map, feats=None, acts=None, act_args=None, embed_dim_fn=lambda x: max(1, round(np.log2(x)))):
+    def __init__(self, sz, map, restore=False, feats=None, acts=None, act_args=None, embed_dim_fn=lambda x: max(1, round(np.log2(x)))):
         self.sz, self.map = sz, map
         self.embed_dim_fn = embed_dim_fn
 
@@ -52,6 +53,7 @@ class Config:
             feats['non_spatial'] = NON_SPATIAL_FEATURES.keys()
         self.feats = feats
 
+        # TODO not connected to anything atm
         if acts is None:
             acts = FUNCTIONS
         self.acts = acts
@@ -59,6 +61,10 @@ class Config:
         if act_args is None:
             act_args = TYPES._fields
         self.act_args = act_args
+
+        if restore:
+            self._load()
+        self._save()
 
         self.arg_idx = {arg: i for i, arg in enumerate(self.act_args)}
         self.ns_idx = {f: i for i, f in enumerate(self.feats['non_spatial'])}
@@ -101,6 +107,15 @@ class Config:
             acts[ob['available_actions']] = 1
             return acts
         return ob[_type]
+
+    def _save(self):
+        with open('weights/%s/config.json' % self.map_id(), 'w') as fl:
+            json.dump({'feats': self.feats, 'act_args': self.act_args}, fl)
+
+    def _load(self):
+        with open('weights/%s/config.json' % self.map_id(), 'r') as fl:
+            data = json.load(fl)
+        self.feats, self.act_args = data['feats'], data['act_args']
 
 
 def is_spatial(arg):

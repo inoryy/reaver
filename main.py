@@ -31,7 +31,12 @@ if __name__ == '__main__':
     tf.reset_default_graph()
     sess = tf.Session()
 
-    config = Config(args.sz, args.map, {'non_spatial': ['player', 'available_actions']})
+    feats = {
+        'screen': ['visibility_map', 'player_relative', 'unit_type', 'selected', 'unit_hit_points', 'unit_density'],
+        'minimap': ['visibility_map', 'camera', 'player_relative', 'selected'],
+        'non_spatial': ['player', 'available_actions']
+    }
+    config = Config(args.sz, args.map, args.restore, feats)
     os.makedirs('weights/' + config.map_id(), exist_ok=True)
 
     envs = EnvWrapper(make_envs(args), config)
