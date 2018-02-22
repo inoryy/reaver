@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--sz", type=int, default=32)
     parser.add_argument("--envs", type=int, default=32)
-    parser.add_argument("--render", type=int, default=0)
+    parser.add_argument("--render", type=int, default=1)
     parser.add_argument("--steps", type=int, default=16)
     parser.add_argument("--updates", type=int, default=100000)
     parser.add_argument('--lr', type=float, default=7e-4)
