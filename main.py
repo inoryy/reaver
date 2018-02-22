@@ -35,7 +35,7 @@ if __name__ == '__main__':
     os.makedirs('weights/' + config.map_id(), exist_ok=True)
 
     envs = EnvWrapper(make_envs(args), config)
-    agent = A2CAgent(sess, fully_conv, config, args.restore, args.discount, args.lr, args.vf_coef, args.ent_coef, args.clip_grads)
+    agent = A2CAgent(sess, fully_conv, config, args.restore or args.test, args.discount, args.lr, args.vf_coef, args.ent_coef, args.clip_grads)
 
     runner = Runner(envs, agent, args.steps)
     runner.run(args.updates, not args.test)
