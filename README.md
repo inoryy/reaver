@@ -1,4 +1,4 @@
-# (D)RL agent for PySC2 environment
+# (D)RL Agent For PySC2 Environment
 
 ## Requirements
 
@@ -7,15 +7,15 @@
 
 ## Results
 
-Map | Agent | Deepmind
+Map | This Agent | Deepmind
 ---|---|---
 MoveToBeacon | 26.3 | 26
 CollectMineralShards | 102 | 103
-FindAndDefeatZerglings | - | 45
+FindAndDefeatZerglings | 25 | 45
 DefeatRoaches | 126* | 100
 DefeatZerglingsAndBanelings | 197* | 62
 CollectMineralsAndGas | 3340 | 3978
-BuildMarines | - | 3
+BuildMarines | 0.55 | 3
 
 \* Unstable result with high std.dev (30 for *DefeatRoaches* and 100 for *DefeatZerglingsAndBanelings*)
 
