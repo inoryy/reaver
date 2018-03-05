@@ -23,7 +23,7 @@ if __name__ == '__main__':
     parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--clip_grads', type=float, default=1.)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
-    parser.add_argument("--cfg_path", type=str, default='config.json')
+    parser.add_argument("--cfg_path", type=str, default='config.json.dist')
     parser.add_argument("--test", type=bool, nargs='?', const=True, default=False)
     parser.add_argument("--restore", type=bool, nargs='?', const=True, default=False)
     args = parser.parse_args()
