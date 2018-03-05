@@ -23,6 +23,7 @@ if __name__ == '__main__':
     parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--clip_grads', type=float, default=1.)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
+    parser.add_argument("--cfg_path", type=str, default='config.json')
     parser.add_argument("--test", type=bool, nargs='?', const=True, default=False)
     parser.add_argument("--restore", type=bool, nargs='?', const=True, default=False)
     args = parser.parse_args()
@@ -31,13 +32,12 @@ if __name__ == '__main__':
     tf.reset_default_graph()
     sess = tf.Session()
 
-    feats = {
-        'screen': ['visibility_map', 'player_relative', 'unit_type', 'selected', 'unit_hit_points', 'unit_density'],
-        'minimap': ['visibility_map', 'camera', 'player_relative', 'selected'],
-        'non_spatial': ['player', 'available_actions']
-    }
-    config = Config(args.sz, args.map, args.restore, feats)
+    config = Config(args.sz, args.map)
     os.makedirs('weights/' + config.map_id(), exist_ok=True)
+    cfg_path = 'weights/%s/config.json' % config.map_id()
+    config.build(cfg_path if args.restore else args.cfg_path)
+    if not args.restore:
+        config.save(cfg_path)
 
     envs = EnvWrapper(make_envs(args), config)
     agent = A2CAgent(sess, fully_conv, config, args.restore or args.test, args.discount, args.lr, args.vf_coef, args.ent_coef, args.clip_grads)

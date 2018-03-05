@@ -39,12 +39,15 @@ NON_SPATIAL_FEATURES = dict(
 
 
 class Config:
-    def __init__(self, sz, map, restore=False, feats=None, acts=None, act_args=None, embed_dim_fn=lambda x: max(1, round(np.log2(x)))):
+    # TODO extract embed_dim_fn to config
+    def __init__(self, sz, map, embed_dim_fn=lambda x: max(1, round(np.log2(x)))):
         self.sz, self.map = sz, map
         self.embed_dim_fn = embed_dim_fn
+        self.feats = self.acts = self.act_args = self.arg_idx = self.ns_idx = None
 
-        if feats is None:
-            feats = {}
+    def build(self, cfg_path):
+        feats, acts, act_args = self._load(cfg_path)
+
         if 'screen' not in feats:
             feats['screen'] = features.SCREEN_FEATURES._fields
         if 'minimap' not in feats:
@@ -62,12 +65,9 @@ class Config:
             act_args = TYPES._fields
         self.act_args = act_args
 
-        if restore:
-            self._load()
-        self._save()
-
         self.arg_idx = {arg: i for i, arg in enumerate(self.act_args)}
         self.ns_idx = {f: i for i, f in enumerate(self.feats['non_spatial'])}
+
 
     def map_id(self):
         return self.map + str(self.sz)
@@ -108,14 +108,14 @@ class Config:
             return acts
         return ob[_type]
 
-    def _save(self):
-        with open('weights/%s/config.json' % self.map_id(), 'w') as fl:
+    def save(self, cfg_path):
+        with open(cfg_path, 'w') as fl:
             json.dump({'feats': self.feats, 'act_args': self.act_args}, fl)
 
-    def _load(self):
-        with open('weights/%s/config.json' % self.map_id(), 'r') as fl:
+    def _load(self, cfg_path):
+        with open(cfg_path, 'r') as fl:
             data = json.load(fl)
-        self.feats, self.act_args = data['feats'], data['act_args']
+        return data.get('feats'), data.get('acts'), data.get('act_args')
 
 
 def is_spatial(arg):
