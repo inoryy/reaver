@@ -36,7 +36,7 @@ if __name__ == '__main__':
     os.makedirs('weights/' + config.map_id(), exist_ok=True)
     cfg_path = 'weights/%s/config.json' % config.map_id()
     config.build(cfg_path if args.restore else args.cfg_path)
-    if not args.restore:
+    if not args.restore and not args.test:
         config.save(cfg_path)
 
     envs = EnvWrapper(make_envs(args), config)
