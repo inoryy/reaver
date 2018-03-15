@@ -41,6 +41,9 @@ class EnvWrapper:
 
         return states, rewards, dones
 
+    def save_replay(self, replay_dir='PySC2Replays'):
+        self.envs.save_replay(replay_dir)
+
     def spec(self):
         return self.envs.spec()
 

@@ -26,6 +26,7 @@ if __name__ == '__main__':
     parser.add_argument("--cfg_path", type=str, default='config.json.dist')
     parser.add_argument("--test", type=bool, nargs='?', const=True, default=False)
     parser.add_argument("--restore", type=bool, nargs='?', const=True, default=False)
+    parser.add_argument('--save_replay', type=bool, nargs='?', const=True, default=False)
     args = parser.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
@@ -45,3 +46,7 @@ if __name__ == '__main__':
     runner = Runner(envs, agent, args.steps)
     runner.run(args.updates, not args.test)
 
+    if args.save_replay:
+        envs.save_replay()
+
+    envs.close()

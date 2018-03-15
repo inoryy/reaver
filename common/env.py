@@ -33,6 +33,8 @@ def worker(remote, env_fn_wrapper):
         elif cmd == 'close':
             remote.close()
             break
+        elif cmd == 'save_replay':
+            env.save_replay(data)
         else:
             raise NotImplementedError
 
@@ -82,6 +84,9 @@ class EnvPool(object):
             remote.send(('close', None))
         for p in self.ps:
             p.join()
+
+    def save_replay(self, replay_dir='PySC2Replays'):
+        self.remotes[0].send(('save_replay', replay_dir))
 
     @property
     def num_envs(self):

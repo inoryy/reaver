@@ -24,7 +24,6 @@ class Runner:
             elapsed_time = time.time() - self.logs['start_time']
             frames = self.envs.num_envs * self.n_steps * self.logs['updates']
             print("Took %.3f seconds for %s steps: %.3f fps" % (elapsed_time, frames, frames / elapsed_time))
-            self.envs.close()
 
     def collect_rollout(self):
         states, actions = [None]*self.n_steps, [None]*self.n_steps
