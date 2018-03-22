@@ -28,7 +28,7 @@ Map | This Agent | DeepMind
 ---|---|---
 MoveToBeacon | 26.3 | 26
 CollectMineralShards | 102 | 103
-FindAndDefeatZerglings | 25 | 45
+FindAndDefeatZerglings | 43 | 45
 DefeatRoaches | 126* | 100
 DefeatZerglingsAndBanelings | 197* | 62
 CollectMineralsAndGas | 3340 | 3978
