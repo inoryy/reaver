@@ -6,7 +6,7 @@ from common import flatten_lists
 
 class Runner:
     def __init__(self, envs, agent, n_steps=8):
-        self.state = self.logs = None
+        self.state = self.logs = self.ep_rews = None
         self.agent, self.envs, self.n_steps = agent, envs, n_steps
 
     def run(self, num_updates=1, train=True):
@@ -38,7 +38,7 @@ class Runner:
 
         last_value = self.agent.get_value(self.state)
 
-        return flatten_lists(states), flatten_lists(actions), rewards, dones, last_value
+        return flatten_lists(states), flatten_lists(actions), rewards, dones, last_value, self.ep_rews
 
     def reset(self):
         self.state, *_ = self.envs.reset()
@@ -56,6 +56,7 @@ class Runner:
         elapsed_time = time.time() - self.logs['start_time']
         frames = self.envs.num_envs * self.n_steps * self.logs['updates']
 
+        self.ep_rews = np.mean(self.logs['ep_rew'])
         logger.logkv('fps', int(frames / elapsed_time))
         logger.logkv('elapsed_time', int(elapsed_time))
         logger.logkv('n_eps', self.logs['eps'])

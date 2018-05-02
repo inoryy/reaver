@@ -40,7 +40,8 @@ NON_SPATIAL_FEATURES = dict(
 
 class Config:
     # TODO extract embed_dim_fn to config
-    def __init__(self, sz, map, embed_dim_fn=lambda x: max(1, round(np.log2(x)))):
+    def __init__(self, sz, map, run_id, embed_dim_fn=lambda x: max(1, round(np.log2(x)))):
+        self.run_id = run_id
         self.sz, self.map = sz, map
         self.embed_dim_fn = embed_dim_fn
         self.feats = self.acts = self.act_args = self.arg_idx = self.ns_idx = None
@@ -68,9 +69,13 @@ class Config:
         self.arg_idx = {arg: i for i, arg in enumerate(self.act_args)}
         self.ns_idx = {f: i for i, f in enumerate(self.feats['non_spatial'])}
 
-
     def map_id(self):
         return self.map + str(self.sz)
+
+    def full_id(self):
+        if self.run_id == -1:
+            return self.map_id()
+        return self.map_id() + "_" + str(self.run_id)
 
     def policy_dims(self):
         return [(len(self.acts), 0)] + [(getattr(TYPES, arg).sizes[0], is_spatial(arg)) for arg in self.act_args]

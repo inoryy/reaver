@@ -20,13 +20,25 @@ class A2CAgent:
 
         self.saver = tf.train.Saver()
         if restore:
-            self.saver.restore(self.sess, tf.train.latest_checkpoint('weights/' + self.config.map_id()))
+            self.saver.restore(self.sess, tf.train.latest_checkpoint('weights/' + self.config.full_id()))
 
-    def train(self, step, states, actions, rewards, dones, last_value):
+        self.summary_op = tf.summary.merge_all()
+        self.summary_writer = tf.summary.FileWriter('logs/' + self.config.full_id())
+
+    def train(self, step, states, actions, rewards, dones, last_value, ep_rews):
         if step % 500 == 0:
-            self.saver.save(self.sess, 'weights/%s/a2c' % self.config.map_id(), global_step=step)
+            self.saver.save(self.sess, 'weights/%s/a2c' % self.config.full_id(), global_step=step)
+
         returns = self._compute_returns(rewards, dones, last_value)
-        return self.sess.run([self.train_op], dict(zip(self.inputs + self.loss_inputs, states + actions + [returns])))
+
+        feed_dict = dict(zip(self.inputs + self.loss_inputs, states + actions + [returns]))
+        result, result_summary = self.sess.run([self.train_op, self.summary_op], feed_dict)
+
+        self.summary_writer.add_summary(result_summary, step)
+        self.summary_writer.add_summary(summarize(rewards=ep_rews), step)
+        self.summary_writer.add_summary(summarize(rewards_samples=ep_rews), (step+1)*np.prod(dones.shape))
+
+        return result
 
     def act(self, state):
         return self.sess.run([self.action, self.value], feed_dict=dict(zip(self.inputs, state)))
@@ -45,6 +57,10 @@ class A2CAgent:
         policy_loss = -tf.reduce_mean(logli * adv)
         entropy_loss = -self.ent_coef * tf.reduce_mean(entropy)
         value_loss = self.vf_coef * tf.reduce_mean(tf.square(returns - self.value))
+
+        tf.summary.scalar('loss/policy', policy_loss)
+        tf.summary.scalar('loss/entropy', entropy_loss)
+        tf.summary.scalar('loss/value', value_loss)
 
         return policy_loss + entropy_loss + value_loss, actions + [returns]
 
@@ -69,3 +85,9 @@ def sample(probs):
 
 def clip_log(probs):
     return tf.log(tf.clip_by_value(probs, 1e-12, 1.0))
+
+def summarize(**kwargs):
+    summary = tf.Summary()
+    for k, v in kwargs.items():
+        summary.value.add(tag=k, simple_value=v)
+    return summary

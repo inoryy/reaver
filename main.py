@@ -22,6 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--ent_coef', type=float, default=1e-3)
     parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--clip_grads', type=float, default=1.)
+    parser.add_argument("--run_id", type=int, default=-1)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
     parser.add_argument("--cfg_path", type=str, default='config.json.dist')
     parser.add_argument("--test", type=bool, nargs='?', const=True, default=False)
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     sess = tf.Session()
 
     # config = Config(args.sz, args.map, lambda _: 1)
-    config = Config(args.sz, args.map)
+    config = Config(args.sz, args.map, args.run_id)
     os.makedirs('weights/' + config.map_id(), exist_ok=True)
     cfg_path = 'weights/%s/config.json' % config.map_id()
     config.build(cfg_path if args.restore else args.cfg_path)
