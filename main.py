@@ -36,8 +36,8 @@ if __name__ == '__main__':
 
     # config = Config(args.sz, args.map, lambda _: 1)
     config = Config(args.sz, args.map, args.run_id)
-    os.makedirs('weights/' + config.map_id(), exist_ok=True)
-    cfg_path = 'weights/%s/config.json' % config.map_id()
+    os.makedirs('weights/' + config.full_id(), exist_ok=True)
+    cfg_path = 'weights/%s/config.json' % config.full_id()
     config.build(cfg_path if args.restore else args.cfg_path)
     if not args.restore and not args.test:
         config.save(cfg_path)

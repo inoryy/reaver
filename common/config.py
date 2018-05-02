@@ -75,7 +75,7 @@ class Config:
     def full_id(self):
         if self.run_id == -1:
             return self.map_id()
-        return self.map_id() + "_" + str(self.run_id)
+        return self.map_id() + "/" + str(self.run_id)
 
     def policy_dims(self):
         return [(len(self.acts), 0)] + [(getattr(TYPES, arg).sizes[0], is_spatial(arg)) for arg in self.act_args]
