@@ -12,10 +12,10 @@ class A2CAgent:
         self.action = [sample(p) for p in self.policy]
         loss_fn, self.loss_inputs = self._loss_func()
 
+        self.step = tf.Variable(0, trainable=False)
         opt = tf.train.RMSPropOptimizer(learning_rate=lr, decay=0.99, epsilon=1e-5)
         # opt = tf.train.AdamOptimizer(learning_rate=lr, epsilon=1e-5)
-        self.train_op = layers.optimize_loss(loss=loss_fn, optimizer=opt, learning_rate=None,
-                                             global_step=tf.train.get_global_step(), clip_gradients=clip_grads)
+        self.train_op = layers.optimize_loss(loss=loss_fn, optimizer=opt, learning_rate=None, global_step=self.step, clip_gradients=clip_grads)
         self.sess.run(tf.global_variables_initializer())
 
         self.saver = tf.train.Saver()
@@ -24,19 +24,20 @@ class A2CAgent:
 
         self.summary_op = tf.summary.merge_all()
         self.summary_writer = tf.summary.FileWriter('logs/' + self.config.full_id())
+        self.summary_writer.add_session_log(tf.SessionLog(status=tf.SessionLog.START), sess.run(self.step))
 
+    # TODO: get rid of the step param; gracefully restore for console logs as well
     def train(self, step, states, actions, rewards, dones, last_value, ep_rews):
         if step % 500 == 0:
-            self.saver.save(self.sess, 'weights/%s/a2c' % self.config.full_id(), global_step=step)
+            self.saver.save(self.sess, 'weights/%s/a2c' % self.config.full_id(), global_step=self.step)
 
         returns = self._compute_returns(rewards, dones, last_value)
 
         feed_dict = dict(zip(self.inputs + self.loss_inputs, states + actions + [returns]))
-        result, result_summary = self.sess.run([self.train_op, self.summary_op], feed_dict)
+        result, result_summary, step = self.sess.run([self.train_op, self.summary_op, self.step], feed_dict)
 
         self.summary_writer.add_summary(result_summary, step)
         self.summary_writer.add_summary(summarize(rewards=ep_rews), step)
-        self.summary_writer.add_summary(summarize(rewards_samples=ep_rews), (step+1)*np.prod(dones.shape))
 
         return result
 
@@ -85,6 +86,7 @@ def sample(probs):
 
 def clip_log(probs):
     return tf.log(tf.clip_by_value(probs, 1e-12, 1.0))
+
 
 def summarize(**kwargs):
     summary = tf.Summary()
