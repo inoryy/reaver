@@ -60,4 +60,4 @@ def broadcast(tensor, sz):
 
 def mask_probs(probs, mask):
     masked = probs * mask
-    return masked / tf.reduce_sum(masked, axis=1, keep_dims=True)
+    return masked / tf.clip_by_value(tf.reduce_sum(masked, axis=1, keep_dims=True), 1e-12, 1.0)
