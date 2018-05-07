@@ -27,14 +27,14 @@ using reduced set of features (unified across all mini-games) or alternative app
 Map | This Agent | DeepMind
 ---|---|---
 MoveToBeacon | 26.3 | 26
-CollectMineralShards | 102 | 103
+CollectMineralShards | 104 | 103
 FindAndDefeatZerglings | 43 | 45
-DefeatRoaches | 126* | 100
+DefeatRoaches | 95 | 100
 DefeatZerglingsAndBanelings | 197* | 62
 CollectMineralsAndGas | 3340 | 3978
 BuildMarines | 0.55 | 3
 
-\* Unstable result with high std.dev (40 for *DefeatRoaches* and 120 for *DefeatZerglingsAndBanelings*)
+\* Unstable result with high std.dev (120 for *DefeatZerglingsAndBanelings*)
 
 A video of the trained agent on all minigames can be seen here: https://youtu.be/gEyBzcPU5-w
 
