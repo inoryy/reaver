@@ -23,7 +23,7 @@ class A2CAgent:
             self.saver.restore(self.sess, tf.train.latest_checkpoint('weights/' + self.config.full_id()))
 
         self.summary_op = tf.summary.merge_all()
-        self.summary_writer = tf.summary.FileWriter('logs/' + self.config.full_id())
+        self.summary_writer = tf.summary.FileWriter('logs/' + self.config.full_id(), graph=None)
         self.summary_writer.add_session_log(tf.SessionLog(status=tf.SessionLog.START), sess.run(self.step))
 
     # TODO: get rid of the step param; gracefully restore for console logs as well
