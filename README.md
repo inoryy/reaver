@@ -74,6 +74,10 @@ such as full feature and action space support.
 Authors of [simonmeister/pysc2-rl-agents](https://github.com/simonmeister/pysc2-rl-agents) 
 also aim to replicate both results and architecture, though their final goals seem to be in another direction. Their policy implementation was used as a loose reference for this project.
 
+## Acknowledgements
+
+Work in this repository was done as part of bachelor's thesis in University of Tartu under the supervision of Ilya Kuzovkin and Tambet Matiisen.
+
 ## References
 
 [1] [StarCraft II: A New Challenge for Reinforcement Learning](https://arxiv.org/abs/1708.04782)  
