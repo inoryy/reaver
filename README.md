@@ -52,15 +52,15 @@ Good GPU and CPU are recommended, especially for full state/action space.
 
 ## Results
 
-Map | This Agent | DeepMind
----|---|---
-MoveToBeacon | 26.3 ± 0.5 | 26
-CollectMineralShards | 106 ± 4.3 | 103
-DefeatRoaches | 147 ± 38.7 | 100
-DefeatZerglingsAndBanelings | 230 ± 106.4 | 62
-FindAndDefeatZerglings | 43 ± 5 | 45
-CollectMineralsAndGas | 3340 ± 185 | 3978
-BuildMarines | 0.55 ± 0.25 | 3
+Map | This Agent | DeepMind | Human
+---|---|---|---
+MoveToBeacon | 26.3 ± 0.5 | 26 | 28
+CollectMineralShards | 106 ± 4.3 | 103 | 177
+DefeatRoaches | 147 ± 38.7 | 100 | 215
+DefeatZerglingsAndBanelings | 230 ± 106.4 | 62 | 727
+FindAndDefeatZerglings | 43 ± 5 | 45 | 61
+CollectMineralsAndGas | 3340 ± 185 | 3978 | 7566
+BuildMarines | 0.55 ± 0.25 | 3 | 133
 
 ### Learning Curves
 
