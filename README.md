@@ -83,6 +83,10 @@ Here y-axis represents episode cumulative score and x-axis - number of updates. 
 
 [![DefeatZerglingsAndBanelings](https://i.imgur.com/pW5xROMm.png)](https://i.imgur.com/pW5xROM.png)
 
+#### CollectMineralsAndGas
+
+[![CollectMineralsAndGas](https://i.imgur.com/9MuQ6Bam.png)](https://i.imgur.com/9MuQ6Ba.png)
+
 ## Related Work
 
 Authors of [xhujoy/pysc2-agents](https://github.com/xhujoy/pysc2-agents) and [pekaalto/sc2aibot](https://github.com/pekaalto/sc2aibot) 
