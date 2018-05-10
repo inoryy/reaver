@@ -21,21 +21,6 @@ and multi-head policy, supporting actions with variable arguments (both spatial 
 b.) Improve the results and/or sample efficiency of the baseline solution. Either with alternative algorithms (such as PPO [2]), 
 using reduced set of features (unified across all mini-games) or alternative approaches, such as HRL [3] or Auxiliary Tasks [4].
 
-
-## Results
-
-Map | This Agent | DeepMind
----|---|---
-MoveToBeacon | 26.3 | 26
-CollectMineralShards | 104 | 103
-FindAndDefeatZerglings | 43 | 45
-DefeatRoaches | 95 | 100
-DefeatZerglingsAndBanelings | 197* | 62
-CollectMineralsAndGas | 3340 | 3978
-BuildMarines | 0.55 | 3
-
-\* Unstable result with high std.dev (120 for *DefeatZerglingsAndBanelings*)
-
 A video of the trained agent on all minigames can be seen here: https://youtu.be/gEyBzcPU5-w
 
 ## Running
@@ -65,6 +50,39 @@ A video of the trained agent on all minigames can be seen here: https://youtu.be
 Good GPU and CPU are recommended, especially for full state/action space.
 
 
+## Results
+
+Map | This Agent | DeepMind
+---|---|---
+MoveToBeacon | 26.3 ± 0.5 | 26
+CollectMineralShards | 106 ± 4.3 | 103
+DefeatRoaches | 147 ± 38.7 | 100
+DefeatZerglingsAndBanelings | 230 ± 106.4 | 62
+FindAndDefeatZerglings | 43 ± 5 | 45
+CollectMineralsAndGas | 3340 ± 185 | 3978
+BuildMarines | 0.55 ± 0.25 | 3
+
+### Learning Curves
+
+Below are screenshots of TensorBoard views of agents learning curves for each minigame. Each curve represents a different random seed run.
+Here y-axis represents episode cumulative score and x-axis - number of updates. Each update contains 512 samples (32 agents x 16 n-steps).
+
+#### MoveToBeacon
+
+[![MoveToBeacon](https://i.imgur.com/m5m01Hfm.png)](https://i.imgur.com/m5m01Hf.png)
+
+#### CollectMineralShards
+
+[![CollectMineralShards](https://i.imgur.com/oNVuxa2m.png)](https://i.imgur.com/oNVuxa2.png)
+
+#### DefeatRoaches
+
+[![DefeatRoaches](https://i.imgur.com/8cWvs7Zm.png)](https://i.imgur.com/8cWvs7Z.png)
+
+#### DefeatZerglingsAndBanelings
+
+[![DefeatZerglingsAndBanelings](https://i.imgur.com/pW5xROMm.png)](https://i.imgur.com/pW5xROM.png)
+
 ## Related Work
 
 Authors of [xhujoy/pysc2-agents](https://github.com/xhujoy/pysc2-agents) and [pekaalto/sc2aibot](https://github.com/pekaalto/sc2aibot) 
@@ -76,7 +94,7 @@ also aim to replicate both results and architecture, though their final goals se
 
 ## Acknowledgements
 
-Work in this repository was done as part of bachelor's thesis in University of Tartu under the supervision of Ilya Kuzovkin and Tambet Matiisen.
+Work in this repository was done as part of [bachelor's thesis](https://github.com/inoryy/bsc-thesis) at University of Tartu under the supervision of Ilya Kuzovkin and Tambet Matiisen.
 
 ## References
 
