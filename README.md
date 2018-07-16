@@ -45,12 +45,14 @@ A video of the trained agent on all minigames can be seen here: https://youtu.be
 
 * Python 3.x
 * Tensorflow >= 1.3
-* PySC2 [with action spec fix](https://github.com/deepmind/pysc2/pull/105)
+* PySC2 **1.2** [with action spec fix](https://github.com/deepmind/pysc2/pull/105)
 
 Good GPU and CPU are recommended, especially for full state/action space.
 
 
 ## Results
+
+These results are gathered with full feature / action config on 32 agents x 16 n-steps.
 
 Map | This Agent | DeepMind | Human
 ---|---|---|---
