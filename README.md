@@ -43,9 +43,12 @@ A video of the trained agent on all minigames can be seen here: https://youtu.be
 
 ### Requirements
 
+* [StarCraft II 3.17](https://github.com/Blizzard/s2client-proto#downloads) 
 * Python 3.x
 * Tensorflow >= 1.3
+* [openAI baselines](https://github.com/openai/baselines)
 * PySC2 **1.2** [with action spec fix](https://github.com/deepmind/pysc2/pull/105)
+  * This is a relatively old version, simplest way to install it is to clone [my fork](https://github.com/inoryy/pysc2/tree/spec_fix_pickle) and run `pip install .` inside
 
 Good GPU and CPU are recommended, especially for full state/action space.
 
