@@ -1,11 +1,14 @@
-from .abc_env import Env
+from .abc_env import Env, Spec, Space
+from pysc2.env.environment import StepType
 from pysc2.lib.actions import FunctionCall, FUNCTIONS
 
 
 class SC2Env(Env):
-    def __init__(self, map_name='MoveToBeacon', size=16, render=False):
+    def __init__(self, map_name='MoveToBeacon', spatial_size=16, render=False):
+        self.map_name, self.sz, self.render = map_name, spatial_size, render
         self._env = None
-        self.map_name, self.sz, self.render = map_name, size, render
+        self.act_wrapper = ActionWrapper()
+        self.obs_wrapper = ObservationWrapper()
 
     def start(self):
         from pysc2.env import sc2_env
@@ -23,16 +26,33 @@ class SC2Env(Env):
         )
 
     def step(self, action):
-        pass
+        return self.obs_wrapper(self._env.step(self.act_wrapper(action)))
 
     def reset(self):
-        return self._env.reset()
+        return self.obs_wrapper(self._env.reset())
 
     def stop(self):
         self._env.close()
 
     def obs_spec(self):
-        return self._env.observation_spec()
+        return self.obs_wrapper.wrap_spec(self._env.observation_spec())
 
     def act_spec(self):
-        return self._env.action_spec()
+        return self.act_wrapper.wrap_spec(self._env.action_spec())
+
+
+class ActionWrapper:
+    def __call__(self, action):
+        return [FunctionCall(action[0], action[1:])]
+
+    def wrap_spec(self, spec):
+        return spec[0]
+
+
+class ObservationWrapper:
+    def __call__(self, timestep):
+        ts = timestep[0]
+        return ts.observation, ts.reward, ts.step_type == StepType.LAST
+
+    def wrap_spec(self, spec):
+        return spec[0]
