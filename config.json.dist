@@ -1,5 +1,0 @@
-{
-  "feats": {
-    "non_spatial": ["player", "available_actions"]
-  }
-}
