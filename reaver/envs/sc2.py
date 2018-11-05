@@ -103,12 +103,14 @@ class ObservationWrapper:
             'available_actions': (len(actions.FUNCTIONS), ),
         }
 
-        screen, screen_dims = self.features['screen'], spec['feature_screen'][1:]
-        minimap, minimap_dims = self.features['minimap'], spec['feature_minimap'][1:]
+        screen_shape = (len(self.features['screen']), *spec['feature_screen'][1:])
+        minimap_shape = (len(self.features['minimap']), *spec['feature_minimap'][1:])
+        screen_dims = get_spatial_dims(self.features['screen'], features.SCREEN_FEATURES)
+        minimap_dims = get_spatial_dims(self.features['minimap'], features.MINIMAP_FEATURES)
 
         spaces = [
-            Space((len(screen), *screen_dims), np.int32, 'screen: ' + ','.join(screen)),
-            Space((len(minimap), *minimap_dims), np.int32, 'minimap: ' + ','.join(minimap)),
+            SC2Space(screen_shape, 'screen', self.features['screen'], screen_dims),
+            SC2Space(minimap_shape, 'minimap', self.features['minimap'], minimap_dims),
         ]
 
         for feat in self.features['non-spatial']:
@@ -160,7 +162,7 @@ class ActionWrapper:
     def make_spec(self, spec):
         spec = spec[0]
 
-        spaces = [Space(len(spec.functions), np.int32, "function_id")]
+        spaces = [Space((len(spec.functions),), np.int32, "function_id")]
         for arg_name in self.args:
             arg = getattr(spec.types, arg_name)
             spaces.append(Space(arg.sizes, np.int32, arg_name))
@@ -168,5 +170,20 @@ class ActionWrapper:
         self.spec = Spec(spaces, "Action")
 
 
-def make_envs(args):
-    return [SC2Env(args.map, args.spatial_dim, args.step_mul, i == 0 and args.render) for i in range(args.n_envs)]
+class SC2Space(Space):
+    def __init__(self, shape, name, spatial_feats=None, spatial_dims=None):
+        if spatial_feats:
+            name += "{%s}" % ", ".join(spatial_feats)
+        self.spatial_feats, self.spatial_dims = spatial_feats, spatial_dims
+
+        super().__init__(shape, np.int32, name)
+
+
+def get_spatial_dims(feat_names, feats):
+    feats_dims = []
+    for feat_name in feat_names:
+        feat = getattr(feats, feat_name)
+        feats_dims.append(1)
+        if feat.type == features.FeatureType.CATEGORICAL:
+            feats_dims[-1] = feat.scale
+    return feats_dims

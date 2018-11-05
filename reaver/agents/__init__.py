@@ -6,5 +6,6 @@ class Agent(ABC):
     def get_action(self, obs): ...
 
 
-from .running import RunningAgent, SyncRunningAgent
+from .running import SyncRunningAgent
 from .random import RandomAgent
+from .a2c import A2CAgent
