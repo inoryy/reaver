@@ -18,14 +18,16 @@ def main(argv):
         return [function_id] + args
 
     env = reaver.env.SC2Env(FLAGS.map, FLAGS.spatial_dim, FLAGS.step_mul, FLAGS.render)
-
     env.start()
-    obs, rew, done = env.reset()
-    for _ in range(1000):
-        obs, rew, done = env.step(act())
-        if done:
-            obs, rew, done = env.reset()
+    print(env.obs_spec())
+    print(env.reset())
     env.stop()
+    # obs, rew, done = env.reset()
+    # for _ in range(1000):
+    #     obs, rew, done = env.step(act())
+    #     if done:
+    #         obs, rew, done = env.reset()
+    # env.stop()
 
 
 if __name__ == '__main__':

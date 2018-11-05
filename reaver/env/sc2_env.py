@@ -1,29 +1,39 @@
+import numpy as np
 from pysc2.lib import actions
+from pysc2.lib import features
 from pysc2.env.environment import StepType
 from .abc_env import Env, Spec, Space
 
 
 class SC2Env(Env):
-    def __init__(self, map_name='MoveToBeacon', spatial_dim=16, step_mul=8, render=False):
+    def __init__(self, map_name='MoveToBeacon', spatial_dim=16, step_mul=8, render=False, obs_features=None):
+        """
+
+        :param map_name:
+        :param spatial_dim:
+        :param step_mul:
+        :param render:
+        :param obs_features: observation features to use (e.g. return via step)
+        """
         self._env = None
+        self.kwargs = dict(
+            map_name=map_name,
+            visualize=render,
+            agent_interface_format=[features.parse_agent_interface_format(
+                feature_screen=spatial_dim,
+                feature_minimap=spatial_dim,
+                rgb_screen=None,
+                rgb_minimap=None
+            )],
+            step_mul=step_mul,
+        )
         self.act_wrapper = ActionWrapper()
-        self.obs_wrapper = ObservationWrapper()
-        self.map_name, self.dim, self.step_mul, self.render = map_name, spatial_dim, step_mul, render
+        self.obs_wrapper = ObservationWrapper(obs_features)
 
     def start(self):
         # importing here to lazy-load
         from pysc2.env import sc2_env
-        self._env = sc2_env.SC2Env(
-            map_name=self.map_name,
-            visualize=self.render,
-            agent_interface_format=sc2_env.parse_agent_interface_format(
-                feature_screen=self.dim,
-                feature_minimap=self.dim,
-                rgb_screen=None,
-                rgb_minimap=None
-            ),
-            step_mul=self.step_mul,
-        )
+        self._env = sc2_env.SC2Env(**self.kwargs)
 
     def step(self, action):
         return self.obs_wrapper(self._env.step(self.act_wrapper(action)))
@@ -35,24 +45,84 @@ class SC2Env(Env):
         self._env.close()
 
     def obs_spec(self):
-        return self.obs_wrapper.wrap_spec(self._env.observation_spec())
+        if not self.obs_wrapper.spec:
+            self.make_specs()
+        return self.obs_wrapper.spec
 
     def act_spec(self):
-        return self.act_wrapper.wrap_spec(self._env.action_spec())
+        if not self.act_wrapper.spec:
+            self.make_specs()
+        return self.act_wrapper.spec
+
+    def make_specs(self):
+        # importing here to lazy-load
+        from pysc2.env import mock_sc2_env
+        mock_env = mock_sc2_env.SC2TestEnv(**self.kwargs)
+        self.act_wrapper.make_spec(mock_env.action_spec())
+        self.obs_wrapper.make_spec(mock_env.observation_spec())
+        mock_env.close()
 
 
 class ActionWrapper:
+    def __init__(self):
+        self.spec = None
+
     def __call__(self, action):
         return [actions.FunctionCall(action[0], action[1:])]
 
-    def wrap_spec(self, spec):
-        return spec[0]
+    def make_spec(self, spec):
+        spec = spec[0]
+        self.spec = spec
 
 
 class ObservationWrapper:
+    def __init__(self, _features=None):
+        self.spec = None
+        if not _features:
+            _features = {
+                'screen': ['player_relative'],
+                'minimap': ['player_relative'],
+                'non-spatial': ['player', 'available_actions']}
+        self.features = _features
+        self.feature_masks = {
+            'screen': [i for i, f in enumerate(features.SCREEN_FEATURES._fields) if f in _features['screen']],
+            'minimap': [i for i, f in enumerate(features.MINIMAP_FEATURES._fields) if f in _features['minimap']],}
+
     def __call__(self, timestep):
         ts = timestep[0]
-        return ts.observation, ts.reward, ts.step_type == StepType.LAST
+        obs, reward, done = ts.observation, ts.reward, ts.step_type == StepType.LAST
 
-    def wrap_spec(self, spec):
-        return spec[0]
+        obs_wrapped = [
+            obs['feature_screen'][self.feature_masks['screen']],
+            obs['feature_minimap'][self.feature_masks['minimap']]
+        ]
+        for feat_name in self.features['non-spatial']:
+            if feat_name == 'available_actions':
+                mask = np.zeros((len(actions.FUNCTIONS),), dtype=np.int32)
+                mask[obs[feat_name]] = 1
+                obs[feat_name] = mask
+            obs_wrapped.append(obs[feat_name])
+
+        return obs_wrapped, reward, done
+
+    def make_spec(self, spec):
+        spec = spec[0]
+
+        default_dims = {
+            'available_actions': (len(actions.FUNCTIONS), ),
+        }
+
+        screen, screen_dims = self.features['screen'], spec['feature_screen'][1:]
+        minimap, minimap_dims = self.features['minimap'], spec['feature_minimap'][1:]
+
+        spaces = [
+            Space((len(screen), *screen_dims), np.int32, 'screen: ' + ','.join(screen)),
+            Space((len(minimap), *minimap_dims), np.int32, 'minimap: ' + ','.join(minimap)),
+        ]
+
+        for feat in self.features['non-spatial']:
+            if 0 in spec[feat]:
+                spec[feat] = default_dims[feat]
+            spaces.append(Space(spec[feat], np.int32, feat))
+
+        self.spec = Spec(spaces, 'Observation')

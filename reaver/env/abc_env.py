@@ -22,18 +22,16 @@ class Env(ABC):
 
 
 class Space:
-    def __init__(self, shape=(1,), dtype=float, domain=(0, 1), categorical=False):
-        self.lo, self.hi = domain
-        self.categorical = categorical
-        self.shape, self.dtype = shape, dtype
+    def __init__(self, shape=(1,), dtype=float, name=None):
+        self.name, self.shape, self.dtype = name, shape, dtype
 
     def __repr__(self):
-        return "Space(sh: %s, dt: %s, dom: (%d, %d)" % (str(self.shape), str(self.dtype), self.lo, self.hi)
+        return "Space(%s, %s, %s" % (self.name, str(self.shape), str(self.dtype).strip("<class>' "))
 
 
 class Spec:
-    def __init__(self, *spaces):
-        self.spaces = spaces
+    def __init__(self, spaces, name=None):
+        self.name, self.spaces = name, spaces
 
     def __repr__(self):
-        return "Spec:" + str(self.spaces)
+        return "Spec: %s\n%s" % (self.name, "\n".join(map(str, self.spaces)))
