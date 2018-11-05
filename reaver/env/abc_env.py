@@ -26,7 +26,7 @@ class Space:
         self.name, self.shape, self.dtype = name, shape, dtype
 
     def __repr__(self):
-        return "Space(%s, %s, %s" % (self.name, str(self.shape), str(self.dtype).strip("<class>' "))
+        return "Space(%s, %s, %s)" % (self.name, str(self.shape), str(self.dtype).strip("<class>' "))
 
 
 class Spec:
