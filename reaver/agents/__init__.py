@@ -9,5 +9,5 @@ class Agent(ABC):
     def get_action(self, obs): ...
 
 
-from .running_agent import RunningAgent, SyncRunningAgent
-from .random_agent import RandomAgent
+from .running import RunningAgent, SyncRunningAgent
+from .random import RandomAgent

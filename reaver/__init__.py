@@ -1,2 +1,2 @@
-import reaver.env
-import reaver.agent
+import reaver.envs
+import reaver.agents

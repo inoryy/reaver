@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from .env_spec import Space, Spec
+from .spec import Space, Spec
 
 
 class Env(ABC):
@@ -22,5 +22,5 @@ class Env(ABC):
     def act_spec(self): ...
 
 
-from .sc2_env import SC2Env
-from .mp_env import MultiProcEnv
+from .sc2 import SC2Env
+from .parallel import MultiProcEnv

@@ -36,4 +36,4 @@ class SyncRunningAgent(RunningAgent):
         envs = [env] + [copy.deepcopy(env) for _ in range(self.n_envs-1)]
         env.render = render
 
-        return reaver.env.MultiProcEnv(envs)
+        return reaver.envs.MultiProcEnv(envs)
