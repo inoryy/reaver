@@ -24,8 +24,7 @@ class RunningAgent(Agent):
 
 
 class SyncRunningAgent(RunningAgent):
-    def __init__(self, obs_spec, act_spec, n_envs=2):
-        super().__init__(obs_spec, act_spec)
+    def __init__(self, n_envs):
         self.n_envs = n_envs
 
     def wrap_env(self, env):

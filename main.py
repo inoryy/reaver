@@ -13,7 +13,7 @@ flags.DEFINE_integer("steps", 2000, "Number of game steps to run (per environmen
 def main(argv):
     args = flags.FLAGS
     env = reaver.envs.SC2Env(args.map, args.spatial_dim, args.step_mul, args.render)
-    agent = reaver.agents.RandomAgent(env.obs_spec(), env.act_spec(), args.envs)
+    agent = reaver.agents.RandomAgent(env.act_spec(), args.envs)
     agent.run(env, args.steps)
 
 
