@@ -23,4 +23,4 @@ class Env(ABC):
 
 
 from .sc2 import SC2Env
-from .parallel import MultiProcEnv
+from .multiproc import MultiProcEnv
