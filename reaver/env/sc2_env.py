@@ -1,6 +1,6 @@
-from .abc_env import Env, Spec, Space
+from pysc2.lib import actions
 from pysc2.env.environment import StepType
-from pysc2.lib.actions import FunctionCall, FUNCTIONS
+from .abc_env import Env, Spec, Space
 
 
 class SC2Env(Env):
@@ -42,7 +42,7 @@ class SC2Env(Env):
 
 class ActionWrapper:
     def __call__(self, action):
-        return [FunctionCall(action[0], action[1:])]
+        return [actions.FunctionCall(action[0], action[1:])]
 
     def wrap_spec(self, spec):
         return spec[0]

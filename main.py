@@ -1,7 +1,7 @@
+import reaver
 import numpy as np
 from absl import app
 from absl import flags
-from env import SC2Env
 
 flags.DEFINE_string("map", "MoveToBeacon", "Name of a map to use.")
 flags.DEFINE_bool("render", True, "Whether to render with pygame.")
@@ -17,8 +17,8 @@ def main(argv):
                 for arg in env.act_spec().functions[function_id].args]
         return [function_id] + args
 
-    env = SC2Env(map_name=FLAGS.map, render=FLAGS.render,
-                 spatial_size=FLAGS.spatial_size, step_mul=FLAGS.step_mul)
+    env = reaver.env.SC2Env(FLAGS.map, FLAGS.spatial_size, FLAGS.step_mul, FLAGS.render)
+
     env.start()
     obs, rew, done = env.reset()
     for _ in range(1000):
