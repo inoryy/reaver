@@ -63,18 +63,6 @@ class SC2Env(Env):
         mock_env.close()
 
 
-class ActionWrapper:
-    def __init__(self):
-        self.spec = None
-
-    def __call__(self, action):
-        return [actions.FunctionCall(action[0], action[1:])]
-
-    def make_spec(self, spec):
-        spec = spec[0]
-        self.spec = spec
-
-
 class ObservationWrapper:
     def __init__(self, _features=None):
         self.spec = None
@@ -126,3 +114,52 @@ class ObservationWrapper:
             spaces.append(Space(spec[feat], np.int32, feat))
 
         self.spec = Spec(spaces, 'Observation')
+
+
+class ActionWrapper:
+    def __init__(self, args=None):
+        self.spec = None
+        if not args:
+            args = [
+                'screen',
+                'minimap',
+                'screen2',
+                'queued',
+                'control_group_act',
+                'control_group_id',
+                'select_add',
+                'select_point_act',
+                'select_add',
+                'select_unit_act',
+                # 'select_unit_id'
+                'select_worker',
+                'build_queue_id',
+                # 'unload_id'
+            ]
+        self.args = args
+
+    def __call__(self, action):
+        defaults = {
+            'select_unit_id': 0,
+            'unload_id': 0,
+        }
+
+        fn_id, args = action.pop(0), []
+        for arg in actions.FUNCTIONS[fn_id].args:
+            arg_name = arg.name
+            if arg_name in self.args:
+                args.append(action[self.args.index(arg_name)])
+            else:
+                args.append(defaults[arg_name])
+
+        return [actions.FunctionCall(fn_id, args)]
+
+    def make_spec(self, spec):
+        spec = spec[0]
+
+        spaces = [Space(len(spec.functions), np.int32, "function_id")]
+        for arg_name in self.args:
+            arg = getattr(spec.types, arg_name)
+            spaces.append(Space(arg.sizes, np.int32, arg_name))
+
+        self.spec = Spec(spaces, "Action")

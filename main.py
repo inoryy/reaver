@@ -12,22 +12,19 @@ FLAGS = flags.FLAGS
 
 def main(argv):
     def act():
-        function_id = np.random.choice(obs.available_actions)
-        args = [[np.random.randint(0, size) for size in arg.sizes]
-                for arg in env.act_spec().functions[function_id].args]
+        function_id = np.random.choice(np.argwhere(obs[-1] > 0).flatten())
+        args = [[np.random.randint(0, size) for size in arg.shape]
+                for arg in env.act_spec().spaces[1:]]
         return [function_id] + args
 
     env = reaver.env.SC2Env(FLAGS.map, FLAGS.spatial_dim, FLAGS.step_mul, FLAGS.render)
     env.start()
-    print(env.obs_spec())
-    print(env.reset())
+    obs, rew, done = env.reset()
+    for _ in range(1000):
+        obs, rew, done = env.step(act())
+        if done:
+            obs, rew, done = env.reset()
     env.stop()
-    # obs, rew, done = env.reset()
-    # for _ in range(1000):
-    #     obs, rew, done = env.step(act())
-    #     if done:
-    #         obs, rew, done = env.reset()
-    # env.stop()
 
 
 if __name__ == '__main__':
