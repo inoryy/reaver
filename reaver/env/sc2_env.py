@@ -36,7 +36,10 @@ class SC2Env(Env):
         self._env = sc2_env.SC2Env(**self.kwargs)
 
     def step(self, action):
-        return self.obs_wrapper(self._env.step(self.act_wrapper(action)))
+        obs, reward, done = self.obs_wrapper(self._env.step(self.act_wrapper(action)))
+        if done:
+            obs, *_ = self.reset()
+        return obs, reward, done
 
     def reset(self):
         return self.obs_wrapper(self._env.reset())
