@@ -163,3 +163,7 @@ class ActionWrapper:
             spaces.append(Space(arg.sizes, np.int32, arg_name))
 
         self.spec = Spec(spaces, "Action")
+
+
+def make_envs(args):
+    return [SC2Env(args.map, args.spatial_dim, args.step_mul, i == 0 and args.render) for i in range(args.n_envs)]
