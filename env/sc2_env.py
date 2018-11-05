@@ -4,11 +4,11 @@ from pysc2.lib.actions import FunctionCall, FUNCTIONS
 
 
 class SC2Env(Env):
-    def __init__(self, map_name='MoveToBeacon', spatial_size=16, render=False):
-        self.map_name, self.sz, self.render = map_name, spatial_size, render
+    def __init__(self, map_name='MoveToBeacon', spatial_size=16, step_mul=8, render=False):
         self._env = None
         self.act_wrapper = ActionWrapper()
         self.obs_wrapper = ObservationWrapper()
+        self.map_name, self.sz, self.step_mul, self.render = map_name, spatial_size, step_mul, render
 
     def start(self):
         from pysc2.env import sc2_env
@@ -19,10 +19,9 @@ class SC2Env(Env):
                 feature_screen=self.sz,
                 feature_minimap=self.sz,
                 rgb_screen=None,
-                rgb_minimap=None,
-                use_feature_units=False
+                rgb_minimap=None
             ),
-            step_mul=8,
+            step_mul=self.step_mul,
         )
 
     def step(self, action):
