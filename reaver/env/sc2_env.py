@@ -2,38 +2,37 @@ import numpy as np
 from pysc2.lib import actions
 from pysc2.lib import features
 from pysc2.env.environment import StepType
-from .abc_env import Env, Spec, Space
+from . import Env, Spec, Space
 
 
 class SC2Env(Env):
     def __init__(self, map_name='MoveToBeacon', spatial_dim=16, step_mul=8, render=False, obs_features=None):
         """
-
         :param map_name:
         :param spatial_dim:
         :param step_mul:
         :param render:
         :param obs_features: observation features to use (e.g. return via step)
         """
+        self.map_name, self.spatial_dim, self.step_mul, self.render = map_name, spatial_dim, step_mul, render
         self._env = None
-        self.kwargs = dict(
-            map_name=map_name,
-            visualize=render,
-            agent_interface_format=[features.parse_agent_interface_format(
-                feature_screen=spatial_dim,
-                feature_minimap=spatial_dim,
-                rgb_screen=None,
-                rgb_minimap=None
-            )],
-            step_mul=step_mul,
-        )
         self.act_wrapper = ActionWrapper()
         self.obs_wrapper = ObservationWrapper(obs_features)
 
     def start(self):
         # importing here to lazy-load
         from pysc2.env import sc2_env
-        self._env = sc2_env.SC2Env(**self.kwargs)
+
+        self._env = sc2_env.SC2Env(
+            map_name=self.map_name,
+            visualize=self.render,
+            agent_interface_format=[features.parse_agent_interface_format(
+                feature_screen=self.spatial_dim,
+                feature_minimap=self.spatial_dim,
+                rgb_screen=None,
+                rgb_minimap=None
+            )],
+            step_mul=self.step_mul,)
 
     def step(self, action):
         obs, reward, done = self.obs_wrapper(self._env.step(self.act_wrapper(action)))
@@ -60,7 +59,8 @@ class SC2Env(Env):
     def make_specs(self):
         # importing here to lazy-load
         from pysc2.env import mock_sc2_env
-        mock_env = mock_sc2_env.SC2TestEnv(**self.kwargs)
+        mock_env = mock_sc2_env.SC2TestEnv(map_name=self.map_name, agent_interface_format=[
+            features.parse_agent_interface_format(feature_screen=self.spatial_dim, feature_minimap=self.spatial_dim)])
         self.act_wrapper.make_spec(mock_env.action_spec())
         self.obs_wrapper.make_spec(mock_env.observation_spec())
         mock_env.close()

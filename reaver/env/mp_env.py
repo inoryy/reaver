@@ -2,7 +2,7 @@ import ctypes
 import numpy as np
 from multiprocessing import Pipe, Process
 from multiprocessing.sharedctypes import RawArray
-from .abc_env import Env, Space
+from . import Env, Space
 
 START, STEP, RESET, STOP, DONE = range(5)
 
