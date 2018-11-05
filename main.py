@@ -6,7 +6,7 @@ from absl import flags
 flags.DEFINE_string("map", "MoveToBeacon", "Name of a map to use.")
 flags.DEFINE_bool("render", True, "Whether to render with pygame.")
 flags.DEFINE_integer("step_mul", 8, "Game steps per observation.")
-flags.DEFINE_integer("spatial_size", 16, "Resolution for spatial feature layers.")
+flags.DEFINE_integer("spatial_dim", 16, "Resolution for spatial feature layers.")
 FLAGS = flags.FLAGS
 
 
@@ -17,7 +17,7 @@ def main(argv):
                 for arg in env.act_spec().functions[function_id].args]
         return [function_id] + args
 
-    env = reaver.env.SC2Env(FLAGS.map, FLAGS.spatial_size, FLAGS.step_mul, FLAGS.render)
+    env = reaver.env.SC2Env(FLAGS.map, FLAGS.spatial_dim, FLAGS.step_mul, FLAGS.render)
 
     env.start()
     obs, rew, done = env.reset()

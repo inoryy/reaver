@@ -4,20 +4,21 @@ from .abc_env import Env, Spec, Space
 
 
 class SC2Env(Env):
-    def __init__(self, map_name='MoveToBeacon', spatial_size=16, step_mul=8, render=False):
+    def __init__(self, map_name='MoveToBeacon', spatial_dim=16, step_mul=8, render=False):
         self._env = None
         self.act_wrapper = ActionWrapper()
         self.obs_wrapper = ObservationWrapper()
-        self.map_name, self.sz, self.step_mul, self.render = map_name, spatial_size, step_mul, render
+        self.map_name, self.dim, self.step_mul, self.render = map_name, spatial_dim, step_mul, render
 
     def start(self):
+        # importing here to lazy-load
         from pysc2.env import sc2_env
         self._env = sc2_env.SC2Env(
             map_name=self.map_name,
             visualize=self.render,
             agent_interface_format=sc2_env.parse_agent_interface_format(
-                feature_screen=self.sz,
-                feature_minimap=self.sz,
+                feature_screen=self.dim,
+                feature_minimap=self.dim,
                 rgb_screen=None,
                 rgb_minimap=None
             ),
