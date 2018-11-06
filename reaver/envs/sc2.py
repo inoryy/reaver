@@ -16,7 +16,7 @@ class SC2Env(Env):
         """
         self.map_name, self.spatial_dim, self.step_mul, self.render = map_name, spatial_dim, step_mul, render
         self._env = None
-        self.act_wrapper = ActionWrapper()
+        self.act_wrapper = ActionWrapper(spatial_dim)
         self.obs_wrapper = ObservationWrapper(obs_features)
 
     def start(self):
@@ -70,10 +70,11 @@ class ObservationWrapper:
     def __init__(self, _features=None):
         self.spec = None
         if not _features:
+            # available actions should always be present and in first position
             _features = {
                 'screen': ['player_relative'],
                 'minimap': ['player_relative'],
-                'non-spatial': ['player', 'available_actions']}
+                'non-spatial': ['available_actions', 'player']}
         self.features = _features
         self.feature_masks = {
             'screen': [i for i, f in enumerate(features.SCREEN_FEATURES._fields) if f in _features['screen']],
@@ -122,7 +123,7 @@ class ObservationWrapper:
 
 
 class ActionWrapper:
-    def __init__(self, args=None):
+    def __init__(self, spatial_dim, args=None):
         self.spec = None
         if not args:
             args = [
@@ -141,19 +142,26 @@ class ActionWrapper:
                 'build_queue_id',
                 # 'unload_id'
             ]
-        self.args = args
+        self.args, self.spatial_dim = args, spatial_dim
 
     def __call__(self, action):
         defaults = {
             'select_unit_id': 0,
             'unload_id': 0,
         }
-
         fn_id, args = action.pop(0), []
-        for arg in actions.FUNCTIONS[fn_id].args:
-            arg_name = arg.name
+        for arg_type in actions.FUNCTIONS[fn_id].args:
+            arg_name = arg_type.name
             if arg_name in self.args:
-                args.append(action[self.args.index(arg_name)])
+                arg = action[self.args.index(arg_name)]
+                # pysc2 expects all args in their separate lists
+                if type(arg) not in [list, tuple]:
+                    arg = [arg]
+                # pysc2 expects spatial coords, but we have flattened => attempt to fix
+                if len(arg_type.sizes) > 1 and len(arg) == 1:
+                    # note: pysc2 accepts y,x as coords
+                    arg = [arg[0] % self.spatial_dim, arg[0] // self.spatial_dim]
+                args.append(arg)
             else:
                 args.append(defaults[arg_name])
 

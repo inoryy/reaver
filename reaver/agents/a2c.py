@@ -4,14 +4,18 @@ from . import SyncRunningAgent
 
 
 class A2CAgent(SyncRunningAgent):
-    def __init__(self, sess, model, n_envs, batch_sz=16, discount=0.99):
+    def __init__(self, model, n_envs, batch_sz=16, discount=0.99):
         super().__init__(n_envs)
-        self.sess, self.policy = sess, model
         self.batch_sz, self.discount = batch_sz, discount
 
+        self.model = model
+
+        self.sess = tf.Session()
+        self.sess.run(tf.global_variables_initializer())
+
     def get_action(self, obs):
-        feed_dict = dict(zip(self.policy.inputs, obs))
-        return self.sess.run(self.policy.sample, feed_dict=feed_dict)
+        feed_dict = dict(zip(self.model.inputs, obs))
+        return self.sess.run(self.model.policy.sample, feed_dict=feed_dict)
 
     def compute_returns(self, rewards, dones, last_value):
         returns = np.zeros((self.batch_sz+1, self.n_envs), dtype=np.float32)
