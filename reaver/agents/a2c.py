@@ -10,9 +10,9 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         MemoryAgent.__init__(self, (batch_sz, n_envs), obs_spec, act_spec)
 
         self.coefs = dict(
-            lr=0.001,
-            policy=0.1,
-            value=0.1,
+            lr=0.01,
+            policy=0.01,
+            value=0.01,
             entropy=0.03,  # TODO maybe start higher and reduce to zero over time?
             discount=0.99,)
         if kwargs:
@@ -43,7 +43,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
             return
 
         next_value = self.tf_run(self.model.value, self.model.inputs, self.next_obs)
-        adv, returns = self.compute_advantages_and_returns(normalize_returns=True, normalize_adv=True)
+        adv, returns = self.compute_advantages_and_returns()
 
         inputs = self.obs + self.acts + [adv, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
@@ -58,7 +58,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         Using bootstrap seems to only make sense if critic (baseline) is a separate network
         In which case it sees the "future" value and can bootstrap returns for the actor network
 
-        Returns normalization stabilizes value loss, but have re-normalize baseline for advantages
+        Returns normalization can help with stabilizing value loss
         Advantage normalization can help with stabilizing policy loss
         """
         returns = np.zeros((self.batch_sz+1, self.n_envs), dtype=np.float32)
@@ -72,6 +72,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
             r_mu, r_std = np.mean(returns, axis=0), np.std(returns, axis=0) + 1e-12
 
             returns = (returns - r_mu) / r_std
+            # have to re-scale baseline for advantages
             self.values = self.values * r_std + r_mu
 
         adv = returns - self.values

@@ -3,7 +3,7 @@ import numpy as np
 
 
 class AgentLogger:
-    def __init__(self, agent, n_steps=2000, n_detailed=5, verbosity=4):
+    def __init__(self, agent, n_steps=1000, n_detailed=5, verbosity=4):
         self.agent, self.verbosity = agent, verbosity
         self.n_steps, self.n_detailed = n_steps, n_detailed
         self.env_eps = np.zeros(self.agent.n_envs)

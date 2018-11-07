@@ -3,12 +3,12 @@ import reaver as rvr
 from absl import app, flags
 
 flags.DEFINE_string("map", "MoveToBeacon", "Name of a map to use.")
-flags.DEFINE_bool("render", True, "Whether to render first(!) env with pygame.")
+flags.DEFINE_bool("render", False, "Whether to render first(!) env with pygame.")
 flags.DEFINE_integer("step_mul", 8, "Game steps per observation.")
 flags.DEFINE_integer("spatial_dim", 16, "Resolution for spatial feature layers.")
 flags.DEFINE_integer("envs", 4, "Number of environments to execute in parallel.")
 flags.DEFINE_integer("batch", 16, "Steps agent takes in-between training procedure.")
-flags.DEFINE_integer("steps", 2000, "Number of game steps to run (per environment).")
+flags.DEFINE_integer("steps", 1000000, "Number of game steps to run (per environment).")
 flags.DEFINE_string("gpu", "0", "id(s) of GPU(s) to use. If not set TensorFlow will default to CPU")
 
 
