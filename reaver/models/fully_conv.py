@@ -47,9 +47,9 @@ class MultiPolicy:
         self.sample = [dist.sample() for dist in self.dists]
 
         self.action_inputs = [tf.placeholder(tf.int32, [None]) for _ in self.dists]
-        self.logli = sum([dist.log_prob(act) for dist, act in zip(self.dists, self.action_inputs)])
         # TODO push individual entropy / logli to summary
         self.entropy = sum([dist.entropy() for dist in self.dists])
+        self.logli = sum([dist.log_prob(act) for dist, act in zip(self.dists, self.action_inputs)])
 
 
 def spatial_block(space, conv_cfg):
