@@ -1,9 +1,11 @@
+import time
 from . import Agent
 
 
 class RunningAgent(Agent):
     def __init__(self):
         self.next_obs = None
+        self.start_time = None
 
     def run(self, env, n_steps=1000000):
         env = self.wrap_env(env)
@@ -14,6 +16,8 @@ class RunningAgent(Agent):
             env.stop()
 
     def _run(self, env, n_steps):
+        self.start_time = time.time()
+
         obs, *_ = env.reset()
         for step in range(n_steps):
             action, value = self.get_action_and_value(obs)

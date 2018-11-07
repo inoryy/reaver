@@ -84,7 +84,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         # but since optimizer is minimizing the signs are opposite
         full_loss = self.coefs['policy']*policy + self.coefs['value']*value - self.coefs['entropy']*entropy
 
-        return full_loss, loss_terms, [adv, returns]
+        return full_loss, loss_terms + [full_loss], [adv, returns]
 
     def tf_run(self, tf_op, tf_inputs, inputs):
         return self.sess.run(tf_op, feed_dict=dict(zip(tf_inputs, inputs)))
