@@ -11,9 +11,9 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         self.coefs = dict(
             lr=0.001,
-            policy=1.0,
-            value=1.0,  # if rewards in [-1,1] there's no real need to scale this
-            entropy=0.0,
+            policy=0.1,
+            value=0.1,
+            entropy=0.03,  # TODO maybe start higher and reduce to zero over time?
             discount=0.99,)
         if kwargs:
             self.coefs.update(kwargs)
@@ -43,7 +43,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
             return
 
         next_value = self.tf_run(self.model.value, self.model.inputs, self.next_obs)
-        adv, returns = self.compute_advantages_and_returns()
+        adv, returns = self.compute_advantages_and_returns(normalize_returns=True, normalize_adv=True)
 
         inputs = self.obs + self.acts + [adv, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
@@ -53,10 +53,13 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         self.logger.on_step(step, loss_terms, adv, next_value)
 
-    def compute_advantages_and_returns(self, bootstrap=0., normalize=False):
+    def compute_advantages_and_returns(self, bootstrap=0., normalize_returns=False, normalize_adv=False):
         """
         Using bootstrap seems to only make sense if critic (baseline) is a separate network
         In which case it sees the "future" value and can bootstrap returns for the actor network
+
+        Returns normalization stabilizes value loss, but have re-normalize baseline for advantages
+        Advantage normalization can help with stabilizing policy loss
         """
         returns = np.zeros((self.batch_sz+1, self.n_envs), dtype=np.float32)
 
@@ -65,9 +68,15 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
             returns[t] = self.rewards[t] + self.coefs['discount'] * returns[t+1] * (1-self.dones[t])
         returns = returns[:-1]
 
+        if normalize_returns:
+            r_mu, r_std = np.mean(returns, axis=0), np.std(returns, axis=0) + 1e-12
+
+            returns = (returns - r_mu) / r_std
+            self.values = self.values * r_std + r_mu
+
         adv = returns - self.values
 
-        if normalize:
+        if normalize_adv:
             adv = (adv - np.mean(adv, axis=0)) / (np.std(adv, axis=0) + 1e-12)
 
         return adv, returns
