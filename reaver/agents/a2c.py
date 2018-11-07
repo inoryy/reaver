@@ -43,7 +43,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
             return
 
         next_value = self.tf_run(self.model.value, self.model.inputs, self.next_obs)
-        adv, returns = self.compute_advantages_and_returns(next_value)
+        adv, returns = self.compute_advantages_and_returns()
 
         inputs = self.obs + self.acts + [adv, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
@@ -53,10 +53,14 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         self.logger.on_step(step, loss_terms, adv, next_value)
 
-    def compute_advantages_and_returns(self, next_value, normalize=False):
+    def compute_advantages_and_returns(self, bootstrap=0., normalize=False):
+        """
+        Using bootstrap seems to only make sense if critic (baseline) is a separate network
+        In which case it sees the "future" value and can bootstrap returns for the actor network
+        """
         returns = np.zeros((self.batch_sz+1, self.n_envs), dtype=np.float32)
 
-        returns[-1] = next_value
+        returns[-1] = bootstrap
         for t in range(self.batch_sz-1, -1, -1):
             returns[t] = self.rewards[t] + self.coefs['discount'] * returns[t+1] * (1-self.dones[t])
         returns = returns[:-1]
