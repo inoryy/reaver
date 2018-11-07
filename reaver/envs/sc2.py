@@ -72,8 +72,9 @@ class ObservationWrapper:
         if not _features:
             # available actions should always be present and in first position
             _features = {
-                'screen': ['player_relative'],
-                'minimap': ['player_relative'],
+                'screen': ['player_id', 'player_relative', 'selected', 'unit_density',
+                           'unit_density_aa', 'unit_hit_points_ratio'],
+                'minimap': ['player_id', 'player_relative', 'selected'],
                 'non-spatial': ['available_actions', 'player']}
         self.features = _features
         self.feature_masks = {
