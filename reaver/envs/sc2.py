@@ -6,7 +6,7 @@ from . import Env, Spec, Space
 
 
 class SC2Env(Env):
-    def __init__(self, map_name='MoveToBeacon', spatial_dim=16, step_mul=8, render=False, obs_features=None):
+    def __init__(self, map_name='MoveToBeacon', spatial_dim=16, step_mul=8, render=False, obs_features=None, action_ids=None):
         """
         :param map_name:
         :param spatial_dim:
@@ -16,8 +16,13 @@ class SC2Env(Env):
         """
         self.map_name, self.spatial_dim, self.step_mul, self.render = map_name, spatial_dim, step_mul, render
         self._env = None
-        self.act_wrapper = ActionWrapper(spatial_dim)
-        self.obs_wrapper = ObservationWrapper(obs_features)
+
+        if not action_ids:
+            # Sensible defaults for minigames
+            action_ids = [1, 3, 6, 7, 12, 13, 331, 332, 333, 334]
+
+        self.act_wrapper = ActionWrapper(spatial_dim, action_ids)
+        self.obs_wrapper = ObservationWrapper(obs_features, action_ids)
 
     def start(self):
         # importing here to lazy-load
@@ -67,7 +72,7 @@ class SC2Env(Env):
 
 
 class ObservationWrapper:
-    def __init__(self, _features=None):
+    def __init__(self, _features=None, action_ids=None):
         self.spec = None
         if not _features:
             # available actions should always be present and in first position
@@ -80,6 +85,7 @@ class ObservationWrapper:
         self.feature_masks = {
             'screen': [i for i, f in enumerate(features.SCREEN_FEATURES._fields) if f in _features['screen']],
             'minimap': [i for i, f in enumerate(features.MINIMAP_FEATURES._fields) if f in _features['minimap']],}
+        self.action_ids = action_ids
 
     def __call__(self, timestep):
         ts = timestep[0]
@@ -91,8 +97,9 @@ class ObservationWrapper:
         ]
         for feat_name in self.features['non-spatial']:
             if feat_name == 'available_actions':
-                mask = np.zeros((len(actions.FUNCTIONS),), dtype=np.int32)
-                mask[obs[feat_name]] = 1
+                fn_ids_idxs = [i for i, fn_id in enumerate(self.action_ids) if fn_id in obs[feat_name]]
+                mask = np.zeros((len(self.action_ids),), dtype=np.int32)
+                mask[fn_ids_idxs] = 1
                 obs[feat_name] = mask
             obs_wrapped.append(obs[feat_name])
 
@@ -102,7 +109,7 @@ class ObservationWrapper:
         spec = spec[0]
 
         default_dims = {
-            'available_actions': (len(actions.FUNCTIONS), ),
+            'available_actions': (len(self.action_ids), ),
         }
 
         screen_shape = (len(self.features['screen']), *spec['feature_screen'][1:])
@@ -124,7 +131,7 @@ class ObservationWrapper:
 
 
 class ActionWrapper:
-    def __init__(self, spatial_dim, args=None):
+    def __init__(self, spatial_dim, action_ids, args=None):
         self.spec = None
         if not args:
             args = [
@@ -143,6 +150,7 @@ class ActionWrapper:
                 'build_queue_id',
                 # 'unload_id'
             ]
+        self.action_ids = action_ids
         self.args, self.spatial_dim = args, spatial_dim
 
     def __call__(self, action):
@@ -150,7 +158,8 @@ class ActionWrapper:
             'select_unit_id': 0,
             'unload_id': 0,
         }
-        fn_id, args = action.pop(0), []
+        fn_id_idx, args = action.pop(0), []
+        fn_id = self.action_ids[fn_id_idx]
         for arg_type in actions.FUNCTIONS[fn_id].args:
             arg_name = arg_type.name
             if arg_name in self.args:
@@ -171,7 +180,7 @@ class ActionWrapper:
     def make_spec(self, spec):
         spec = spec[0]
 
-        spaces = [Space((len(spec.functions),), np.int32, "function_id")]
+        spaces = [Space((len(self.action_ids),), np.int32, "function_id")]
         for arg_name in self.args:
             arg = getattr(spec.types, arg_name)
             spaces.append(Space(arg.sizes, np.int32, arg_name))

@@ -73,6 +73,7 @@ class AgentLogger:
             return
 
         print()
+        print("Note: action ids listed are not equivalent to pysc2")
         for t in range(n_steps-1, -1, -1):
             trv = n_steps - t
             avail = np.argwhere(self.agent.obs[2][-trv, 0]).flatten()

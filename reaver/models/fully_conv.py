@@ -41,7 +41,7 @@ class MultiPolicy:
         # we can treat available_actions as a constant => no need to condition the distribution
         # TODO check if this actually masks properly
         # large neg number => normalized prob --> 0
-        multi_logits[0] = tf.where(available_actions > 0, multi_logits[0], -10000 * tf.ones_like(multi_logits[0]))
+        multi_logits[0] = tf.where(available_actions > 0, multi_logits[0], -100 * tf.ones_like(multi_logits[0]))
         self.dists = [tfp.distributions.Categorical(logits) for logits in multi_logits]
 
         self.sample = [dist.sample() for dist in self.dists]
