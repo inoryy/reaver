@@ -1,8 +1,10 @@
-from abc import abstractmethod
 from . import Agent
 
 
 class RunningAgent(Agent):
+    def __init__(self):
+        self.next_obs = None
+
     def run(self, env, n_steps=1000000):
         env = self.wrap_env(env)
         env.start()
@@ -13,18 +15,25 @@ class RunningAgent(Agent):
 
     def _run(self, env, n_steps):
         obs, *_ = env.reset()
-        for n_step in range(1, n_steps+1):
-            action = self.get_action(obs)
-            next_obs, reward, done = env.step(action)
-            obs = next_obs
+        for step in range(n_steps):
+            action, value = self.get_action_and_value(obs)
+            self.next_obs, reward, done = env.step(action)
+            self.on_step(step, obs, action, reward, done, value)
+            obs = [o.copy() for o in self.next_obs]
         env.stop()
 
-    @abstractmethod
-    def wrap_env(self, env): ...
+    def get_action_and_value(self, obs):
+        return self.get_action(obs), None
+
+    def on_step(self, step, obs, action, reward, done, value=None): ...
+
+    def wrap_env(self, env):
+        return env
 
 
 class SyncRunningAgent(RunningAgent):
     def __init__(self, n_envs):
+        RunningAgent.__init__(self)
         self.n_envs = n_envs
 
     def wrap_env(self, env):

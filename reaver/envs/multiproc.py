@@ -75,14 +75,21 @@ class MultiProcEnv(Env):
     def step(self, actions):
         for idx, env in enumerate(self.envs):
             env.step([a[idx] for a in actions])
-        self.wait()
-        return self.shm[:-2], self.shm[-2], self.shm[-1]
+        return self._observe()
 
     def reset(self):
         for e in self.envs:
             e.reset()
+        return self._observe()
+
+    def _observe(self):
         self.wait()
-        return self.shm[:-2], self.shm[-2], self.shm[-1]
+
+        obs = self.shm[:-2]
+        reward = np.squeeze(self.shm[-2], axis=-1)
+        done = np.squeeze(self.shm[-1], axis=-1)
+
+        return obs, reward, done
 
     def stop(self):
         for e in self.envs:

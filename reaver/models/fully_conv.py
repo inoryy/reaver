@@ -3,8 +3,10 @@ import tensorflow.keras.layers as L
 import tensorflow_probability as tfp
 
 
+# TODO extend from Keras.models?
 class FullyConv:
     def __init__(self, obs_spec, act_spec):
+        # TODO add support for LSTM via TimeDistributed
         # TODO NCHW is only supported on GPU atm, make this device agnostic
         self.conv_cfg = dict(padding='same', data_format='channels_first')
         screen, self.screen_input = spatial_block(obs_spec.spaces[0], self.conv_cfg)
@@ -18,8 +20,10 @@ class FullyConv:
         fc = L.Flatten()(state)
         fc = L.Dense(256, activation='relu')(fc)
 
-        self.value = L.Dense(1)(fc)
+        # TODO do I really want to squeeze here?
+        self.value = tf.squeeze(L.Dense(1)(fc), axis=-1)
 
+        # TODO only flow gradients to arg logits that actually contributed to the action
         self.logits = []
         for space in act_spec.spaces:
             if len(space.shape) == 1:
@@ -41,14 +45,11 @@ class MultiPolicy:
         self.dists = [tfp.distributions.Categorical(logits) for logits in multi_logits]
 
         self.sample = [dist.sample() for dist in self.dists]
+
+        self.action_inputs = [tf.placeholder(tf.int32, [None]) for _ in self.dists]
+        self.logli = sum([dist.log_prob(act) for dist, act in zip(self.dists, self.action_inputs)])
         # TODO push individual entropy / logli to summary
         self.entropy = sum([dist.entropy() for dist in self.dists])
-
-        self.action_input = [L.Input(shape=(1,), dtype=tf.int32) for _ in self.dists]
-        # TODO get rid of this tf.squeeze() due to shape (1,)
-        action = [tf.squeeze(act) for act in self.action_input]
-        self.logli = -sum([dist.log_prob(act) for dist, act in zip(self.dists, action)])
-
 
 
 def spatial_block(space, conv_cfg):
