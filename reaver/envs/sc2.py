@@ -164,7 +164,7 @@ class ActionWrapper:
                     arg = [arg[0] % self.spatial_dim, arg[0] // self.spatial_dim]
                 args.append(arg)
             else:
-                args.append(defaults[arg_name])
+                args.append([defaults[arg_name]])
 
         return [actions.FunctionCall(fn_id, args)]
 

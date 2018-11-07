@@ -10,10 +10,10 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         MemoryAgent.__init__(self, (batch_sz, n_envs), obs_spec, act_spec)
 
         self.coefs = dict(
-            lr=0.01,
-            policy=0.01,
-            value=0.01,
-            entropy=0.03,  # TODO maybe start higher and reduce to zero over time?
+            lr=0.001,
+            policy=1.0,
+            value=0.005,
+            entropy=0.001, # TODO maybe start higher and reduce to zero over time?
             discount=0.99,)
         if kwargs:
             self.coefs.update(kwargs)
@@ -43,7 +43,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
             return
 
         next_value = self.tf_run(self.model.value, self.model.inputs, self.next_obs)
-        adv, returns = self.compute_advantages_and_returns()
+        adv, returns = self.compute_advantages_and_returns(normalize_returns=True, normalize_adv=True)
 
         inputs = self.obs + self.acts + [adv, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
@@ -69,7 +69,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         returns = returns[:-1]
 
         if normalize_returns:
-            r_mu, r_std = np.mean(returns, axis=0), np.std(returns, axis=0) + 1e-12
+            r_mu, r_std = np.mean(returns), np.std(returns) + 1e-12
 
             returns = (returns - r_mu) / r_std
             # have to re-scale baseline for advantages
@@ -78,14 +78,16 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         adv = returns - self.values
 
         if normalize_adv:
-            adv = (adv - np.mean(adv, axis=0)) / (np.std(adv, axis=0) + 1e-12)
+            adv = (adv - np.mean(adv)) / (np.std(adv) + 1e-12)
 
         return adv, returns
 
     def _loss_fn(self):
-        # note: could have calculated advantages directly in TF from returns
-        # but in future might calculate them differently, e.g. via GAE
-        # which is not trivial to implement as a tensor ops, so easier to take both in
+        """
+        note: could have calculated advantages directly in TF from returns
+        but in future might calculate them differently, e.g. via GAE
+        which is not trivial to implement as a tensor ops, so easier to take both in
+        """
         adv = tf.placeholder(tf.float32, [None], name="advantages")
         returns = tf.placeholder(tf.float32, [None], name="returns")
 
