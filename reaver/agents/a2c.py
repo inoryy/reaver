@@ -5,16 +5,17 @@ from .util import AgentLogger
 
 
 class A2CAgent(SyncRunningAgent, MemoryAgent):
-    def __init__(self, model_cls, obs_spec, act_spec, n_envs=1, batch_sz=8, **kwargs):
+    def __init__(self, model_cls, obs_spec, act_spec, n_envs=1, batch_sz=8, clip_grads_norm=1.0, **kwargs):
         SyncRunningAgent.__init__(self, n_envs)
         MemoryAgent.__init__(self, (batch_sz, n_envs), obs_spec, act_spec)
 
         self.coefs = dict(
-            lr=0.001,
+            lr=0.005,
             policy=1.0,
-            value=0.005,
-            entropy=0.001, # TODO maybe start higher and reduce to zero over time?
-            discount=0.99,)
+            value=0.5,
+            entropy=0.001,
+            discount=0.99,
+        )
         if kwargs:
             self.coefs.update(kwargs)
 
@@ -22,8 +23,13 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         self.sess = tf.Session()
 
         self.model = model_cls(obs_spec, act_spec)
+
         self.loss_op, self.loss_terms, self.loss_inputs = self._loss_fn()
-        self.train_op = tf.train.AdamOptimizer(self.coefs['lr']).minimize(self.loss_op)
+        opt = tf.train.AdamOptimizer(self.coefs['lr'])
+        grads, vars = zip(*opt.compute_gradients(self.loss_op))
+        if clip_grads_norm > 0.:
+            grads, _ = tf.clip_by_global_norm(grads, clip_grads_norm)
+        self.train_op = opt.apply_gradients(zip(grads, vars))
 
         self.sess.run(tf.global_variables_initializer())
 
@@ -43,7 +49,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
             return
 
         next_value = self.tf_run(self.model.value, self.model.inputs, self.next_obs)
-        adv, returns = self.compute_advantages_and_returns(normalize_returns=True, normalize_adv=True)
+        adv, returns = self.compute_advantages_and_returns()
 
         inputs = self.obs + self.acts + [adv, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
@@ -51,7 +57,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         loss_terms,  _ = self.tf_run([self.loss_terms, self.train_op], tf_inputs, inputs)
 
-        self.logger.on_step(step, loss_terms, adv, next_value)
+        self.logger.on_step(step, loss_terms, returns, adv, next_value)
 
     def compute_advantages_and_returns(self, bootstrap=0., normalize_returns=False, normalize_adv=False):
         """
@@ -92,7 +98,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         returns = tf.placeholder(tf.float32, [None], name="returns")
 
         policy = tf.reduce_mean(self.model.policy.logli * adv)
-        value = tf.nn.l2_loss(self.model.value - returns)
+        value = tf.losses.mean_squared_error(self.model.value, returns)
         entropy = tf.reduce_mean(self.model.policy.entropy)
         loss_terms = [policy, value, entropy]
 
