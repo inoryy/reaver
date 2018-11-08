@@ -1,8 +1,12 @@
 import numpy as np
 
+
 class Spec:
     def __init__(self, spaces, name=None):
         self.name, self.spaces = name, spaces
+
+    def sample(self, n=1):
+        return [space.sample(n) for space in self.spaces]
 
     def __repr__(self):
         return "Spec: %s\n%s" % (self.name, "\n".join(map(str, self.spaces)))
@@ -18,7 +22,7 @@ class Space:
         if np.issubdtype(self.dtype, np.integer):
             return np.random.randint(self.lo, self.hi+1, (n, ) + self.shape)
 
-        if np.issubdtype(self.dtype, np.float):
+        if np.issubdtype(self.dtype, np.floating):
             return np.random.uniform(self.lo, self.hi+1e-10, (n, ) + self.shape)
 
     def __repr__(self):

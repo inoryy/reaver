@@ -5,7 +5,7 @@ from .util import AgentLogger
 
 
 class A2CAgent(SyncRunningAgent, MemoryAgent):
-    def __init__(self, model_cls, obs_spec, act_spec, n_envs=1, batch_sz=8, clip_grads_norm=1.0, **kwargs):
+    def __init__(self, model_cls, obs_spec, act_spec, n_envs=1, batch_sz=16, clip_grads_norm=1.0, **kwargs):
         SyncRunningAgent.__init__(self, n_envs)
         MemoryAgent.__init__(self, (batch_sz, n_envs), obs_spec, act_spec)
 
