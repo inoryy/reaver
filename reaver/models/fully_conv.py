@@ -1,6 +1,5 @@
 import tensorflow as tf
 import tensorflow.keras.layers as L
-import tensorflow_probability as tfp
 
 
 # TODO extend from Keras.models?
@@ -41,6 +40,8 @@ class FullyConv:
 
 class MultiPolicy:
     def __init__(self, multi_logits, available_actions):
+        # tfp is really heavy on init, better to lazy load
+        import tensorflow_probability as tfp
         # we can treat available_actions as a constant => no need to condition the distribution
         # large neg number => normalized prob --> 0
         # TODO check if this actually masks properly
