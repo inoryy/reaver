@@ -19,7 +19,7 @@ class SC2Env(Env):
 
         if not action_ids:
             # Sensible defaults for minigames
-            action_ids = [1, 3, 6, 7, 12, 13, 331, 332, 333, 334]
+            action_ids = [0, 1, 3, 6, 7, 12, 13, 331, 332, 333, 334]
 
         self.act_wrapper = ActionWrapper(spatial_dim, action_ids)
         self.obs_wrapper = ObservationWrapper(obs_features, action_ids)
@@ -139,15 +139,14 @@ class ActionWrapper:
                 'minimap',
                 'screen2',
                 'queued',
-                'control_group_act',
-                'control_group_id',
+                # 'control_group_act',
+                # 'control_group_id',
                 'select_add',
-                'select_point_act',
-                'select_add',
-                'select_unit_act',
+                # 'select_point_act',
+                # 'select_unit_act',
                 # 'select_unit_id'
                 'select_worker',
-                'build_queue_id',
+                # 'build_queue_id',
                 # 'unload_id'
             ]
         self.action_ids = action_ids
@@ -155,8 +154,14 @@ class ActionWrapper:
 
     def __call__(self, action):
         defaults = {
+            'control_group_act': 0,
+            'control_group_id': 0,
+            'select_point_act': 0,
+            'select_unit_act': 0,
             'select_unit_id': 0,
+            'build_queue_id': 0,
             'unload_id': 0,
+
         }
         fn_id_idx, args = action.pop(0), []
         fn_id = self.action_ids[fn_id_idx]
