@@ -49,8 +49,8 @@ class ProcEnv(Env):
                     np.copyto(dst=shm[self.idx], src=ob)
                 self.w_conn.send(DONE)
             elif msg == RESET:
-                obs, rew, done = self._env.reset()
-                for shm, ob in zip(self.shm, obs + [rew, done]):
+                obs = self._env.reset()
+                for shm, ob in zip(self.shm, obs + [0, 0]):
                     np.copyto(dst=shm[self.idx], src=ob)
                 self.w_conn.send(DONE)
             elif msg == STOP:
@@ -63,8 +63,8 @@ class MultiProcEnv(Env):
     def __init__(self, envs):
         super().__init__()
         self.shm = [make_shared(len(envs), s) for s in envs[0].obs_spec().spaces]
-        self.shm.append(make_shared(len(envs), Space((1,), np.float32, "reward")))
-        self.shm.append(make_shared(len(envs), Space((1,), np.int32, "done")))
+        self.shm.append(make_shared(len(envs), Space((1,), name="reward")))
+        self.shm.append(make_shared(len(envs), Space((1,), name="done")))
         self.envs = [ProcEnv(env, idx, self.shm) for idx, env in enumerate(envs)]
 
     def start(self):

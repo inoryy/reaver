@@ -42,11 +42,12 @@ class SC2Env(Env):
     def step(self, action):
         obs, reward, done = self.obs_wrapper(self._env.step(self.act_wrapper(action)))
         if done:
-            obs, *_ = self.reset()
+            obs = self.reset()
         return obs, reward, done
 
     def reset(self):
-        return self.obs_wrapper(self._env.reset())
+        obs, reward, done = self.obs_wrapper(self._env.reset())
+        return obs
 
     def stop(self):
         self._env.close()
@@ -125,7 +126,7 @@ class ObservationWrapper:
         for feat in self.features['non-spatial']:
             if 0 in spec[feat]:
                 spec[feat] = default_dims[feat]
-            spaces.append(Space(spec[feat], np.int32, feat))
+            spaces.append(Space(spec[feat], name=feat))
 
         self.spec = Spec(spaces, 'Observation')
 
@@ -184,10 +185,10 @@ class ActionWrapper:
     def make_spec(self, spec):
         spec = spec[0]
 
-        spaces = [Space((len(self.action_ids),), np.int32, "function_id")]
+        spaces = [Space((len(self.action_ids),), name="function_id")]
         for arg_name in self.args:
             arg = getattr(spec.types, arg_name)
-            spaces.append(Space(arg.sizes, np.int32, arg_name))
+            spaces.append(Space(arg.sizes, name=arg_name))
 
         self.spec = Spec(spaces, "Action")
 
@@ -198,7 +199,7 @@ class SC2Space(Space):
             name += "{%s}" % ", ".join(spatial_feats)
         self.spatial_feats, self.spatial_dims = spatial_feats, spatial_dims
 
-        super().__init__(shape, np.int32, name)
+        super().__init__(shape, name=name)
 
 
 def get_spatial_dims(feat_names, feats):
