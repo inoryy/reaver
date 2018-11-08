@@ -54,7 +54,7 @@ class MultiPolicy:
         # TODO push individual entropy / logli to summary
         # TODO mask entropy of unused args
         self.entropy = sum([dist.entropy() for dist in self.dists])
-        self.logli = sum([dist.log_prob(act) for dist, act in zip(self.dists, self.action_inputs)])
+        self.logli = -sum([dist.log_prob(act) for dist, act in zip(self.dists, self.action_inputs)])
 
 
 def spatial_block(space, conv_cfg):

@@ -5,7 +5,7 @@ from .util import AgentLogger
 
 
 class A2CAgent(SyncRunningAgent, MemoryAgent):
-    def __init__(self, model_cls, obs_spec, act_spec, n_envs=1, batch_sz=16, clip_grads_norm=1.0, **kwargs):
+    def __init__(self, model_cls, obs_spec, act_spec, n_envs=4, batch_sz=16, clip_grads_norm=1.0, **kwargs):
         SyncRunningAgent.__init__(self, n_envs)
         MemoryAgent.__init__(self, (batch_sz, n_envs), obs_spec, act_spec)
 
@@ -43,13 +43,16 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         feed_dict = dict(zip(self.model.inputs, obs))
         return self.sess.run(self.model.policy.sample, feed_dict=feed_dict)
 
+    def run(self, env, n_steps=1000000):
+        SyncRunningAgent.run(self, env, n_steps*self.batch_sz)
+
     def on_step(self, step, obs, action, reward, done, value=None):
         MemoryAgent.on_step(self, step, obs, action, reward, done, value)
         if (step + 1) % self.batch_sz > 0:
             return
 
         next_value = self.tf_run(self.model.value, self.model.inputs, self.next_obs)
-        adv, returns = self.compute_advantages_and_returns()
+        adv, returns = self.compute_advantages_and_returns(next_value)
 
         inputs = self.obs + self.acts + [adv, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
