@@ -174,7 +174,6 @@ class ActionWrapper:
                     arg = [arg]
                 # pysc2 expects spatial coords, but we have flattened => attempt to fix
                 if len(arg_type.sizes) > 1 and len(arg) == 1:
-                    # note: pysc2 accepts y,x as coords
                     arg = [arg[0] % self.spatial_dim, arg[0] // self.spatial_dim]
                 args.append(arg)
             else:
