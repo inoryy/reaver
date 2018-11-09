@@ -18,8 +18,8 @@ class SC2Env(Env):
         self._env = None
 
         if not action_ids:
-            # Sensible defaults for minigames
-            action_ids = [0, 1, 3, 6, 7, 12, 13, 331, 332, 333, 334]
+            # Sensible defaults for all minigames
+            action_ids = [0, 1, 2, 3, 4, 6, 7, 12, 13, 140, 168, 261, 274, 331, 332, 333, 334, 451, 452, 453]
 
         self.act_wrapper = ActionWrapper(spatial_dim, action_ids)
         self.obs_wrapper = ObservationWrapper(obs_features, action_ids)
@@ -78,8 +78,8 @@ class ObservationWrapper:
         if not _features:
             # available actions should always be present and in first position
             _features = {
-                'screen': ['player_id', 'player_relative', 'selected', 'unit_density',
-                           'unit_density_aa', 'unit_hit_points_ratio'],
+                'screen': ['player_id', 'player_relative', 'selected', 'unit_hit_points', 'unit_hit_points_ratio',
+                           'unit_density', 'unit_density_aa'],
                 'minimap': ['player_id', 'player_relative', 'selected'],
                 'non-spatial': ['available_actions', 'player']}
         self.features = _features
@@ -140,10 +140,10 @@ class ActionWrapper:
                 'minimap',
                 'screen2',
                 'queued',
-                # 'control_group_act',
-                # 'control_group_id',
+                'control_group_act',
+                'control_group_id',
                 'select_add',
-                # 'select_point_act',
+                'select_point_act',
                 # 'select_unit_act',
                 # 'select_unit_id'
                 'select_worker',
@@ -162,7 +162,6 @@ class ActionWrapper:
             'select_unit_id': 0,
             'build_queue_id': 0,
             'unload_id': 0,
-
         }
         fn_id_idx, args = action.pop(0), []
         fn_id = self.func_ids[fn_id_idx]
