@@ -43,9 +43,6 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         feed_dict = dict(zip(self.model.inputs, obs))
         return self.sess.run(self.model.policy.sample, feed_dict=feed_dict)
 
-    def run(self, env, n_steps=1000000):
-        SyncRunningAgent.run(self, env, n_steps*self.batch_sz)
-
     def on_step(self, step, obs, action, reward, done, value=None):
         MemoryAgent.on_step(self, step, obs, action, reward, done, value)
         if (step + 1) % self.batch_sz > 0:
