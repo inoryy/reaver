@@ -1,20 +1,29 @@
+import sys
 import time
 import numpy as np
+from collections import deque
 
 
 class AgentLogger:
-    def __init__(self, agent, n_steps=2000, n_detailed=10, verbosity=3):
+    def __init__(self, agent, n_updates=100, n_detailed=10, verbosity=3):
         self.agent, self.verbosity = agent, verbosity
-        self.n_steps, self.n_detailed = n_steps, n_detailed
-        self.env_eps = np.zeros(self.agent.n_envs)
-        self.env_rews = np.zeros(self.agent.n_envs)
+        self.n_updates, self.n_detailed = n_updates, n_detailed
+        self.env_eps = [0]*self.agent.n_envs
+        self.env_rews = [0]*self.agent.n_envs
+        self.n_eps = max(10, self.agent.n_envs)
+        self.tot_rews = deque([], maxlen=self.n_eps)
 
-    def on_step(self, step, loss_terms, returns, adv, next_value):
-        # TODO doesn't track stats correctly, fix this
-        self.env_eps += np.sum(self.agent.dones, axis=0)
-        self.env_rews += np.sum(self.agent.rewards, axis=0)
+    def on_step(self, step):
+        t = step % self.agent.batch_sz
+        self.env_rews += self.agent.rewards[t]
+        for i in range(self.agent.n_envs):
+            if self.agent.dones[t, i]:
+                self.tot_rews.append(self.env_rews[i])
+                self.env_rews[i] = 0.
+                self.env_eps[i] += 1
 
-        if self.verbosity < 1 or (step+1) % self.n_steps:
+    def on_update(self, step, loss_terms, returns, adv, next_value):
+        if self.verbosity < 1 or ((step+1) // self.agent.batch_sz) % self.n_updates:
             return
 
         loss_terms = np.array(loss_terms).round(5)
@@ -32,13 +41,13 @@ class AgentLogger:
         print("Updates ", (step+1) // self.agent.batch_sz)
         print("FPS     ", frames // runtime)
 
+        tot_rews = self.tot_rews if len(self.tot_rews) > 0 else [0]
         print()
-        print("Total Rewards:")
-        tot_rews = (self.env_eps > 0) * self.env_rews / (self.env_eps + 1e-10)
-        print("Mean %.3f " % np.mean(tot_rews))
-        print("Std  %.3f  " % np.std(tot_rews))
-        print("Min  %.3f  " % np.min(tot_rews))
-        print("Max  %.3f  " % np.max(tot_rews))
+        print("Total Rewards For Last %d Eps:" % self.n_eps)
+        print("Mean %.3f" % np.mean(tot_rews))
+        print("Std  %.3f" % np.std(tot_rews))
+        print("Min  %.3f" % np.min(tot_rews))
+        print("Max  %.3f" % np.max(tot_rews))
 
         if self.verbosity < 2:
             return
@@ -69,6 +78,8 @@ class AgentLogger:
         print("Advs       ", adv[-n_steps:, 0].flatten())
         print("Action ids ", action_ids)
         print("Act logits ", logits[np.arange(n_steps), action_ids])
+
+        sys.stdout.flush()
 
         if self.verbosity < 4:
             return

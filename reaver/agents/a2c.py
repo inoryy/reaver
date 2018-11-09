@@ -45,6 +45,8 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
     def on_step(self, step, obs, action, reward, done, value=None):
         MemoryAgent.on_step(self, step, obs, action, reward, done, value)
+        self.logger.on_step(step)
+
         if (step + 1) % self.batch_sz > 0:
             return
 
@@ -57,7 +59,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         loss_terms,  _ = self.tf_run([self.loss_terms, self.train_op], tf_inputs, inputs)
 
-        self.logger.on_step(step, loss_terms, returns, adv, next_value)
+        self.logger.on_update(step, loss_terms, returns, adv, next_value)
 
     def compute_advantages_and_returns(self, bootstrap_value=0., normalize_returns=False, normalize_adv=False):
         """
