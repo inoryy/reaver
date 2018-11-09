@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 import tensorflow.keras.layers as L
 
@@ -11,11 +12,13 @@ class FullyConv:
         screen, self.screen_input = spatial_block(obs_spec.spaces[0], self.conv_cfg)
         minimap, self.minimap_input = spatial_block(obs_spec.spaces[1], self.conv_cfg)
 
-        # TODO connect non-spatial inputs to the state block
         self.non_spatial_inputs = [L.Input(s.shape) for s in obs_spec.spaces[2:]]
         self.inputs = [self.screen_input, self.minimap_input] + self.non_spatial_inputs
 
-        state = tf.concat([screen, minimap], axis=1)
+        non_spatial, dim = self.non_spatial_inputs[1], obs_spec.spaces[0].shape[1]
+        broadcasted_non_spatial = tf.tile(tf.expand_dims(tf.expand_dims(tf.log(non_spatial), 2), 3), [1, 1, dim, dim])
+
+        state = tf.concat([screen, minimap, broadcasted_non_spatial], axis=1)
         fc = L.Flatten()(state)
         fc = L.Dense(256, activation='relu', kernel_initializer='he_normal')(fc)
 
@@ -69,8 +72,9 @@ def spatial_block(space, conv_cfg):
     for i, (name, dim) in enumerate(zip(space.spatial_feats, space.spatial_dims)):
         if dim > 1:
             # categorical spatial feature
+            embed_dim = int(max(1, round(np.log2(dim))))
             block[i] = tf.squeeze(block[i], axis=1)
-            block[i] = L.Embedding(input_dim=dim, output_dim=1, embeddings_initializer='he_normal')(block[i])
+            block[i] = L.Embedding(input_dim=dim, output_dim=embed_dim, embeddings_initializer='he_normal')(block[i])
             # [N, H, W, C] -> [N, C, H, W]
             block[i] = tf.transpose(block[i], [0, 3, 1, 2])
         else:
