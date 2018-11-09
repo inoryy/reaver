@@ -5,7 +5,7 @@ from .util import AgentLogger
 
 
 class A2CAgent(SyncRunningAgent, MemoryAgent):
-    def __init__(self, model_cls, obs_spec, act_spec, n_envs=4, batch_sz=16, clip_grads_norm=1.0, **kwargs):
+    def __init__(self, model_cls, obs_spec, act_spec, n_envs=4, batch_sz=16, clip_grads_norm=0.0, **kwargs):
         SyncRunningAgent.__init__(self, n_envs)
         MemoryAgent.__init__(self, (batch_sz, n_envs), obs_spec, act_spec)
 
@@ -25,7 +25,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         self.model = model_cls(obs_spec, act_spec)
 
         self.loss_op, self.loss_terms, self.loss_inputs = self._loss_fn()
-        opt = tf.train.AdamOptimizer(self.coefs['lr'])
+        opt = tf.train.RMSPropOptimizer(self.coefs['lr'])
         grads, vars = zip(*opt.compute_gradients(self.loss_op))
         if clip_grads_norm > 0.:
             grads, _ = tf.clip_by_global_norm(grads, clip_grads_norm)
@@ -62,23 +62,25 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         self.logger.on_step(step, loss_terms, returns, adv, next_value)
 
-    def compute_advantages_and_returns(self, bootstrap=0., normalize_returns=False, normalize_adv=False):
+    def compute_advantages_and_returns(self, bootstrap_value=0., normalize_returns=False, normalize_adv=False):
         """
-        Using bootstrap seems to only make sense if critic (baseline) is a separate network
-        In which case it sees the "future" value and can bootstrap returns for the actor network
-
+        Bootstrap helps with stabilizing advantages with sparse rewards
         Returns normalization can help with stabilizing value loss
-        Advantage normalization can help with stabilizing policy loss
+        Advantage normalization can help with stabilizing policy loss, but can lead to large swings if rewards are sparse
         """
         returns = np.zeros((self.batch_sz+1, self.n_envs), dtype=np.float32)
+        values = np.zeros((self.batch_sz+1, self.n_envs), dtype=np.float32)
+        values[:-1] = self.values
+        returns[-1] = values[-1] = bootstrap_value
 
-        returns[-1] = bootstrap
         for t in range(self.batch_sz-1, -1, -1):
             returns[t] = self.rewards[t] + self.coefs['discount'] * returns[t+1] * (1-self.dones[t])
+            # avoid killing bootstrap signal in terminal states
+            returns[t] += self.coefs['discount'] * values[t+1] * self.dones[t]
         returns = returns[:-1]
 
         if normalize_returns:
-            r_mu, r_std = np.mean(returns), np.std(returns) + 1e-12
+            r_mu, r_std = np.mean(returns, axis=0), np.std(returns, axis=0) + 1e-12
 
             returns = (returns - r_mu) / r_std
             # have to re-scale baseline for advantages
@@ -87,7 +89,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         adv = returns - self.values
 
         if normalize_adv:
-            adv = (adv - np.mean(adv)) / (np.std(adv) + 1e-12)
+            adv = (adv - np.mean(adv, axis=0)) / (np.std(adv, axis=0) + 1e-12)
 
         return adv, returns
 

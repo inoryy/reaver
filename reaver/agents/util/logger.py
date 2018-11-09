@@ -10,6 +10,7 @@ class AgentLogger:
         self.env_rews = np.zeros(self.agent.n_envs)
 
     def on_step(self, step, loss_terms, returns, adv, next_value):
+        # TODO doesn't track stats correctly, fix this
         self.env_eps += np.sum(self.agent.dones, axis=0)
         self.env_rews += np.sum(self.agent.rewards, axis=0)
 
@@ -55,7 +56,7 @@ class AgentLogger:
         np.set_printoptions(suppress=True, precision=2)
         n_steps = min(self.n_detailed, self.agent.batch_sz)
 
-        logits = self.agent.tf_run(self.agent.model.logits, self.agent.model.inputs,
+        logits = self.agent.tf_run(self.agent.model.logits[0], self.agent.model.inputs,
                                    [o[-n_steps:, 0] for o in self.agent.obs])
         action_ids = self.agent.acts[0][-n_steps:, 0].flatten()
 
@@ -67,7 +68,7 @@ class AgentLogger:
         print("Returns    ", returns[-n_steps:, 0].flatten())
         print("Advs       ", adv[-n_steps:, 0].flatten())
         print("Action ids ", action_ids)
-        print("Act logits ", logits[0][-np.arange(n_steps), action_ids])
+        print("Act logits ", logits[np.arange(n_steps), action_ids])
 
         if self.verbosity < 4:
             return

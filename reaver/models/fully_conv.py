@@ -43,17 +43,16 @@ class MultiPolicy:
         # tfp is really heavy on init, better to lazy load
         import tensorflow_probability as tfp
         # we can treat available_actions as a constant => no need to condition the distribution
-        # large neg number => normalized prob --> 0
-        # TODO check if this actually masks properly
-        multi_logits[0] = tf.where(available_actions > 0, multi_logits[0], -100 * tf.ones_like(multi_logits[0]))
+        # large neg logit => normalized prob = 0 during sampling
+        multi_logits[0] = tf.where(available_actions > 0, multi_logits[0], -1000 * tf.ones_like(multi_logits[0]))
         self.dists = [tfp.distributions.Categorical(logits) for logits in multi_logits]
-
         self.sample = [dist.sample() for dist in self.dists]
 
-        self.action_inputs = [tf.placeholder(tf.int32, [None]) for _ in self.dists]
         # TODO push individual entropy / logli to summary
         # TODO mask entropy of unused args
         self.entropy = sum([dist.entropy() for dist in self.dists])
+
+        self.action_inputs = [tf.placeholder(tf.int32, [None]) for _ in self.dists]
         self.logli = -sum([dist.log_prob(act) for dist, act in zip(self.dists, self.action_inputs)])
 
 
