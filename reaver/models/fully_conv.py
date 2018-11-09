@@ -22,7 +22,6 @@ class FullyConv:
         # TODO do I really want to squeeze here?
         self.value = tf.squeeze(L.Dense(1, kernel_initializer='he_normal')(fc), axis=-1)
 
-        # TODO only flow gradients to arg logits that actually contributed to the action
         self.logits = []
         for space in act_spec.spaces:
             if len(space.shape) == 1:
@@ -33,13 +32,15 @@ class FullyConv:
                 # flatten spatial logits, simplifying sampling
                 self.logits[-1] = L.Flatten()(self.logits[-1])
 
+        args_mask = tf.constant(act_spec.spaces[0].args_mask, dtype=tf.float32)
+
         # TODO replace with Autoregressive
         # TODO get rid of the index hard-code
-        self.policy = MultiPolicy(self.logits, self.non_spatial_inputs[0])
+        self.policy = MultiPolicy(self.logits, self.non_spatial_inputs[0], args_mask)
 
 
 class MultiPolicy:
-    def __init__(self, multi_logits, available_actions):
+    def __init__(self, multi_logits, available_actions, args_mask):
         # tfp is really heavy on init, better to lazy load
         import tensorflow_probability as tfp
         # we can treat available_actions as a constant => no need to condition the distribution
@@ -48,12 +49,17 @@ class MultiPolicy:
         self.dists = [tfp.distributions.Categorical(logits) for logits in multi_logits]
         self.sample = [dist.sample() for dist in self.dists]
 
-        # TODO push individual entropy / logli to summary
-        # TODO mask entropy of unused args
         self.entropy = sum([dist.entropy() for dist in self.dists])
 
-        self.action_inputs = [tf.placeholder(tf.int32, [None]) for _ in self.dists]
-        self.logli = -sum([dist.log_prob(act) for dist, act in zip(self.dists, self.action_inputs)])
+        self.inputs = [tf.placeholder(tf.int32, [None]) for _ in self.dists]
+        act_args_mask = tf.gather(args_mask, self.inputs[0])
+        act_args_mask = tf.transpose(act_args_mask, [1, 0])
+
+        self.logli = self.dists[0].log_prob(self.inputs[0])
+        for i in range(1, len(self.dists)):
+            self.logli += act_args_mask[i-1] * self.dists[i].log_prob(self.inputs[i])
+        # tfp dists actually return neg log prob
+        self.logli *= -1
 
 
 def spatial_block(space, conv_cfg):
@@ -68,8 +74,7 @@ def spatial_block(space, conv_cfg):
             # [N, H, W, C] -> [N, C, H, W]
             block[i] = tf.transpose(block[i], [0, 3, 1, 2])
         else:
-            # TODO do I need + 1.0 here?
-            block[i] = tf.log(block[i] + 1.0)
+            block[i] = tf.log(block[i] + 1e-10)
 
     block = tf.concat(block, axis=1)
     block = L.Conv2D(16, 5, activation='relu', **conv_cfg)(block)

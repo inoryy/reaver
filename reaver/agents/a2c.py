@@ -55,7 +55,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         inputs = self.obs + self.acts + [adv, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
-        tf_inputs = self.model.inputs + self.model.policy.action_inputs + self.loss_inputs
+        tf_inputs = self.model.inputs + self.model.policy.inputs + self.loss_inputs
 
         loss_terms,  _ = self.tf_run([self.loss_terms, self.train_op], tf_inputs, inputs)
 

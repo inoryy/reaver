@@ -150,7 +150,7 @@ class ActionWrapper:
                 # 'build_queue_id',
                 # 'unload_id'
             ]
-        self.action_ids = action_ids
+        self.func_ids = action_ids
         self.args, self.spatial_dim = args, spatial_dim
 
     def __call__(self, action):
@@ -165,7 +165,7 @@ class ActionWrapper:
 
         }
         fn_id_idx, args = action.pop(0), []
-        fn_id = self.action_ids[fn_id_idx]
+        fn_id = self.func_ids[fn_id_idx]
         for arg_type in actions.FUNCTIONS[fn_id].args:
             arg_name = arg_type.name
             if arg_name in self.args:
@@ -185,7 +185,7 @@ class ActionWrapper:
     def make_spec(self, spec):
         spec = spec[0]
 
-        spaces = [Space((len(self.action_ids),), name="function_id")]
+        spaces = [SC2FuncIdSpace(self.func_ids, self.args)]
         for arg_name in self.args:
             arg = getattr(spec.types, arg_name)
             spaces.append(Space(arg.sizes, name=arg_name))
@@ -200,6 +200,15 @@ class SC2Space(Space):
         self.spatial_feats, self.spatial_dims = spatial_feats, spatial_dims
 
         super().__init__(shape, name=name)
+
+
+class SC2FuncIdSpace(Space):
+    def __init__(self, func_ids, args):
+        super().__init__((len(func_ids),), name="function_id")
+        self.args_mask = []
+        for fn_id in func_ids:
+            fn_id_args = [arg_type.name for arg_type in actions.FUNCTIONS[fn_id].args]
+            self.args_mask.append([arg in fn_id_args for arg in args])
 
 
 def get_spatial_dims(feat_names, feats):
