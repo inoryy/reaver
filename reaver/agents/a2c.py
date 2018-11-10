@@ -67,6 +67,8 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
     def compute_advantages_and_returns(self, bootstrap_value=0., normalize_returns=False, normalize_adv=False):
         """
+        TODO disable bootstrap if done flag is due to agent dying rather than episode simply stopping
+
         Bootstrap helps with stabilizing advantages with sparse rewards
         Returns normalization can help with stabilizing value loss
         Advantage normalization can help with stabilizing policy loss, but can lead to large swings if rewards are sparse
