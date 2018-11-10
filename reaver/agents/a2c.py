@@ -5,17 +5,19 @@ from .util import AgentLogger
 
 
 class A2CAgent(SyncRunningAgent, MemoryAgent):
-    def __init__(self, model_cls, obs_spec, act_spec, n_envs=4, batch_sz=16, clip_grads_norm=0.0, **kwargs):
+    def __init__(self, model_cls, obs_spec, act_spec, n_envs=4, batch_sz=16, **kwargs):
         SyncRunningAgent.__init__(self, n_envs)
         MemoryAgent.__init__(self, (batch_sz, n_envs), obs_spec, act_spec)
 
         self.kwargs = dict(
             lr=0.005,
+            discount=0.99,
             policy_coef=1.0,
             value_coef=0.5,
             entropy_coef=0.001,
-            discount=0.99,
+            clip_grads_norm=0.0,
             logger_updates=100,
+            model_args=(obs_spec, act_spec)
         )
         if kwargs:
             self.kwargs.update(kwargs)
@@ -23,13 +25,13 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         tf.reset_default_graph()
         self.sess = tf.Session()
 
-        self.model = model_cls(obs_spec, act_spec)
+        self.model = model_cls(*self.kwargs['model_args'])
 
         self.loss_op, self.loss_terms, self.loss_inputs = self._loss_fn()
         opt = tf.train.RMSPropOptimizer(self.kwargs['lr'])
         grads, vars = zip(*opt.compute_gradients(self.loss_op))
-        if clip_grads_norm > 0.:
-            grads, _ = tf.clip_by_global_norm(grads, clip_grads_norm)
+        if self.kwargs['clip_grads_norm'] > 0.:
+            grads, _ = tf.clip_by_global_norm(grads, self.kwargs['clip_grads_norm'])
         self.train_op = opt.apply_gradients(zip(grads, vars))
 
         self.sess.run(tf.global_variables_initializer())
