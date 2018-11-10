@@ -9,15 +9,16 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         SyncRunningAgent.__init__(self, n_envs)
         MemoryAgent.__init__(self, (batch_sz, n_envs), obs_spec, act_spec)
 
-        self.coefs = dict(
+        self.kwargs = dict(
             lr=0.005,
-            policy=1.0,
-            value=0.5,
-            entropy=0.001,
+            policy_coef=1.0,
+            value_coef=0.5,
+            entropy_coef=0.001,
             discount=0.99,
+            logger_updates=100,
         )
         if kwargs:
-            self.coefs.update(kwargs)
+            self.kwargs.update(kwargs)
 
         tf.reset_default_graph()
         self.sess = tf.Session()
@@ -25,7 +26,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         self.model = model_cls(obs_spec, act_spec)
 
         self.loss_op, self.loss_terms, self.loss_inputs = self._loss_fn()
-        opt = tf.train.RMSPropOptimizer(self.coefs['lr'])
+        opt = tf.train.RMSPropOptimizer(self.kwargs['lr'])
         grads, vars = zip(*opt.compute_gradients(self.loss_op))
         if clip_grads_norm > 0.:
             grads, _ = tf.clip_by_global_norm(grads, clip_grads_norm)
@@ -33,7 +34,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         self.sess.run(tf.global_variables_initializer())
 
-        self.logger = AgentLogger(self)
+        self.logger = AgentLogger(self, self.kwargs['logger_updates'])
 
     def get_action_and_value(self, obs):
         feed_dict = dict(zip(self.model.inputs, obs))
@@ -73,9 +74,9 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         returns[-1] = values[-1] = bootstrap_value
 
         for t in range(self.batch_sz-1, -1, -1):
-            returns[t] = self.rewards[t] + self.coefs['discount'] * returns[t+1] * (1-self.dones[t])
+            returns[t] = self.rewards[t] + self.kwargs['discount'] * returns[t+1] * (1-self.dones[t])
             # avoid killing bootstrap signal in terminal states
-            returns[t] += self.coefs['discount'] * values[t+1] * self.dones[t]
+            returns[t] += self.kwargs['discount'] * values[t+1] * self.dones[t]
         returns = returns[:-1]
 
         if normalize_returns:
@@ -101,14 +102,16 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         adv = tf.placeholder(tf.float32, [None], name="advantages")
         returns = tf.placeholder(tf.float32, [None], name="returns")
 
-        policy = tf.reduce_mean(self.model.policy.logli * adv)
-        value = tf.losses.mean_squared_error(self.model.value, returns)
-        entropy = tf.reduce_mean(self.model.policy.entropy)
-        loss_terms = [policy, value, entropy]
+        policy_loss = tf.reduce_mean(self.model.policy.logli * adv)
+        value_loss = tf.losses.mean_squared_error(self.model.value, returns)
+        entropy_loss = tf.reduce_mean(self.model.policy.entropy)
+        loss_terms = [policy_loss, value_loss, entropy_loss]
 
         # we want to reduce policy and value errors, and maximize entropy
         # but since optimizer is minimizing the signs are opposite
-        full_loss = self.coefs['policy']*policy + self.coefs['value']*value - self.coefs['entropy']*entropy
+        full_loss = self.kwargs['policy_coef']*policy_loss \
+            + self.kwargs['value_coef']*value_loss \
+            - self.kwargs['entropy_coef']*entropy_loss
 
         return full_loss, loss_terms + [full_loss], [adv, returns]
 
