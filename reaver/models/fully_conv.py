@@ -5,7 +5,7 @@ import tensorflow.keras.layers as L
 
 # TODO extend from Keras.models?
 class FullyConv:
-    def __init__(self, obs_spec, act_spec):
+    def __init__(self, obs_spec, act_spec, broadcast_non_spatial=True):
         # TODO add support for LSTM via TimeDistributed
         # TODO NCHW is only supported on GPU atm, make this device agnostic
         self.conv_cfg = dict(padding='same', data_format='channels_first', kernel_initializer='he_normal')
@@ -15,10 +15,14 @@ class FullyConv:
         self.non_spatial_inputs = [L.Input(s.shape) for s in obs_spec.spaces[2:]]
         self.inputs = [self.screen_input, self.minimap_input] + self.non_spatial_inputs
 
-        non_spatial, dim = self.non_spatial_inputs[1], obs_spec.spaces[0].shape[1]
-        broadcasted_non_spatial = tf.tile(tf.expand_dims(tf.expand_dims(tf.log(non_spatial), 2), 3), [1, 1, dim, dim])
+        if broadcast_non_spatial:
+            non_spatial, dim = self.non_spatial_inputs[1], obs_spec.spaces[0].shape[1]
+            non_spatial = tf.log(non_spatial + 1e-10)
+            broadcasted_non_spatial = tf.tile(tf.expand_dims(tf.expand_dims(non_spatial, 2), 3), [1, 1, dim, dim])
+            state = tf.concat([screen, minimap, broadcasted_non_spatial], axis=1)
+        else:
+            state = tf.concat([screen, minimap], axis=1)
 
-        state = tf.concat([screen, minimap, broadcasted_non_spatial], axis=1)
         fc = L.Flatten()(state)
         fc = L.Dense(256, activation='relu', kernel_initializer='he_normal')(fc)
 
