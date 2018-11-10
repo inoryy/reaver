@@ -1,6 +1,15 @@
 # https://github.com/tambetm/TSCL/blob/master/addition/tensorboard_utils.py
 import tensorflow as tf
 
+optimizers = dict(
+    adam=tf.train.AdamOptimizer,
+    rmsprop=tf.train.RMSPropOptimizer
+)
+
+
+def tf_run(sess, tf_op, tf_inputs, inputs):
+    return sess.run(tf_op, feed_dict=dict(zip(tf_inputs, inputs)))
+
 
 def create_summary_writer(logdir):
     return tf.summary.FileWriter(logdir)

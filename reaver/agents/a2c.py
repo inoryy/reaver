@@ -1,7 +1,8 @@
 import numpy as np
 import tensorflow as tf
-from . import SyncRunningAgent, MemoryAgent
+from .util.tf import *
 from .util import AgentLogger
+from . import SyncRunningAgent, MemoryAgent
 
 
 class A2CAgent(SyncRunningAgent, MemoryAgent):
@@ -17,7 +18,8 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
             entropy_coef=0.001,
             clip_grads_norm=0.0,
             logger_updates=100,
-            model_args=(obs_spec, act_spec)
+            model_kwargs=None,
+            optimizer='rmsprop',
         )
         if kwargs:
             self.kwargs.update(kwargs)
@@ -25,10 +27,11 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         tf.reset_default_graph()
         self.sess = tf.Session()
 
-        self.model = model_cls(*self.kwargs['model_args'])
+        opt = optimizers[self.kwargs['optimizer']](self.kwargs['lr'])
 
+        self.model = model_cls(obs_spec, act_spec, **self.kwargs['model_kwargs'])
         self.loss_op, self.loss_terms, self.loss_inputs = self._loss_fn()
-        opt = tf.train.RMSPropOptimizer(self.kwargs['lr'])
+
         grads, vars = zip(*opt.compute_gradients(self.loss_op))
         if self.kwargs['clip_grads_norm'] > 0.:
             grads, _ = tf.clip_by_global_norm(grads, self.kwargs['clip_grads_norm'])
@@ -39,12 +42,10 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         self.logger = AgentLogger(self, self.kwargs['logger_updates'])
 
     def get_action_and_value(self, obs):
-        feed_dict = dict(zip(self.model.inputs, obs))
-        return self.sess.run([self.model.policy.sample, self.model.value], feed_dict=feed_dict)
+        return tf_run(self.sess, [self.model.policy.sample, self.model.value], self.model.inputs, obs)
 
     def get_action(self, obs):
-        feed_dict = dict(zip(self.model.inputs, obs))
-        return self.sess.run(self.model.policy.sample, feed_dict=feed_dict)
+        return tf_run(self.sess, self.model.policy.sample, self.model.inputs, obs)
 
     def on_step(self, step, obs, action, reward, done, value=None):
         MemoryAgent.on_step(self, step, obs, action, reward, done, value)
@@ -53,14 +54,14 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         if (step + 1) % self.batch_sz > 0:
             return
 
-        next_value = self.tf_run(self.model.value, self.model.inputs, self.next_obs)
+        next_value = tf_run(self.sess, self.model.value, self.model.inputs, self.next_obs)
         adv, returns = self.compute_advantages_and_returns(next_value)
 
         inputs = self.obs + self.acts + [adv, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
         tf_inputs = self.model.inputs + self.model.policy.inputs + self.loss_inputs
 
-        loss_terms,  _ = self.tf_run([self.loss_terms, self.train_op], tf_inputs, inputs)
+        loss_terms,  _ = tf_run(self.sess, [self.loss_terms, self.train_op], tf_inputs, inputs)
 
         self.logger.on_update(step, loss_terms, returns, adv, next_value)
 
@@ -116,6 +117,3 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
             - self.kwargs['entropy_coef']*entropy_loss
 
         return full_loss, loss_terms + [full_loss], [adv, returns]
-
-    def tf_run(self, tf_op, tf_inputs, inputs):
-        return self.sess.run(tf_op, feed_dict=dict(zip(tf_inputs, inputs)))

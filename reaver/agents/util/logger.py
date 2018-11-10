@@ -1,8 +1,8 @@
 import sys
 import time
 import numpy as np
-from .summary import *
 from collections import deque
+from .tf import *
 
 
 class AgentLogger:
@@ -71,7 +71,7 @@ class AgentLogger:
         np.set_printoptions(suppress=True, precision=2)
         n_steps = min(self.n_detailed, self.agent.batch_sz)
 
-        logits = self.agent.tf_run(self.agent.model.logits[0], self.agent.model.inputs,
+        logits = tf_run(self.agent.sess, self.agent.model.logits[0], self.agent.model.inputs,
                                    [o[-n_steps:, 0] for o in self.agent.obs])
         action_ids = self.agent.acts[0][-n_steps:, 0].flatten()
 
