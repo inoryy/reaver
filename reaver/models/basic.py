@@ -32,7 +32,7 @@ class MultiPolicy:
         self.dists = [tfp.distributions.Categorical(logits) for logits in multi_logits]
         self.sample = [dist.sample() for dist in self.dists]
 
-        self.action_inputs = [tf.placeholder(tf.int32, [None]) for _ in self.dists]
+        self.inputs = [tf.placeholder(tf.int32, [None]) for _ in self.dists]
         # TODO push individual entropy / logli to summary
         self.entropy = sum([dist.entropy() for dist in self.dists])
-        self.logli = -sum([dist.log_prob(act) for dist, act in zip(self.dists, self.action_inputs)])
+        self.logli = -sum([dist.log_prob(act) for dist, act in zip(self.dists, self.inputs)])
