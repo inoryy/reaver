@@ -73,13 +73,14 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         """
         bootstrap_value = np.expand_dims(bootstrap_value, 0)
         values = np.append(self.values, bootstrap_value, axis=0)
-        rewards = np.append(self.rewards, bootstrap_value, axis=0)
-        discounts = self.kwargs['discount'] * np.ones(self.shape) * (1-self.dones)
+        rewards = self.rewards + self.dones * self.kwargs['discount'] * values[1:]
+        discounts = self.kwargs['discount'] * (1-self.dones)
 
-        returns = discounted_cumsum(rewards, discounts)[:-1]
+        rewards[-1] += (1-self.dones[-1]) * self.kwargs['discount'] * values[-1]
+        returns = discounted_cumsum(rewards, discounts)
 
         if self.kwargs['gae_lambda'] > 0.:
-            deltas = rewards[:-1] + discounts * values[1:] - values[:-1]
+            deltas = self.rewards + self.kwargs['discount'] * values[1:] - values[:-1]
             adv = discounted_cumsum(deltas, self.kwargs['gae_lambda'] * discounts)
         else:
             adv = returns - self.values
