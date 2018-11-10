@@ -1,17 +1,19 @@
 import sys
 import time
 import numpy as np
+from .summary import *
 from collections import deque
 
 
 class AgentLogger:
-    def __init__(self, agent, n_updates=100, n_detailed=10, verbosity=3):
+    def __init__(self, agent, n_updates=100, n_detailed=10, verbosity=3, summary_logs_dir='data/summary'):
         self.agent, self.verbosity = agent, verbosity
         self.n_updates, self.n_detailed = n_updates, n_detailed
         self.env_eps = [0]*self.agent.n_envs
         self.env_rews = [0]*self.agent.n_envs
         self.n_eps = max(10, self.agent.n_envs)
         self.tot_rews = deque([], maxlen=self.n_eps)
+        self.writer = create_summary_writer(summary_logs_dir)
 
     def on_step(self, step):
         t = step % self.agent.batch_sz
@@ -23,7 +25,8 @@ class AgentLogger:
                 self.env_eps[i] += 1
 
     def on_update(self, step, loss_terms, returns, adv, next_value):
-        if self.verbosity < 1 or ((step+1) // self.agent.batch_sz) % self.n_updates:
+        update_step = (step+1) // self.agent.batch_sz
+        if self.verbosity < 1 or update_step % self.n_updates:
             return
 
         loss_terms = np.array(loss_terms).round(5)
@@ -38,16 +41,18 @@ class AgentLogger:
         print("Eps     ", int(np.sum(self.env_eps)))
         print("Frames  ", frames)
         print("Steps   ", step+1)
-        print("Updates ", (step+1) // self.agent.batch_sz)
+        print("Updates ", update_step)
         print("FPS     ", frames // runtime)
 
         tot_rews = self.tot_rews if len(self.tot_rews) > 0 else [0]
+        rews = [np.mean(tot_rews), np.std(tot_rews), np.min(tot_rews), np.max(tot_rews)]
         print()
         print("Total Rewards For Last %d Eps:" % self.n_eps)
-        print("Mean %.3f" % np.mean(tot_rews))
-        print("Std  %.3f" % np.std(tot_rews))
-        print("Min  %.3f" % np.min(tot_rews))
-        print("Max  %.3f" % np.max(tot_rews))
+        print("Mean %.3f" % rews[0])
+        print("Std  %.3f" % rews[1])
+        print("Min  %.3f" % rews[2])
+        print("Max  %.3f" % rews[3])
+        add_summaries(self.writer, ['Mean', 'Std', 'Min', 'Max'], rews, update_step, 'Rewards')
 
         if self.verbosity < 2:
             return
@@ -58,6 +63,7 @@ class AgentLogger:
         print("Policy loss  ", loss_terms[0])
         print("Value loss   ", loss_terms[1])
         print("Entropy loss ", loss_terms[2])
+        add_summaries(self.writer, ['Policy', 'Value', 'Entropy', 'Total'], loss_terms, update_step, 'Losses')
 
         if self.verbosity < 3:
             return
