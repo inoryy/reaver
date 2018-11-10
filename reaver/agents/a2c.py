@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
 from .util.tf import *
-from .util import AgentLogger
 from . import SyncRunningAgent, MemoryAgent
+from .util import AgentLogger, discounted_cumsum
 
 
 class A2CAgent(SyncRunningAgent, MemoryAgent):
@@ -13,12 +13,13 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
         self.kwargs = dict(
             lr=0.005,
             discount=0.99,
+            gae_lambda=0.95,
             policy_coef=1.0,
             value_coef=0.5,
             entropy_coef=0.001,
             clip_grads_norm=0.0,
             logger_updates=100,
-            model_kwargs=None,
+            model_kwargs=dict(),
             optimizer='rmsprop',
         )
         if kwargs:
@@ -65,36 +66,23 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         self.logger.on_update(step, loss_terms, returns, adv, next_value)
 
-    def compute_advantages_and_returns(self, bootstrap_value=0., normalize_returns=False, normalize_adv=False):
+    def compute_advantages_and_returns(self, bootstrap_value=0.):
         """
-        TODO disable bootstrap if done flag is due to agent dying rather than episode simply stopping
-
         Bootstrap helps with stabilizing advantages with sparse rewards
-        Returns normalization can help with stabilizing value loss
-        Advantage normalization can help with stabilizing policy loss, but can lead to large swings if rewards are sparse
+        GAE can help with reducing variance of policy gradient estimates
         """
-        returns = np.zeros((self.batch_sz+1, self.n_envs), dtype=np.float32)
-        values = np.zeros((self.batch_sz+1, self.n_envs), dtype=np.float32)
-        values[:-1] = self.values
-        returns[-1] = values[-1] = bootstrap_value
+        bootstrap_value = np.expand_dims(bootstrap_value, 0)
+        values = np.append(self.values, bootstrap_value, axis=0)
+        rewards = np.append(self.rewards, bootstrap_value, axis=0)
+        discounts = self.kwargs['discount'] * np.ones(self.shape) * (1-self.dones)
 
-        for t in range(self.batch_sz-1, -1, -1):
-            returns[t] = self.rewards[t] + self.kwargs['discount'] * returns[t+1] * (1-self.dones[t])
-            # avoid killing bootstrap signal in terminal states
-            returns[t] += self.kwargs['discount'] * values[t+1] * self.dones[t]
-        returns = returns[:-1]
+        returns = discounted_cumsum(rewards, discounts)[:-1]
 
-        if normalize_returns:
-            r_mu, r_std = np.mean(returns, axis=0), np.std(returns, axis=0) + 1e-12
-
-            returns = (returns - r_mu) / r_std
-            # have to re-scale baseline for advantages
-            self.values = self.values * r_std + r_mu
-
-        adv = returns - self.values
-
-        if normalize_adv:
-            adv = (adv - np.mean(adv, axis=0)) / (np.std(adv, axis=0) + 1e-12)
+        if self.kwargs['gae_lambda'] > 0.:
+            deltas = rewards[:-1] + discounts * values[1:] - values[:-1]
+            adv = discounted_cumsum(deltas, self.kwargs['gae_lambda'] * discounts)
+        else:
+            adv = returns - self.values
 
         return adv, returns
 
