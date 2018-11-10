@@ -33,7 +33,7 @@ class AgentLogger:
         np.set_printoptions(suppress=True, precision=3)
 
         print("######################################################")
-        runtime = int(time.time() - self.agent.start_time)
+        runtime = max(1, int(time.time() - self.agent.start_time))
         frames = (step+1) * self.agent.n_envs
 
         print("Runner Stats:")
