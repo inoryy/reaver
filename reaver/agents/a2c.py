@@ -66,7 +66,7 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         self.logger.on_update(step, loss_terms, returns, adv, next_value)
 
-    def compute_advantages_and_returns(self, bootstrap_value=0.):
+    def compute_advantages_and_returns(self, bootstrap_value=0., normalize_adv=True):
         """
         Bootstrap helps with stabilizing advantages with sparse rewards
         GAE can help with reducing variance of policy gradient estimates
@@ -84,6 +84,9 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
             adv = discounted_cumsum(deltas, self.kwargs['gae_lambda'] * discounts)
         else:
             adv = returns - self.values
+
+        if normalize_adv:
+            adv = (adv - adv.mean()) / (adv.std() + 1e-10)
 
         return adv, returns
 
