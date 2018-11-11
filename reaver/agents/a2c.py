@@ -12,15 +12,17 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         self.kwargs = dict(
             lr=0.005,
-            discount=0.99,
-            gae_lambda=0.95,
+            optimizer='adam',
             policy_coef=1.0,
             value_coef=0.5,
             entropy_coef=0.001,
             clip_grads_norm=0.0,
-            logger_updates=100,
+            discount=0.99,
+            gae_lambda=0.95,
+            normalize_advantages=True,
+            bootstrap_terminals=False,
             model_kwargs=dict(),
-            optimizer='rmsprop',
+            logger_updates=100,
         )
         if kwargs:
             self.kwargs.update(kwargs)
@@ -66,26 +68,30 @@ class A2CAgent(SyncRunningAgent, MemoryAgent):
 
         self.logger.on_update(step, loss_terms, returns, adv, next_value)
 
-    def compute_advantages_and_returns(self, bootstrap_value=0., normalize_adv=True):
+    def compute_advantages_and_returns(self, bootstrap_value=0.):
         """
         Bootstrap helps with stabilizing advantages with sparse rewards
         GAE can help with reducing variance of policy gradient estimates
         """
         bootstrap_value = np.expand_dims(bootstrap_value, 0)
         values = np.append(self.values, bootstrap_value, axis=0)
-        rewards = self.rewards + self.dones * self.kwargs['discount'] * values[1:]
+        rewards = self.rewards.copy()
+        if self.kwargs['bootstrap_terminals']:
+            rewards += self.dones * self.kwargs['discount'] * values[1:]
         discounts = self.kwargs['discount'] * (1-self.dones)
 
         rewards[-1] += (1-self.dones[-1]) * self.kwargs['discount'] * values[-1]
         returns = discounted_cumsum(rewards, discounts)
 
         if self.kwargs['gae_lambda'] > 0.:
-            deltas = self.rewards + self.kwargs['discount'] * values[1:] - values[:-1]
+            deltas = self.rewards + discounts * values[1:] - values[:-1]
+            if self.kwargs['bootstrap_terminals']:
+                deltas += self.dones * self.kwargs['discount'] * values[1:]
             adv = discounted_cumsum(deltas, self.kwargs['gae_lambda'] * discounts)
         else:
             adv = returns - self.values
 
-        if normalize_adv:
+        if self.kwargs['normalize_advantages']:
             adv = (adv - adv.mean()) / (adv.std() + 1e-10)
 
         return adv, returns
