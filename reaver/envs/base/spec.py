@@ -11,6 +11,12 @@ class Spec:
     def __repr__(self):
         return "Spec: %s\n%s" % (self.name, "\n".join(map(str, self.spaces)))
 
+    def __iter__(self):
+        return (space for space in self.spaces)
+
+    def __len__(self):
+        return len(self.spaces)
+
 
 class Space:
     def __init__(self, shape=(), dtype=np.int32, domain=(0, 1), categorical=False, name=None):

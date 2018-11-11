@@ -10,12 +10,12 @@ class BasicNN:
 
         cfg = dict(kernel_initializer='he_normal')
 
-        self.inputs = [L.Input(s.shape) for s in obs_spec.spaces]
+        self.inputs = [L.Input(s.shape) for s in obs_spec]
         x = self.inputs[0]
         for _ in range(n_layers):
             x = L.Dense(size, activation=activation, **cfg)(x)
 
-        self.logits = [L.Dense(s.size(), **cfg)(x) for s in act_spec.spaces]
+        self.logits = [L.Dense(s.size(), **cfg)(x) for s in act_spec]
         self.policy = MultiPolicy(act_spec, self.logits)
         self.value = tf.squeeze(L.Dense(1, **cfg)(x), axis=-1)
 
@@ -31,7 +31,7 @@ class MultiPolicy:
             else:
                 return tfp.distributions.Categorical(logits)
 
-        self.inputs = [tf.placeholder(s.dtype, [None, *s.shape]) for s in act_spec.spaces]
+        self.inputs = [tf.placeholder(s.dtype, [None, *s.shape]) for s in act_spec]
         self.dists = [make_dist(s, l) for s, l in zip(act_spec.spaces, multi_logits)]
 
         self.entropy = sum([dist.entropy() for dist in self.dists])
