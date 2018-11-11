@@ -71,10 +71,6 @@ class AgentLogger:
         np.set_printoptions(suppress=True, precision=2)
         n_steps = min(self.n_detailed, self.agent.batch_sz)
 
-        logits = tf_run(self.agent.sess, self.agent.model.logits[0], self.agent.model.inputs,
-                                   [o[-n_steps:, 0] for o in self.agent.obs])
-        action_ids = self.agent.acts[0][-n_steps:, 0].flatten()
-
         print()
         print("First Env For Last %d Steps:" % n_steps)
         print("Dones      ", self.agent.dones[-n_steps:, 0].flatten().astype(int))
@@ -82,23 +78,27 @@ class AgentLogger:
         print("Values     ", self.agent.values[-n_steps:, 0].flatten(), round(next_value[0], 3))
         print("Returns    ", returns[-n_steps:, 0].flatten())
         print("Advs       ", adv[-n_steps:, 0].flatten())
-        print("Action ids ", action_ids)
-        print("Act logits ", logits[np.arange(n_steps), action_ids])
+
+        if self.verbosity >= 4:
+            logits = tf_run(self.agent.sess, self.agent.model.logits[0], self.agent.model.inputs,
+                                       [o[-n_steps:, 0] for o in self.agent.obs])
+            action_ids = self.agent.acts[0][-n_steps:, 0].flatten()
+
+            print("Action ids ", action_ids)
+            print("Act logits ", logits[np.arange(n_steps), action_ids])
+
+        if self.verbosity >= 5:
+            print()
+            print("Note: action ids listed are not equivalent to pysc2")
+            for t in range(n_steps-1, -1, -1):
+                trv = n_steps - t
+                avail = np.argwhere(self.agent.obs[2][-trv, 0]).flatten()
+                avail_logits = logits[0][t, avail].flatten()
+                avail_sorted = np.argsort(avail_logits)
+                print("Step", -trv+1)
+                print("Actions   ", self.agent.obs[2][-trv, 0].sum())
+                print("Action ids", avail[avail_sorted[:3]], "..."*3, avail[avail_sorted[-5:]])
+                print("Logits    ", avail_logits[avail_sorted[:3]], "...", avail_logits[avail_sorted[-5:]])
+            print("######################################################")
 
         sys.stdout.flush()
-
-        if self.verbosity < 4:
-            return
-
-        print()
-        print("Note: action ids listed are not equivalent to pysc2")
-        for t in range(n_steps-1, -1, -1):
-            trv = n_steps - t
-            avail = np.argwhere(self.agent.obs[2][-trv, 0]).flatten()
-            avail_logits = logits[0][t, avail].flatten()
-            avail_sorted = np.argsort(avail_logits)
-            print("Step", -trv+1)
-            print("Actions   ", self.agent.obs[2][-trv, 0].sum())
-            print("Action ids", avail[avail_sorted[:3]], "..."*3, avail[avail_sorted[-5:]])
-            print("Logits    ", avail_logits[avail_sorted[:3]], "...", avail_logits[avail_sorted[-5:]])
-        print("######################################################")

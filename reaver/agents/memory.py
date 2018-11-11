@@ -15,7 +15,7 @@ class MemoryAgent(RunningAgent):
         self.dones = np.empty(self.shape, dtype=np.bool)
         self.values = np.empty(self.shape, dtype=np.float32)
         self.rewards = np.empty(self.shape, dtype=np.float32)
-        self.acts = [np.empty(self.shape, dtype=np.int32) for s in act_spec.spaces]
+        self.acts = [np.empty(self.shape + s.shape, dtype=s.dtype) for s in act_spec.spaces]
         self.obs = [np.empty(self.shape + s.shape, dtype=s.dtype) for s in obs_spec.spaces]
 
     def on_step(self, step, obs, action, reward, done, value=None):

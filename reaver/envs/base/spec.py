@@ -18,11 +18,26 @@ class Space:
         self.shape, self.dtype = shape, dtype
         self.categorical, (self.lo, self.hi) = categorical, domain
 
+    def is_discrete(self):
+        return np.issubdtype(self.dtype, np.integer)
+
+    def is_continuous(self):
+        return np.issubdtype(self.dtype, np.floating)
+
+    def size(self):
+        if self.is_discrete() and self.categorical:
+            return self.hi - self.lo
+
+        if len(self.shape) == 1:
+            return self.shape[0]
+
+        return 1
+
     def sample(self, n=1):
-        if np.issubdtype(self.dtype, np.integer):
+        if self.is_discrete():
             return np.random.randint(self.lo, self.hi+1, (n, ) + self.shape)
 
-        if np.issubdtype(self.dtype, np.floating):
+        if self.is_continuous():
             return np.random.uniform(self.lo, self.hi+1e-10, (n, ) + self.shape)
 
     def __repr__(self):
