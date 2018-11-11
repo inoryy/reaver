@@ -17,11 +17,6 @@ class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
         ActorCriticAgent.__init__(self, model_cls, obs_spec, act_spec, (batch_sz, n_envs), **kwargs)
 
     def _loss_fn(self):
-        """
-        note: could have calculated advantages directly in TF from returns
-        but in future might calculate them differently, e.g. via GAE
-        which is not trivial to implement as a tensor ops, so easier to take both in
-        """
         adv = tf.placeholder(tf.float32, [None], name="advantages")
         returns = tf.placeholder(tf.float32, [None], name="returns")
 
