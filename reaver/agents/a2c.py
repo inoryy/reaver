@@ -20,7 +20,7 @@ class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
         adv = tf.placeholder(tf.float32, [None], name="advantages")
         returns = tf.placeholder(tf.float32, [None], name="returns")
 
-        policy_loss = tf.reduce_mean(self.model.policy.logli * adv)
+        policy_loss = -tf.reduce_mean(self.model.policy.logli * adv)
         value_loss = tf.reduce_mean((self.model.value - returns)**2)
         entropy_loss = tf.reduce_mean(self.model.policy.entropy)
         loss_terms = [policy_loss, value_loss, entropy_loss]

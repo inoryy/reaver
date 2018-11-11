@@ -35,6 +35,6 @@ class MultiPolicy:
         self.dists = [make_dist(s, l) for s, l in zip(act_spec.spaces, multi_logits)]
 
         self.entropy = sum([dist.entropy() for dist in self.dists])
-        self.logli = -sum([dist.log_prob(act) for dist, act in zip(self.dists, self.inputs)])
+        self.logli = sum([dist.log_prob(act) for dist, act in zip(self.dists, self.inputs)])
 
         self.sample = [dist.sample() for dist in self.dists]

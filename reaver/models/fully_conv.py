@@ -64,8 +64,6 @@ class MultiPolicy:
         self.logli = self.dists[0].log_prob(self.inputs[0])
         for i in range(1, len(self.dists)):
             self.logli += act_args_mask[i-1] * self.dists[i].log_prob(self.inputs[i])
-        # tfp dists actually return neg log prob
-        self.logli *= -1
 
 
 def spatial_block(space, conv_cfg):

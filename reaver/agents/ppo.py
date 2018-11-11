@@ -45,7 +45,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         eps = self.kwargs['clip_ratio']
 
         ratio = tf.exp(policy.logli - logli_old)
-        policy_loss = tf.reduce_mean(tf.minimum(adv * ratio, adv * tf.clip_by_value(ratio, 1-eps, 1+eps)))
+        policy_loss = -tf.reduce_mean(tf.minimum(adv * ratio, adv * tf.clip_by_value(ratio, 1-eps, 1+eps)))
         value_loss = tf.reduce_mean((self.model.value - returns) ** 2)
         entropy_loss = tf.reduce_mean(self.model.policy.entropy)
         loss_terms = [policy_loss, value_loss, entropy_loss]
