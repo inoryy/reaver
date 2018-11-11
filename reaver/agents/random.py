@@ -1,5 +1,5 @@
 import numpy as np
-from . import SyncRunningAgent
+from reaver.agents import SyncRunningAgent
 
 
 class RandomAgent(SyncRunningAgent):

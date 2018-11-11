@@ -1,100 +1,20 @@
-import numpy as np
 import tensorflow as tf
-from .util.tf import *
-from . import SyncRunningAgent, MemoryAgent
-from .util import AgentLogger, discounted_cumsum
+from . import SyncRunningAgent, ActorCriticAgent
 
 
-class A2CAgent(SyncRunningAgent, MemoryAgent):
-    def __init__(self, model_cls, obs_spec, act_spec, n_envs=4, batch_sz=16, **kwargs):
+class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
+    def __init__(self, model_cls, obs_spec, act_spec, n_envs=4, batch_sz=16, **_kwargs):
         SyncRunningAgent.__init__(self, n_envs)
-        MemoryAgent.__init__(self, (batch_sz, n_envs), obs_spec, act_spec)
 
-        self.kwargs = dict(
-            lr=0.005,
-            optimizer='adam',
+        kwargs = dict(
             policy_coef=1.0,
             value_coef=0.5,
             entropy_coef=0.001,
-            clip_grads_norm=0.0,
-            discount=0.99,
-            gae_lambda=0.95,
-            normalize_advantages=True,
-            bootstrap_terminals=False,
-            model_kwargs=dict(),
-            logger_updates=100,
         )
-        if kwargs:
-            self.kwargs.update(kwargs)
+        if _kwargs:
+            kwargs.update(_kwargs)
 
-        tf.reset_default_graph()
-        self.sess = tf.Session()
-
-        opt = optimizers[self.kwargs['optimizer']](self.kwargs['lr'])
-
-        self.model = model_cls(obs_spec, act_spec, **self.kwargs['model_kwargs'])
-        self.loss_op, self.loss_terms, self.loss_inputs = self._loss_fn()
-
-        grads, vars = zip(*opt.compute_gradients(self.loss_op))
-        if self.kwargs['clip_grads_norm'] > 0.:
-            grads, _ = tf.clip_by_global_norm(grads, self.kwargs['clip_grads_norm'])
-        self.train_op = opt.apply_gradients(zip(grads, vars))
-
-        self.sess.run(tf.global_variables_initializer())
-
-        self.logger = AgentLogger(self, self.kwargs['logger_updates'])
-
-    def get_action_and_value(self, obs):
-        return tf_run(self.sess, [self.model.policy.sample, self.model.value], self.model.inputs, obs)
-
-    def get_action(self, obs):
-        return tf_run(self.sess, self.model.policy.sample, self.model.inputs, obs)
-
-    def on_step(self, step, obs, action, reward, done, value=None):
-        MemoryAgent.on_step(self, step, obs, action, reward, done, value)
-        self.logger.on_step(step)
-
-        if (step + 1) % self.batch_sz > 0:
-            return
-
-        next_value = tf_run(self.sess, self.model.value, self.model.inputs, self.next_obs)
-        adv, returns = self.compute_advantages_and_returns(next_value)
-
-        inputs = self.obs + self.acts + [adv, returns]
-        inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
-        tf_inputs = self.model.inputs + self.model.policy.inputs + self.loss_inputs
-
-        loss_terms,  _ = tf_run(self.sess, [self.loss_terms, self.train_op], tf_inputs, inputs)
-
-        self.logger.on_update(step, loss_terms, returns, adv, next_value)
-
-    def compute_advantages_and_returns(self, bootstrap_value=0.):
-        """
-        Bootstrap helps with stabilizing advantages with sparse rewards
-        GAE can help with reducing variance of policy gradient estimates
-        """
-        bootstrap_value = np.expand_dims(bootstrap_value, 0)
-        values = np.append(self.values, bootstrap_value, axis=0)
-        rewards = self.rewards.copy()
-        if self.kwargs['bootstrap_terminals']:
-            rewards += self.dones * self.kwargs['discount'] * values[1:]
-        discounts = self.kwargs['discount'] * (1-self.dones)
-
-        rewards[-1] += (1-self.dones[-1]) * self.kwargs['discount'] * values[-1]
-        returns = discounted_cumsum(rewards, discounts)
-
-        if self.kwargs['gae_lambda'] > 0.:
-            deltas = self.rewards + discounts * values[1:] - values[:-1]
-            if self.kwargs['bootstrap_terminals']:
-                deltas += self.dones * self.kwargs['discount'] * values[1:]
-            adv = discounted_cumsum(deltas, self.kwargs['gae_lambda'] * discounts)
-        else:
-            adv = returns - self.values
-
-        if self.kwargs['normalize_advantages']:
-            adv = (adv - adv.mean()) / (adv.std() + 1e-10)
-
-        return adv, returns
+        ActorCriticAgent.__init__(self, model_cls, obs_spec, act_spec, (batch_sz, n_envs), **kwargs)
 
     def _loss_fn(self):
         """

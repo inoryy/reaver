@@ -1,5 +1,5 @@
 import numpy as np
-from . import RunningAgent
+from .running import RunningAgent
 
 
 class MemoryAgent(RunningAgent):

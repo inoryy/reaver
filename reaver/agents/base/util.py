@@ -1,8 +1,20 @@
 import sys
 import time
 import numpy as np
+import tensorflow as tf
 from collections import deque
-from .tf import *
+
+
+def discounted_cumsum(x, discount):
+    y = np.zeros_like(x)
+    y[-1] = x[-1]
+    for t in range(x.shape[0]-2, -1, -1):
+        y[t] = x[t] + discount[t] * y[t+1]
+    return y
+
+
+def tf_run(sess, tf_op, tf_inputs, inputs):
+    return sess.run(tf_op, feed_dict=dict(zip(tf_inputs, inputs)))
 
 
 class AgentLogger:
@@ -102,3 +114,22 @@ class AgentLogger:
             print("######################################################")
 
         sys.stdout.flush()
+
+
+# https://github.com/tambetm/TSCL/blob/master/addition/tensorboard_utils.py
+def create_summary_writer(logdir):
+    return tf.summary.FileWriter(logdir)
+
+
+def create_summary(tag, value):
+    return tf.Summary(value=[tf.Summary.Value(tag=tag, simple_value=value)])
+
+
+def add_summary(writer, tag, value, step):
+    writer.add_summary(create_summary(tag, value), global_step=step)
+
+
+def add_summaries(writer, tags, values, step, prefix=''):
+    for (t, v) in zip(tags, values):
+        s = create_summary(prefix + '/' + t, v)
+        writer.add_summary(s, global_step=step)
