@@ -24,8 +24,13 @@ class Space:
     def is_continuous(self):
         return np.issubdtype(self.dtype, np.floating)
 
+    def is_spatial(self):
+        return len(self.shape) > 1 or type(self.hi) in [list, tuple]
+
     def size(self):
         if self.is_discrete() and self.categorical:
+            if self.is_spatial():
+                return self.hi
             return self.hi - self.lo
 
         if len(self.shape) == 1:

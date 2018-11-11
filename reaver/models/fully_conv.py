@@ -30,14 +30,13 @@ class FullyConv:
         self.value = tf.squeeze(L.Dense(1, kernel_initializer='he_normal')(fc), axis=-1)
 
         self.logits = []
-        for space in act_spec.spaces:
-            if len(space.shape) == 1:
-                # non-spatial action logits
-                self.logits.append(L.Dense(space.shape[0], kernel_initializer='he_normal')(fc))
-            else:
+        for s in act_spec.spaces:
+            if s.is_spatial():
                 self.logits.append(L.Conv2D(1, 1, **self.conv_cfg)(state))
                 # flatten spatial logits, simplifying sampling
                 self.logits[-1] = L.Flatten()(self.logits[-1])
+            else:
+                self.logits.append(L.Dense(s.size(), kernel_initializer='he_normal')(fc))
 
         args_mask = tf.constant(act_spec.spaces[0].args_mask, dtype=tf.float32)
 

@@ -187,7 +187,10 @@ class ActionWrapper:
         spaces = [SC2FuncIdSpace(self.func_ids, self.args)]
         for arg_name in self.args:
             arg = getattr(spec.types, arg_name)
-            spaces.append(Space(arg.sizes, name=arg_name))
+            if len(arg.sizes) > 1:
+                spaces.append(Space(domain=(0, arg.sizes), categorical=True, name=arg_name))
+            else:
+                spaces.append(Space(domain=(0, arg.sizes[0]), categorical=True, name=arg_name))
 
         self.spec = Spec(spaces, "Action")
 
@@ -203,7 +206,7 @@ class SC2Space(Space):
 
 class SC2FuncIdSpace(Space):
     def __init__(self, func_ids, args):
-        super().__init__((len(func_ids),), name="function_id")
+        super().__init__(domain=(0, len(func_ids)), categorical=True, name="function_id")
         self.args_mask = []
         for fn_id in func_ids:
             fn_id_args = [arg_type.name for arg_type in actions.FUNCTIONS[fn_id].args]
