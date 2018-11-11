@@ -23,7 +23,7 @@ class ActorCriticAgent(MemoryAgent):
             normalize_advantages=True,
             bootstrap_terminals=False,
             model_kwargs=dict(),
-            logger_updates=100,
+            logger_kwargs=dict(),
         )
         if kwargs:
             self.kwargs.update(kwargs)
@@ -43,7 +43,7 @@ class ActorCriticAgent(MemoryAgent):
 
         self.sess.run(tf.global_variables_initializer())
 
-        self.logger = AgentLogger(self, self.kwargs['logger_updates'])
+        self.logger = AgentLogger(self, **self.kwargs['logger_kwargs'])
 
     def get_action_and_value(self, obs):
         return tf_run(self.sess, [self.model.policy.sample, self.model.value], self.model.inputs, obs)
