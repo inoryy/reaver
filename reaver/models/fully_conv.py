@@ -29,14 +29,15 @@ class FullyConv:
         # TODO do I really want to squeeze here?
         self.value = tf.squeeze(L.Dense(1, kernel_initializer='he_normal')(fc), axis=-1)
 
+        # note: initializing logits to zeros since we want initial policy to be uniformly random
         self.logits = []
         for s in act_spec:
             if s.is_spatial():
-                self.logits.append(L.Conv2D(1, 1, **self.conv_cfg)(state))
+                self.logits.append(L.Conv2D(1, 1, **dict(self.conv_cfg, **dict(kernel_initializer='zeros')))(state))
                 # flatten spatial logits, simplifying sampling
                 self.logits[-1] = L.Flatten()(self.logits[-1])
             else:
-                self.logits.append(L.Dense(s.size(), kernel_initializer='he_normal')(fc))
+                self.logits.append(L.Dense(s.size(), kernel_initializer='zeros')(fc))
 
         args_mask = tf.constant(act_spec.spaces[0].args_mask, dtype=tf.float32)
 
