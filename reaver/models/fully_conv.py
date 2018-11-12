@@ -8,7 +8,7 @@ class FullyConv:
     def __init__(self, obs_spec, act_spec, broadcast_non_spatial=True):
         # TODO add support for LSTM via TimeDistributed
         # TODO NCHW is only supported on GPU atm, make this device agnostic
-        self.conv_cfg = dict(padding='same', data_format='channels_first', kernel_initializer='he_normal')
+        self.conv_cfg = dict(padding='same', data_format='channels_first', kernel_initializer='he_uniform')
         screen, self.screen_input = spatial_block(obs_spec.spaces[0], self.conv_cfg)
         minimap, self.minimap_input = spatial_block(obs_spec.spaces[1], self.conv_cfg)
 
@@ -24,20 +24,19 @@ class FullyConv:
             state = tf.concat([screen, minimap], axis=1)
 
         fc = L.Flatten()(state)
-        fc = L.Dense(256, activation='relu', kernel_initializer='he_normal')(fc)
+        fc = L.Dense(256, activation='relu', kernel_initializer='he_uniform')(fc)
 
         # TODO do I really want to squeeze here?
-        self.value = tf.squeeze(L.Dense(1, kernel_initializer='he_normal')(fc), axis=-1)
+        self.value = tf.squeeze(L.Dense(1, kernel_initializer='he_uniform')(fc), axis=-1)
 
-        # note: initializing logits to zeros since we want initial policy to be uniformly random
         self.logits = []
         for s in act_spec:
             if s.is_spatial():
-                self.logits.append(L.Conv2D(1, 1, **dict(self.conv_cfg, **dict(kernel_initializer='zeros')))(state))
+                self.logits.append(L.Conv2D(1, 1, **dict(self.conv_cfg, **dict(kernel_initializer='he_uniform')))(state))
                 # flatten spatial logits, simplifying sampling
                 self.logits[-1] = L.Flatten()(self.logits[-1])
             else:
-                self.logits.append(L.Dense(s.size(), kernel_initializer='zeros')(fc))
+                self.logits.append(L.Dense(s.size(), kernel_initializer='he_uniform')(fc))
 
         args_mask = tf.constant(act_spec.spaces[0].args_mask, dtype=tf.float32)
 
@@ -76,7 +75,7 @@ def spatial_block(space, conv_cfg):
             # categorical spatial feature
             embed_dim = int(max(1, round(np.log2(dim))))
             block[i] = tf.squeeze(block[i], axis=1)
-            block[i] = L.Embedding(input_dim=dim, output_dim=embed_dim, embeddings_initializer='he_normal')(block[i])
+            block[i] = L.Embedding(input_dim=dim, output_dim=embed_dim, embeddings_initializer='he_uniform')(block[i])
             # [N, H, W, C] -> [N, C, H, W]
             block[i] = tf.transpose(block[i], [0, 3, 1, 2])
         else:
