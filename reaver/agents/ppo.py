@@ -31,7 +31,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
 
         loss_terms = [-1]*4
         for _ in range(self.kwargs['ppo_updates']):
-            idx = np.random.randint(0, inputs[0].shape[0], self.kwargs['minibatch_sz'])
+            idx = np.random.permutation(self.n_envs * self.batch_sz)[:self.kwargs['minibatch_sz']]
             minibatch = [inpt[idx] for inpt in inputs]
             loss_terms,  _ = tf_run(self.sess, [self.loss_terms, self.train_op], tf_inputs, minibatch)
         return loss_terms
