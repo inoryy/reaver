@@ -40,13 +40,29 @@ class SC2Env(Env):
             step_mul=self.step_mul,)
 
     def step(self, action):
-        obs, reward, done = self.obs_wrapper(self._env.step(self.act_wrapper(action)))
+        try:
+            obs, reward, done = self.obs_wrapper(self._env.step(self.act_wrapper(action)))
+        except ConnectionError:
+            # hacky fix from websocket timeout issue...
+            # this results in faulty reward signals, but I guess it beats completely crashing...
+            self._env.close()
+            self._env.start()
+            return self.reset(), 0, 1
+
         if done:
             obs = self.reset()
         return obs, reward, done
 
     def reset(self):
-        obs, reward, done = self.obs_wrapper(self._env.reset())
+        try:
+            obs, reward, done = self.obs_wrapper(self._env.reset())
+        except ConnectionError:
+            # hacky fix from websocket timeout issue...
+            # this results in faulty reward signals, but I guess it beats completely crashing...
+            self._env.close()
+            self._env.start()
+            return self.reset(), 0, 1
+
         return obs
 
     def stop(self):
