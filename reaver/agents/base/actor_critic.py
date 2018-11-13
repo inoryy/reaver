@@ -39,7 +39,7 @@ class ActorCriticAgent(MemoryAgent):
 
         grads, vars = zip(*opt.compute_gradients(self.loss_op))
         if self.kwargs['clip_grads_norm'] > 0.:
-            grads, _ = tf.clip_by_global_norm(grads, self.kwargs['clip_grads_norm'])
+            grads, self.grads_norm = tf.clip_by_global_norm(grads, self.kwargs['clip_grads_norm'])
         self.train_op = opt.apply_gradients(zip(grads, vars))
 
         self.sess.run(tf.global_variables_initializer())
@@ -62,9 +62,9 @@ class ActorCriticAgent(MemoryAgent):
         next_value = tf_run(self.sess, self.model.value, self.model.inputs, self.next_obs)
         adv, returns = self.compute_advantages_and_returns(next_value)
 
-        loss_terms = self._minimize(adv, returns)
+        loss_terms, grads_norm = self._minimize(adv, returns)
 
-        self.logger.on_update(step, loss_terms, returns, adv, next_value)
+        self.logger.on_update(step, loss_terms, grads_norm, returns, adv, next_value)
 
     def compute_advantages_and_returns(self, bootstrap_value=0.):
         """
@@ -99,12 +99,12 @@ class ActorCriticAgent(MemoryAgent):
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
         tf_inputs = self.model.inputs + self.model.policy.inputs + self.loss_inputs
 
-        ops = [self.loss_terms]
+        ops = [self.loss_terms, self.grads_norm]
         if self.kwargs['train']:
             ops.append(self.train_op)
 
-        loss_terms, *_ = tf_run(self.sess, ops, tf_inputs, inputs)
-        return loss_terms
+        loss_terms, grads_norm, _ = tf_run(self.sess, ops, tf_inputs, inputs)
+        return loss_terms, grads_norm
 
     @abstractmethod
     def _loss_fn(self): ...

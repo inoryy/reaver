@@ -36,7 +36,7 @@ class AgentLogger:
                 self.env_rews[i] = 0.
                 self.env_eps[i] += 1
 
-    def on_update(self, step, loss_terms, returns, adv, next_value):
+    def on_update(self, step, loss_terms, grads_norm, returns, adv, next_value):
         update_step = (step+1) // self.agent.batch_sz
         if self.verbosity < 1 or update_step % self.n_updates:
             return
@@ -75,7 +75,9 @@ class AgentLogger:
         print("Policy loss  ", loss_terms[0])
         print("Value loss   ", loss_terms[1])
         print("Entropy loss ", loss_terms[2])
+        print("Grads norm   ", grads_norm)
         add_summaries(self.writer, ['Policy', 'Value', 'Entropy', 'Total'], loss_terms, update_step, 'Losses')
+        add_summary(self.writer, 'Grads', grads_norm, update_step, 'Losses')
 
         if self.verbosity < 3:
             return
@@ -125,8 +127,8 @@ def create_summary(tag, value):
     return tf.Summary(value=[tf.Summary.Value(tag=tag, simple_value=value)])
 
 
-def add_summary(writer, tag, value, step):
-    writer.add_summary(create_summary(tag, value), global_step=step)
+def add_summary(writer, tag, value, step, prefix=''):
+    writer.add_summary(create_summary(prefix + '/' + tag, value), global_step=step)
 
 
 def add_summaries(writer, tags, values, step, prefix=''):
