@@ -45,8 +45,7 @@ class SC2Env(Env):
         except ConnectionError:
             # hacky fix from websocket timeout issue...
             # this results in faulty reward signals, but I guess it beats completely crashing...
-            self._env.close()
-            self._env.start()
+            self.restart()
             return self.reset(), 0, 1
 
         if done:
@@ -59,14 +58,17 @@ class SC2Env(Env):
         except ConnectionError:
             # hacky fix from websocket timeout issue...
             # this results in faulty reward signals, but I guess it beats completely crashing...
-            self._env.close()
-            self._env.start()
+            self.restart()
             return self.reset(), 0, 1
 
         return obs
 
     def stop(self):
         self._env.close()
+
+    def restart(self):
+        self.stop()
+        self.start()
 
     def obs_spec(self):
         if not self.obs_wrapper.spec:
