@@ -37,8 +37,11 @@ class AgentLogger:
                 self.env_eps[i] += 1
 
     def on_update(self, step, loss_terms, grads_norm, returns, adv, next_value):
+        if self.verbosity < 1:
+            return
+
         update_step = (step+1) // self.agent.batch_sz
-        if self.verbosity < 1 or update_step % self.n_updates:
+        if update_step > 1 and update_step % self.n_updates:
             return
 
         loss_terms = np.array(loss_terms).round(5)
