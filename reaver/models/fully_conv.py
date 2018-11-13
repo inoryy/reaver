@@ -8,9 +8,9 @@ class FullyConv:
     def __init__(self, obs_spec, act_spec, broadcast_non_spatial=True):
         # TODO add support for LSTM via TimeDistributed
         # TODO NCHW is only supported on GPU atm, make this device agnostic
-        self.conv_cfg = dict(padding='same', data_format='channels_first', kernel_initializer='he_uniform')
-        screen, self.screen_input = spatial_block(obs_spec.spaces[0], self.conv_cfg)
-        minimap, self.minimap_input = spatial_block(obs_spec.spaces[1], self.conv_cfg)
+        self.conv_cfg = dict(padding='same', data_format='channels_first')
+        screen, self.screen_input = self.spatial_block(obs_spec.spaces[0])
+        minimap, self.minimap_input = self.spatial_block(obs_spec.spaces[1])
 
         self.non_spatial_inputs = [L.Input(s.shape) for s in obs_spec.spaces[2:]]
         self.inputs = [self.screen_input, self.minimap_input] + self.non_spatial_inputs
@@ -24,25 +24,46 @@ class FullyConv:
             state = tf.concat([screen, minimap], axis=1)
 
         fc = L.Flatten()(state)
-        fc = L.Dense(256, activation='relu', kernel_initializer='he_uniform')(fc)
+        fc = L.Dense(256, activation='relu')(fc)
 
         # TODO do I really want to squeeze here?
-        self.value = tf.squeeze(L.Dense(1, kernel_initializer='he_uniform')(fc), axis=-1)
+        self.value = tf.squeeze(L.Dense(1)(fc), axis=-1)
 
         self.logits = []
         for s in act_spec:
             if s.is_spatial():
-                self.logits.append(L.Conv2D(1, 1, **dict(self.conv_cfg, **dict(kernel_initializer='he_uniform')))(state))
+                self.logits.append(L.Conv2D(1, 1, kernel_initializer='zeros', **self.conv_cfg)(state))
                 # flatten spatial logits, simplifying sampling
                 self.logits[-1] = L.Flatten()(self.logits[-1])
             else:
-                self.logits.append(L.Dense(s.size(), kernel_initializer='he_uniform')(fc))
+                self.logits.append(L.Dense(s.size(), kernel_initializer='zeros')(fc))
 
         args_mask = tf.constant(act_spec.spaces[0].args_mask, dtype=tf.float32)
 
         # TODO replace with Autoregressive
         # TODO get rid of the index hard-code
         self.policy = MultiPolicy(self.logits, self.non_spatial_inputs[0], args_mask)
+
+    def spatial_block(self, space):
+        inpt = L.Input(space.shape)
+
+        block = tf.split(inpt, space.shape[0], axis=1)
+        for i, (name, dim) in enumerate(zip(space.spatial_feats, space.spatial_dims)):
+            if dim > 1:
+                # categorical spatial feature
+                embed_dim = int(max(1, round(np.log2(dim))))
+                block[i] = tf.squeeze(block[i], axis=1)
+                block[i] = L.Embedding(input_dim=dim, output_dim=embed_dim)(block[i])
+                # [N, H, W, C] -> [N, C, H, W]
+                block[i] = tf.transpose(block[i], [0, 3, 1, 2])
+            else:
+                block[i] = tf.log(block[i] + 1e-10)
+
+        block = tf.concat(block, axis=1)
+        block = L.Conv2D(16, 5, activation='relu', **self.conv_cfg)(block)
+        block = L.Conv2D(32, 3, activation='relu', **self.conv_cfg)(block)
+
+        return block, inpt
 
 
 class MultiPolicy:
@@ -64,25 +85,3 @@ class MultiPolicy:
         self.logli = self.dists[0].log_prob(self.inputs[0])
         for i in range(1, len(self.dists)):
             self.logli += act_args_mask[i-1] * self.dists[i].log_prob(self.inputs[i])
-
-
-def spatial_block(space, conv_cfg):
-    inpt = L.Input(space.shape)
-
-    block = tf.split(inpt, space.shape[0], axis=1)
-    for i, (name, dim) in enumerate(zip(space.spatial_feats, space.spatial_dims)):
-        if dim > 1:
-            # categorical spatial feature
-            embed_dim = int(max(1, round(np.log2(dim))))
-            block[i] = tf.squeeze(block[i], axis=1)
-            block[i] = L.Embedding(input_dim=dim, output_dim=embed_dim, embeddings_initializer='he_uniform')(block[i])
-            # [N, H, W, C] -> [N, C, H, W]
-            block[i] = tf.transpose(block[i], [0, 3, 1, 2])
-        else:
-            block[i] = tf.log(block[i] + 1e-10)
-
-    block = tf.concat(block, axis=1)
-    block = L.Conv2D(16, 5, activation='relu', **conv_cfg)(block)
-    block = L.Conv2D(32, 3, activation='relu', **conv_cfg)(block)
-
-    return block, inpt
