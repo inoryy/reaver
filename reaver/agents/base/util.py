@@ -105,7 +105,7 @@ class AgentLogger:
             for t in range(n_steps-1, -1, -1):
                 trv = n_steps - t
                 avail = np.argwhere(self.agent.obs[2][-trv, 0]).flatten()
-                avail_logits = logits[0][t, avail].flatten()
+                avail_logits = logits[t, avail]
                 avail_sorted = np.argsort(avail_logits)
                 print("Step", -trv+1)
                 print("Actions   ", self.agent.obs[2][-trv, 0].sum())
