@@ -75,7 +75,7 @@ class ActorCriticAgent(MemoryAgent):
         values = np.append(self.values, bootstrap_value, axis=0)
         rewards = self.rewards.copy()
         if self.kwargs['bootstrap_terminals']:
-            rewards += self.dones * self.kwargs['discount'] * values[1:]
+            rewards += self.dones * self.kwargs['discount'] * values[:-1]
         discounts = self.kwargs['discount'] * (1-self.dones)
 
         rewards[-1] += (1-self.dones[-1]) * self.kwargs['discount'] * values[-1]
@@ -84,7 +84,7 @@ class ActorCriticAgent(MemoryAgent):
         if self.kwargs['gae_lambda'] > 0.:
             deltas = self.rewards + discounts * values[1:] - values[:-1]
             if self.kwargs['bootstrap_terminals']:
-                deltas += self.dones * self.kwargs['discount'] * values[1:]
+                deltas += self.dones * self.kwargs['discount'] * values[:-1]
             adv = discounted_cumsum(deltas, self.kwargs['gae_lambda'] * discounts)
         else:
             adv = returns - self.values
