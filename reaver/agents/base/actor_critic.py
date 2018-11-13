@@ -15,6 +15,7 @@ class ActorCriticAgent(MemoryAgent):
         MemoryAgent.__init__(self, base_shape, obs_spec, act_spec)
 
         self.kwargs = dict(
+            train=True,
             lr=0.005,
             optimizer='adam',
             clip_grads_norm=0.0,
@@ -61,7 +62,7 @@ class ActorCriticAgent(MemoryAgent):
         next_value = tf_run(self.sess, self.model.value, self.model.inputs, self.next_obs)
         adv, returns = self.compute_advantages_and_returns(next_value)
 
-        loss_terms = self._train(adv, returns)
+        loss_terms = self._minimize(adv, returns)
 
         self.logger.on_update(step, loss_terms, returns, adv, next_value)
 
@@ -93,12 +94,16 @@ class ActorCriticAgent(MemoryAgent):
 
         return adv, returns
 
-    def _train(self, advantages, returns):
+    def _minimize(self, advantages, returns):
         inputs = self.obs + self.acts + [advantages, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
         tf_inputs = self.model.inputs + self.model.policy.inputs + self.loss_inputs
 
-        loss_terms,  _ = tf_run(self.sess, [self.loss_terms, self.train_op], tf_inputs, inputs)
+        ops = [self.loss_terms]
+        if self.kwargs['train']:
+            ops.append(self.train_op)
+
+        loss_terms, *_ = tf_run(self.sess, ops, tf_inputs, inputs)
         return loss_terms
 
     @abstractmethod
