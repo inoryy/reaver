@@ -1,6 +1,7 @@
 import numpy as np
 from pysc2.lib import actions
 from pysc2.lib import features
+from pysc2.lib import protocol
 from pysc2.env.environment import StepType
 from . import Env, Spec, Space
 
@@ -42,7 +43,7 @@ class SC2Env(Env):
     def step(self, action):
         try:
             obs, reward, done = self.obs_wrapper(self._env.step(self.act_wrapper(action)))
-        except ConnectionError:
+        except protocol.ConnectionError:
             # hacky fix from websocket timeout issue...
             # this results in faulty reward signals, but I guess it beats completely crashing...
             self.restart()
@@ -55,7 +56,7 @@ class SC2Env(Env):
     def reset(self):
         try:
             obs, reward, done = self.obs_wrapper(self._env.reset())
-        except ConnectionError:
+        except protocol.ConnectionError:
             # hacky fix from websocket timeout issue...
             # this results in faulty reward signals, but I guess it beats completely crashing...
             self.restart()
