@@ -103,7 +103,7 @@ class ActorCriticAgent(MemoryAgent):
         if self.kwargs['train']:
             ops.append(self.train_op)
 
-        loss_terms, grads_norm, _ = tf_run(self.sess, ops, tf_inputs, inputs)
+        loss_terms, grads_norm, *_ = tf_run(self.sess, ops, tf_inputs, inputs)
         return loss_terms, grads_norm
 
     @abstractmethod
