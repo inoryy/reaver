@@ -6,7 +6,7 @@ class MemoryAgent(RunningAgent):
     def __init__(self, obs_spec, act_spec, base_shape):
         """
         base_shape is not limited, but most common use case is (T, E)
-        where T is number of time steps (batch size) and E is number of environments
+        where T is number of time steps and E is number of environments
         """
         RunningAgent.__init__(self)
 

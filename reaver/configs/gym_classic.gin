@@ -10,7 +10,7 @@ tf.train.AdamOptimizer.learning_rate = 0.005
 
 ActorCriticAgent.model_fn = @build_mlp
 ActorCriticAgent.policy_cls = @MultiPolicy
-ActorCriticAgent.traj_len = 200
+ActorCriticAgent.batch_sz = 1000
 ActorCriticAgent.gae_lambda = 0.0
 ActorCriticAgent.bootstrap_terminals = False
 ActorCriticAgent.normalize_advantages = False

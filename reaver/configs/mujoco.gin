@@ -1,1 +1,3 @@
-ActorCriticAgent.traj_len = 1500
+ActorCriticAgent.batch_sz = 50000
+
+ProximalPolicyOptimizationAgent.minibatch_sz = 25000

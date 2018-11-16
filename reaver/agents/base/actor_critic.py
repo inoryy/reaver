@@ -16,7 +16,7 @@ class ActorCriticAgent(MemoryAgent):
         obs_spec,
         act_spec,
         n_envs=4,
-        traj_len=16,
+        batch_sz=128,
         model_fn=build_mlp,
         policy_cls=MultiPolicy,
         discount=0.99,
@@ -26,7 +26,7 @@ class ActorCriticAgent(MemoryAgent):
         clip_grads_norm=0.0,
         optimizer=tf.train.AdamOptimizer()
     ):
-        MemoryAgent.__init__(self, obs_spec, act_spec, (traj_len, n_envs))
+        MemoryAgent.__init__(self, obs_spec, act_spec, (round(batch_sz / n_envs), n_envs))
 
         self.sess = sess
         self.discount = discount

@@ -1,7 +1,7 @@
 tf.train.AdamOptimizer.learning_rate = 0.01
 
 
-ActorCriticAgent.traj_len = 250
+ActorCriticAgent.batch_sz = 1000
 ActorCriticAgent.discount = 0.99
 ActorCriticAgent.gae_lambda = 0.95
 ActorCriticAgent.normalize_advantages = True
