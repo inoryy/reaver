@@ -3,7 +3,7 @@ from .running import RunningAgent
 
 
 class MemoryAgent(RunningAgent):
-    def __init__(self, base_shape, obs_spec, act_spec):
+    def __init__(self, obs_spec, act_spec, base_shape):
         """
         base_shape is not limited, but most common use case is (T, E)
         where T is number of time steps (batch size) and E is number of environments
@@ -11,7 +11,7 @@ class MemoryAgent(RunningAgent):
         RunningAgent.__init__(self)
 
         self.shape = base_shape
-        self.batch_sz = self.shape[0]
+        self.traj_len = self.shape[0]
         self.dones = np.empty(self.shape, dtype=np.bool)
         self.values = np.empty(self.shape, dtype=np.float32)
         self.rewards = np.empty(self.shape, dtype=np.float32)
@@ -23,7 +23,7 @@ class MemoryAgent(RunningAgent):
         Note: memory agent will overwrite previous batch without warning
         Keeping track of memory state is up to extending subclasses
         """
-        step = step % self.batch_sz
+        step = step % self.traj_len
 
         self.dones[step] = done
         self.rewards[step] = reward

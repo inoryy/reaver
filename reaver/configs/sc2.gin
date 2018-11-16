@@ -1,0 +1,3 @@
+SC2Env.spatial_dim = 16
+SC2Env.step_mul = 8
+

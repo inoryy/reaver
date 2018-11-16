@@ -1,65 +1,68 @@
-from abc import abstractmethod
+import gin.tf
 import numpy as np
 import tensorflow as tf
-from .memory import MemoryAgent
+from abc import abstractmethod
+
+from reaver.models import mlp, MultiPolicy
+from reaver.agents.base import MemoryAgent
 from .util import tf_run, discounted_cumsum, AgentLogger
 
-optimizers = dict(
-    adam=tf.train.AdamOptimizer,
-    rmsprop=tf.train.RMSPropOptimizer
-)
 
-
+@gin.configurable
 class ActorCriticAgent(MemoryAgent):
-    def __init__(self, model_cls, obs_spec, act_spec, base_shape, **kwargs):
-        MemoryAgent.__init__(self, base_shape, obs_spec, act_spec)
+    def __init__(
+        self,
+        sess,
+        obs_spec,
+        act_spec,
+        n_envs=4,
+        traj_len=16,
+        network_fn=mlp,
+        policy_cls=MultiPolicy,
+        discount=0.99,
+        gae_lambda=0.95,
+        normalize_advantages=True,
+        bootstrap_terminals=False,
+        clip_grads_norm=0.0,
+        optimizer=tf.train.AdamOptimizer()
+    ):
+        MemoryAgent.__init__(self, obs_spec, act_spec, (traj_len, n_envs))
 
-        self.kwargs = dict(
-            train=True,
-            lr=0.005,
-            optimizer='adam',
-            clip_grads_norm=0.0,
-            discount=0.99,
-            gae_lambda=0.95,
-            normalize_advantages=True,
-            bootstrap_terminals=False,
-            model_kwargs=dict(),
-            logger_kwargs=dict(),
-        )
-        if kwargs:
-            self.kwargs.update(kwargs)
+        self.sess = sess
+        self.discount = discount
+        self.gae_lambda = gae_lambda
+        self.normalize_advantages = normalize_advantages
+        self.bootstrap_terminals = bootstrap_terminals
 
-        tf.reset_default_graph()
-        self.sess = tf.Session()
-
-        opt = optimizers[self.kwargs['optimizer']](self.kwargs['lr'])
-
-        self.model = model_cls(obs_spec, act_spec, **self.kwargs['model_kwargs'])
+        self.network = network_fn(obs_spec, act_spec)
+        self.value = self.network.outputs[-1]
+        self.policy = policy_cls(act_spec, self.network.outputs[:-1])
         self.loss_op, self.loss_terms, self.loss_inputs = self._loss_fn()
 
-        grads, vars = zip(*opt.compute_gradients(self.loss_op))
-        if self.kwargs['clip_grads_norm'] > 0.:
-            grads, self.grads_norm = tf.clip_by_global_norm(grads, self.kwargs['clip_grads_norm'])
-        self.train_op = opt.apply_gradients(zip(grads, vars))
+        grads, vars = zip(*optimizer.compute_gradients(self.loss_op))
+        self.grads_norm = tf.linalg.global_norm(grads)
+        if clip_grads_norm > 0.:
+            grads, _ = tf.clip_by_global_norm(grads, clip_grads_norm, self.grads_norm)
+        self.train_op = optimizer.apply_gradients(zip(grads, vars))
 
         self.sess.run(tf.global_variables_initializer())
 
-        self.logger = AgentLogger(self, **self.kwargs['logger_kwargs'])
+        self.logger = AgentLogger(self)
 
     def get_action_and_value(self, obs):
-        return tf_run(self.sess, [self.model.policy.sample, self.model.value], self.model.inputs, obs)
+        return tf_run(self.sess, [self.policy.sample, self.value], self.network.inputs, obs)
 
     def get_action(self, obs):
-        return tf_run(self.sess, self.model.policy.sample, self.model.inputs, obs)
+        return tf_run(self.sess, self.policy.sample, self.network.inputs, obs)
 
     def on_step(self, step, obs, action, reward, done, value=None):
         MemoryAgent.on_step(self, step, obs, action, reward, done, value)
         self.logger.on_step(step)
 
-        if (step + 1) % self.batch_sz > 0:
+        if (step + 1) % self.traj_len > 0:
             return
 
-        next_value = tf_run(self.sess, self.model.value, self.model.inputs, self.next_obs)
+        next_value = tf_run(self.sess, self.value, self.network.inputs, self.next_obs)
         adv, returns = self.compute_advantages_and_returns(next_value)
 
         loss_terms, grads_norm = self._minimize(adv, returns)
@@ -74,33 +77,33 @@ class ActorCriticAgent(MemoryAgent):
         bootstrap_value = np.expand_dims(bootstrap_value, 0)
         values = np.append(self.values, bootstrap_value, axis=0)
         rewards = self.rewards.copy()
-        if self.kwargs['bootstrap_terminals']:
-            rewards += self.dones * self.kwargs['discount'] * values[:-1]
-        discounts = self.kwargs['discount'] * (1-self.dones)
+        if self.bootstrap_terminals:
+            rewards += self.dones * self.discount * values[:-1]
+        discounts = self.discount * (1-self.dones)
 
-        rewards[-1] += (1-self.dones[-1]) * self.kwargs['discount'] * values[-1]
+        rewards[-1] += (1-self.dones[-1]) * self.discount * values[-1]
         returns = discounted_cumsum(rewards, discounts)
 
-        if self.kwargs['gae_lambda'] > 0.:
+        if self.gae_lambda > 0.:
             deltas = self.rewards + discounts * values[1:] - values[:-1]
-            if self.kwargs['bootstrap_terminals']:
-                deltas += self.dones * self.kwargs['discount'] * values[:-1]
-            adv = discounted_cumsum(deltas, self.kwargs['gae_lambda'] * discounts)
+            if self.bootstrap_terminals:
+                deltas += self.dones * self.discount * values[:-1]
+            adv = discounted_cumsum(deltas, self.gae_lambda * discounts)
         else:
             adv = returns - self.values
 
-        if self.kwargs['normalize_advantages']:
+        if self.normalize_advantages:
             adv = (adv - adv.mean()) / (adv.std() + 1e-10)
 
         return adv, returns
 
-    def _minimize(self, advantages, returns):
+    def _minimize(self, advantages, returns, train=True):
         inputs = self.obs + self.acts + [advantages, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
-        tf_inputs = self.model.inputs + self.model.policy.inputs + self.loss_inputs
+        tf_inputs = self.network.inputs + self.policy.inputs + self.loss_inputs
 
         ops = [self.loss_terms, self.grads_norm]
-        if self.kwargs['train']:
+        if train:
             ops.append(self.train_op)
 
         loss_terms, grads_norm, *_ = tf_run(self.sess, ops, tf_inputs, inputs)

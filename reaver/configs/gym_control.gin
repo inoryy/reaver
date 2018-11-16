@@ -1,0 +1,24 @@
+import gin.tf.external_configurables
+
+mlp.activation = 'tanh'
+
+tf.train.AdamOptimizer.learning_rate = 0.005
+
+ActorCriticAgent.network_fn = @mlp
+ActorCriticAgent.policy_cls = @MultiPolicy
+ActorCriticAgent.traj_len = 200
+ActorCriticAgent.gae_lambda = 0.0
+ActorCriticAgent.bootstrap_terminals = False
+ActorCriticAgent.normalize_advantages = False
+ActorCriticAgent.clip_grads_norm = 1.0
+ActorCriticAgent.optimizer = @tf.train.AdamOptimizer()
+
+AdvantageActorCriticAgent.value_coef = 0.005
+AdvantageActorCriticAgent.entropy_coef = 0.01
+
+ProximalPolicyOptimizationAgent.minibatch_sz = 400
+ProximalPolicyOptimizationAgent.value_coef = 0.005
+ProximalPolicyOptimizationAgent.entropy_coef = 0.01
+
+AgentLogger.n_updates = 10
+AgentLogger.verbosity = 4

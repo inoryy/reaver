@@ -1,3 +1,4 @@
+import gin
 import numpy as np
 from pysc2.lib import actions
 from pysc2.lib import features
@@ -6,8 +7,9 @@ from pysc2.env.environment import StepType
 from . import Env, Spec, Space
 
 
+@gin.configurable
 class SC2Env(Env):
-    def __init__(self, map_name='MoveToBeacon', spatial_dim=16, step_mul=8, render=False, obs_features=None, action_ids=None):
+    def __init__(self, map_name='MoveToBeacon', render=False, spatial_dim=16, step_mul=8, obs_features=None, action_ids=None):
         """
         :param map_name:
         :param spatial_dim:

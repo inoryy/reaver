@@ -1,5 +1,6 @@
 import sys
 import time
+import gin
 import numpy as np
 import tensorflow as tf
 from collections import deque
@@ -17,8 +18,9 @@ def tf_run(sess, tf_op, tf_inputs, inputs):
     return sess.run(tf_op, feed_dict=dict(zip(tf_inputs, inputs)))
 
 
+@gin.configurable
 class AgentLogger:
-    def __init__(self, agent, n_updates=100, n_detailed=10, verbosity=3, summary_logs_dir='data/summary'):
+    def __init__(self, agent, n_updates=100, n_detailed=10, verbosity=3, summary_logs_dir='data/summaries'):
         self.agent, self.verbosity = agent, verbosity
         self.n_updates, self.n_detailed = n_updates, n_detailed
         self.env_eps = [0]*self.agent.n_envs
@@ -28,7 +30,7 @@ class AgentLogger:
         self.writer = create_summary_writer(summary_logs_dir)
 
     def on_step(self, step):
-        t = step % self.agent.batch_sz
+        t = step % self.agent.traj_len
         self.env_rews += self.agent.rewards[t]
         for i in range(self.agent.n_envs):
             if self.agent.dones[t, i]:
@@ -40,7 +42,7 @@ class AgentLogger:
         if self.verbosity < 1:
             return
 
-        update_step = (step+1) // self.agent.batch_sz
+        update_step = (step+1) // self.agent.traj_len
         if update_step > 1 and update_step % self.n_updates:
             return
 
@@ -86,7 +88,7 @@ class AgentLogger:
             return
 
         np.set_printoptions(suppress=True, precision=2)
-        n_steps = min(self.n_detailed, self.agent.batch_sz)
+        n_steps = min(self.n_detailed, self.agent.traj_len)
 
         print()
         print("First Env For Last %d Steps:" % n_steps)
@@ -97,7 +99,7 @@ class AgentLogger:
         print("Advs       ", adv[-n_steps:, 0].flatten())
 
         if self.verbosity >= 4:
-            logits = tf_run(self.agent.sess, self.agent.model.logits[0], self.agent.model.inputs,
+            logits = tf_run(self.agent.sess, self.agent.policy.logits[0], self.agent.network.inputs,
                                        [o[-n_steps:, 0] for o in self.agent.obs])
             action_ids = self.agent.acts[0][-n_steps:, 0].flatten()
 

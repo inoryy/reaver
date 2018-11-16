@@ -4,6 +4,9 @@ import numpy as np
 class Spec:
     def __init__(self, spaces, name=None):
         self.name, self.spaces = name, spaces
+        for i, space in enumerate(self.spaces):
+            if not space.name:
+                space.name = str(i)
 
     def sample(self, n=1):
         return [space.sample(n) for space in self.spaces]
@@ -41,6 +44,10 @@ class Space:
 
         if len(self.shape) == 1:
             return self.shape[0]
+
+        if self.is_continuous():
+            # mu and log_std
+            return 2
 
         return 1
 

@@ -20,8 +20,10 @@ setup(
         'reaver.agents'
     ],
     install_requires=[
-        'numpy',
+        'numpy>=1.13',
         'PySC2>=2.0',
+        'absl-py >= 0.2.2',
+        'gin-config >= 0.1.1'
     ],
     extras_require={
         'tf-cpu': [
