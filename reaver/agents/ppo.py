@@ -18,14 +18,12 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         n_updates=3,
         minibatch_sz=24,
         clip_ratio=0.2,
-        policy_coef=1.0,
         value_coef=0.5,
         entropy_coef=0.001,
     ):
         self.n_updates = n_updates
         self.minibatch_sz = minibatch_sz
         self.clip_ratio = clip_ratio
-        self.policy_coef = policy_coef
         self.value_coef = value_coef
         self.entropy_coef = entropy_coef
 
@@ -33,12 +31,12 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         ActorCriticAgent.__init__(self, sess, obs_spec, act_spec, n_envs, traj_len)
 
     def _minimize(self, advantages, returns, train=True):
-        tf_inputs = self.network.inputs + self.policy.inputs
         inputs = [a.reshape(-1, *a.shape[2:]) for a in self.obs + self.acts]
+        tf_inputs = self.model.inputs + self.policy.inputs
         logli_old = tf_run(self.sess, self.policy.logli, tf_inputs, inputs)
 
-        tf_inputs += self.loss_inputs
         inputs += [advantages.flatten(), returns.flatten(), logli_old]
+        tf_inputs += self.loss_inputs
 
         ops = [self.loss_terms, self.grads_norm]
         if train:
@@ -61,10 +59,11 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         clipped_ratio = tf.clip_by_value(ratio, 1-self.clip_ratio, 1+self.clip_ratio)
 
         policy_loss = -tf.reduce_mean(tf.minimum(adv * ratio, adv * clipped_ratio))
-        value_loss = tf.reduce_mean((self.value - returns) ** 2)
-        entropy_loss = tf.reduce_mean(self.policy.entropy)
+        # TODO clip value loss
+        value_loss = tf.reduce_mean((self.value - returns)**2) * self.value_coef
+        entropy_loss = tf.reduce_mean(self.policy.entropy) * self.entropy_coef
         # we want to reduce policy and value errors, and maximize entropy
         # but since optimizer is minimizing the signs are opposite
-        full_loss = self.policy_coef*policy_loss + self.value_coef*value_loss - self.entropy_coef*entropy_loss
+        full_loss = policy_loss + value_loss - entropy_loss
 
-        return full_loss, [policy_loss, value_loss, entropy_loss, full_loss], [adv, returns, logli_old]
+        return full_loss, [policy_loss, value_loss, entropy_loss], [adv, returns, logli_old]

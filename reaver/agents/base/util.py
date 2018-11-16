@@ -76,12 +76,11 @@ class AgentLogger:
 
         print()
         print("Losses For Last Update:")
-        print("Total loss   ", loss_terms[3])
         print("Policy loss  ", loss_terms[0])
         print("Value loss   ", loss_terms[1])
         print("Entropy loss ", loss_terms[2])
         print("Grads norm   ", grads_norm)
-        add_summaries(self.writer, ['Policy', 'Value', 'Entropy', 'Total'], loss_terms, update_step, 'Losses')
+        add_summaries(self.writer, ['Policy', 'Value', 'Entropy'], loss_terms, update_step, 'Losses')
         add_summary(self.writer, 'Grads', grads_norm, update_step, 'Losses')
 
         if self.verbosity < 3:
@@ -99,7 +98,7 @@ class AgentLogger:
         print("Advs       ", adv[-n_steps:, 0].flatten())
 
         if self.verbosity >= 4:
-            logits = tf_run(self.agent.sess, self.agent.policy.logits[0], self.agent.network.inputs,
+            logits = tf_run(self.agent.sess, self.agent.policy.logits[0], self.agent.model.inputs,
                                        [o[-n_steps:, 0] for o in self.agent.obs])
             action_ids = self.agent.acts[0][-n_steps:, 0].flatten()
 

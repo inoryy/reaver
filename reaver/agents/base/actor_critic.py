@@ -3,8 +3,8 @@ import numpy as np
 import tensorflow as tf
 from abc import abstractmethod
 
-from reaver.models import mlp, MultiPolicy
 from reaver.agents.base import MemoryAgent
+from reaver.models import build_mlp, MultiPolicy
 from .util import tf_run, discounted_cumsum, AgentLogger
 
 
@@ -17,7 +17,7 @@ class ActorCriticAgent(MemoryAgent):
         act_spec,
         n_envs=4,
         traj_len=16,
-        network_fn=mlp,
+        model_fn=build_mlp,
         policy_cls=MultiPolicy,
         discount=0.99,
         gae_lambda=0.95,
@@ -34,13 +34,13 @@ class ActorCriticAgent(MemoryAgent):
         self.normalize_advantages = normalize_advantages
         self.bootstrap_terminals = bootstrap_terminals
 
-        self.network = network_fn(obs_spec, act_spec)
-        self.value = self.network.outputs[-1]
-        self.policy = policy_cls(act_spec, self.network.outputs[:-1])
+        self.model = model_fn(obs_spec, act_spec)
+        self.value = self.model.outputs[-1]
+        self.policy = policy_cls(act_spec, self.model.outputs[:-1])
         self.loss_op, self.loss_terms, self.loss_inputs = self._loss_fn()
 
         grads, vars = zip(*optimizer.compute_gradients(self.loss_op))
-        self.grads_norm = tf.linalg.global_norm(grads)
+        self.grads_norm = tf.global_norm(grads)
         if clip_grads_norm > 0.:
             grads, _ = tf.clip_by_global_norm(grads, clip_grads_norm, self.grads_norm)
         self.train_op = optimizer.apply_gradients(zip(grads, vars))
@@ -50,10 +50,10 @@ class ActorCriticAgent(MemoryAgent):
         self.logger = AgentLogger(self)
 
     def get_action_and_value(self, obs):
-        return tf_run(self.sess, [self.policy.sample, self.value], self.network.inputs, obs)
+        return tf_run(self.sess, [self.policy.sample, self.value], self.model.inputs, obs)
 
     def get_action(self, obs):
-        return tf_run(self.sess, self.policy.sample, self.network.inputs, obs)
+        return tf_run(self.sess, self.policy.sample, self.model.inputs, obs)
 
     def on_step(self, step, obs, action, reward, done, value=None):
         MemoryAgent.on_step(self, step, obs, action, reward, done, value)
@@ -62,7 +62,7 @@ class ActorCriticAgent(MemoryAgent):
         if (step + 1) % self.traj_len > 0:
             return
 
-        next_value = tf_run(self.sess, self.value, self.network.inputs, self.next_obs)
+        next_value = tf_run(self.sess, self.value, self.model.inputs, self.next_obs)
         adv, returns = self.compute_advantages_and_returns(next_value)
 
         loss_terms, grads_norm = self._minimize(adv, returns)
@@ -100,7 +100,7 @@ class ActorCriticAgent(MemoryAgent):
     def _minimize(self, advantages, returns, train=True):
         inputs = self.obs + self.acts + [advantages, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
-        tf_inputs = self.network.inputs + self.policy.inputs + self.loss_inputs
+        tf_inputs = self.model.inputs + self.policy.inputs + self.loss_inputs
 
         ops = [self.loss_terms, self.grads_norm]
         if train:

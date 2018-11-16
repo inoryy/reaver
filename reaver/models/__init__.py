@@ -1,4 +1,3 @@
 from .fully_conv import FullyConv
-
-from reaver.models.networks import mlp
-from reaver.models.policy import MultiPolicy
+from reaver.models.base.mlp import build_mlp
+from reaver.models.base.policy import MultiPolicy
