@@ -3,9 +3,15 @@ from . import Env, Spec, Space
 
 
 class GymEnv(Env):
-    def __init__(self, _id='CartPole-v0', render=False, reset_done=True):
-        self.id, self.render, self.reset_done = _id, render, reset_done
-        self._env = self.specs = None
+    def __init__(self, _id='CartPole-v0', render=False, reset_done=True, max_ep_len=None):
+        self.id = _id
+        self.render = render
+        self.reset_done = reset_done
+        self.max_ep_len = max_ep_len if max_ep_len else float('inf')
+
+        self._env = None
+        self.specs = None
+        self.ep_step = 0
 
     def start(self):
         import gym  # lazy-loading
@@ -15,6 +21,10 @@ class GymEnv(Env):
 
     def step(self, action):
         obs, reward, done, _ = self._env.step(self.wrap_act(action))
+
+        self.ep_step += 1
+        if self.ep_step >= self.max_ep_len:
+            done = 1
 
         if done and self.reset_done:
             obs = self.reset(wrap=False)
@@ -29,11 +39,14 @@ class GymEnv(Env):
 
     def reset(self, wrap=True):
         obs = self._env.reset()
+
         if wrap:
             obs = self.wrap_obs(obs)
 
         if self.render:
             self._env.render()
+
+        self.ep_step = 0
 
         return obs
 
