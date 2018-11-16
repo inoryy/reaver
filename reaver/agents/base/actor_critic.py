@@ -3,9 +3,10 @@ import numpy as np
 import tensorflow as tf
 from abc import abstractmethod
 
+from reaver.utils import Logger
+from reaver.utils import tf_run
 from reaver.agents.base import MemoryAgent
 from reaver.models import build_mlp, MultiPolicy
-from .util import tf_run, discounted_cumsum, AgentLogger
 
 
 @gin.configurable
@@ -25,7 +26,8 @@ class ActorCriticAgent(MemoryAgent):
         normalize_advantages=True,
         bootstrap_terminals=False,
         clip_grads_norm=0.0,
-        optimizer=tf.train.AdamOptimizer()
+        optimizer=tf.train.AdamOptimizer(),
+        logger=Logger()
     ):
         MemoryAgent.__init__(self, obs_spec, act_spec, (round(batch_sz / n_envs), n_envs))
 
@@ -35,11 +37,12 @@ class ActorCriticAgent(MemoryAgent):
         self.clip_rewards = clip_rewards
         self.normalize_advantages = normalize_advantages
         self.bootstrap_terminals = bootstrap_terminals
+        self.logger = logger
 
         self.model = model_fn(obs_spec, act_spec)
         self.value = self.model.outputs[-1]
         self.policy = policy_cls(act_spec, self.model.outputs[:-1])
-        self.loss_op, self.loss_terms, self.loss_inputs = self._loss_fn()
+        self.loss_op, self.loss_terms, self.loss_inputs = self.loss_fn()
 
         grads, vars = zip(*optimizer.compute_gradients(self.loss_op))
         self.grads_norm = tf.global_norm(grads)
@@ -48,8 +51,6 @@ class ActorCriticAgent(MemoryAgent):
         self.train_op = optimizer.apply_gradients(zip(grads, vars))
 
         self.sess.run(tf.global_variables_initializer())
-
-        self.logger = AgentLogger(self, act_spec)
 
     def get_action_and_value(self, obs):
         return tf_run(self.sess, [self.policy.sample, self.value], self.model.inputs, obs)
@@ -67,9 +68,21 @@ class ActorCriticAgent(MemoryAgent):
         next_value = tf_run(self.sess, self.value, self.model.inputs, self.next_obs)
         adv, returns = self.compute_advantages_and_returns(next_value)
 
-        loss_terms, grads_norm = self._minimize(adv, returns)
+        loss_terms, grads_norm = self.minimize(adv, returns)
 
         self.logger.on_update(step, loss_terms, grads_norm, returns, adv, next_value)
+
+    def minimize(self, advantages, returns, train=True):
+        inputs = self.obs + self.acts + [advantages, returns]
+        inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
+        tf_inputs = self.model.inputs + self.policy.inputs + self.loss_inputs
+
+        ops = [self.loss_terms, self.grads_norm]
+        if train:
+            ops.append(self.train_op)
+
+        loss_terms, grads_norm, *_ = tf_run(self.sess, ops, tf_inputs, inputs)
+        return loss_terms, grads_norm
 
     def compute_advantages_and_returns(self, bootstrap_value=0.):
         """
@@ -88,13 +101,13 @@ class ActorCriticAgent(MemoryAgent):
         discounts = self.discount * (1-self.dones)
 
         rewards[-1] += (1-self.dones[-1]) * self.discount * values[-1]
-        returns = discounted_cumsum(rewards, discounts)
+        returns = self.discounted_cumsum(rewards, discounts)
 
         if self.gae_lambda > 0.:
             deltas = self.rewards + discounts * values[1:] - values[:-1]
             if self.bootstrap_terminals:
                 deltas += self.dones * self.discount * values[:-1]
-            adv = discounted_cumsum(deltas, self.gae_lambda * discounts)
+            adv = self.discounted_cumsum(deltas, self.gae_lambda * discounts)
         else:
             adv = returns - self.values
 
@@ -103,17 +116,13 @@ class ActorCriticAgent(MemoryAgent):
 
         return adv, returns
 
-    def _minimize(self, advantages, returns, train=True):
-        inputs = self.obs + self.acts + [advantages, returns]
-        inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
-        tf_inputs = self.model.inputs + self.policy.inputs + self.loss_inputs
-
-        ops = [self.loss_terms, self.grads_norm]
-        if train:
-            ops.append(self.train_op)
-
-        loss_terms, grads_norm, *_ = tf_run(self.sess, ops, tf_inputs, inputs)
-        return loss_terms, grads_norm
+    @staticmethod
+    def discounted_cumsum(x, discount):
+        y = np.zeros_like(x)
+        y[-1] = x[-1]
+        for t in range(x.shape[0] - 2, -1, -1):
+            y[t] = x[t] + discount[t] * y[t + 1]
+        return y
 
     @abstractmethod
-    def _loss_fn(self): ...
+    def loss_fn(self): ...

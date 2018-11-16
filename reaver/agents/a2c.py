@@ -1,7 +1,7 @@
 import gin.tf
 import tensorflow as tf
 
-from . import SyncRunningAgent, ActorCriticAgent
+from reaver.agents.base import SyncRunningAgent, ActorCriticAgent
 
 
 @gin.configurable
@@ -22,7 +22,7 @@ class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
         SyncRunningAgent.__init__(self, n_envs)
         ActorCriticAgent.__init__(self, sess, obs_spec, act_spec, n_envs, batch_sz)
 
-    def _loss_fn(self):
+    def loss_fn(self):
         adv = tf.placeholder(tf.float32, [None], name="advantages")
         returns = tf.placeholder(tf.float32, [None], name="returns")
 

@@ -2,8 +2,8 @@ import gin.tf
 import numpy as np
 import tensorflow as tf
 
-from .base.util import tf_run
-from . import SyncRunningAgent, ActorCriticAgent
+from reaver.utils import tf_run
+from reaver.agents.base import SyncRunningAgent, ActorCriticAgent
 
 
 @gin.configurable
@@ -30,7 +30,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         SyncRunningAgent.__init__(self, n_envs)
         ActorCriticAgent.__init__(self, sess, obs_spec, act_spec, n_envs, batch_sz)
 
-    def _minimize(self, advantages, returns, train=True):
+    def minimize(self, advantages, returns, train=True):
         inputs = [a.reshape(-1, *a.shape[2:]) for a in self.obs + self.acts]
         tf_inputs = self.model.inputs + self.policy.inputs
         logli_old = tf_run(self.sess, self.policy.logli, tf_inputs, inputs)
@@ -50,7 +50,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
 
         return loss_terms, grads_norm
 
-    def _loss_fn(self):
+    def loss_fn(self):
         adv = tf.placeholder(tf.float32, [None], name="advantages")
         returns = tf.placeholder(tf.float32, [None], name="returns")
         logli_old = tf.placeholder(tf.float32, [None], name="logli_old")
