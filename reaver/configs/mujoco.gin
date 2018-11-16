@@ -1,3 +1,5 @@
+tf.train.AdamOptimizer.learning_rate = 0.005
+
 ActorCriticAgent.batch_sz = 50000
 
 ProximalPolicyOptimizationAgent.minibatch_sz = 25000

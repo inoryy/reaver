@@ -21,6 +21,7 @@ class ActorCriticAgent(MemoryAgent):
         policy_cls=MultiPolicy,
         discount=0.99,
         gae_lambda=0.95,
+        clip_rewards=0.0,
         normalize_advantages=True,
         bootstrap_terminals=False,
         clip_grads_norm=0.0,
@@ -31,6 +32,7 @@ class ActorCriticAgent(MemoryAgent):
         self.sess = sess
         self.discount = discount
         self.gae_lambda = gae_lambda
+        self.clip_rewards = clip_rewards
         self.normalize_advantages = normalize_advantages
         self.bootstrap_terminals = bootstrap_terminals
 
@@ -77,6 +79,10 @@ class ActorCriticAgent(MemoryAgent):
         bootstrap_value = np.expand_dims(bootstrap_value, 0)
         values = np.append(self.values, bootstrap_value, axis=0)
         rewards = self.rewards.copy()
+
+        if self.clip_rewards > 0.0:
+            np.clip(rewards, -self.clip_rewards, self.clip_rewards, out=rewards)
+
         if self.bootstrap_terminals:
             rewards += self.dones * self.discount * values[:-1]
         discounts = self.discount * (1-self.dones)
