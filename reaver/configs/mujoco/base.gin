@@ -1,5 +1,8 @@
+include 'reaver/configs/gym/continuous.gin'
+
 tf.train.AdamOptimizer.learning_rate = 0.005
 
+ActorCriticAgent.discount = 0.95
 ActorCriticAgent.batch_sz = 50000
 
 ProximalPolicyOptimizationAgent.minibatch_sz = 25000

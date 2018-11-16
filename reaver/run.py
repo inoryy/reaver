@@ -23,9 +23,9 @@ agent_cls = {
 }
 
 gin_configs = {
-    'CartPole-v0':         ['gym_classic.gin'],
-    'InvertedPendulum-v2': ['gym_classic.gin', 'gym_continuous.gin'],
-    'HalfCheetah-v2':      ['gym_classic.gin', 'gym_continuous.gin', 'mujoco.gin']
+    'CartPole-v0':         ['gym/base.gin'],
+    'InvertedPendulum-v2': ['mujoco/base.gin'],
+    'HalfCheetah-v2':      ['mujoco/base.gin']
 }
 
 
