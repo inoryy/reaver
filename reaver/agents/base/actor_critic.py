@@ -47,7 +47,7 @@ class ActorCriticAgent(MemoryAgent):
 
         self.sess.run(tf.global_variables_initializer())
 
-        self.logger = AgentLogger(self)
+        self.logger = AgentLogger(self, act_spec)
 
     def get_action_and_value(self, obs):
         return tf_run(self.sess, [self.policy.sample, self.value], self.model.inputs, obs)

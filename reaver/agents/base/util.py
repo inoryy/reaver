@@ -20,8 +20,9 @@ def tf_run(sess, tf_op, tf_inputs, inputs):
 
 @gin.configurable
 class AgentLogger:
-    def __init__(self, agent, n_updates=100, n_detailed=10, verbosity=3, summary_logs_dir='data/summaries'):
+    def __init__(self, agent, act_spec, n_updates=100, n_detailed=10, verbosity=3, summary_logs_dir='data/summaries'):
         self.agent, self.verbosity = agent, verbosity
+        self.act_spec = act_spec
         self.n_updates, self.n_detailed = n_updates, n_detailed
         self.env_eps = [0]*self.agent.n_envs
         self.env_rews = [0]*self.agent.n_envs
@@ -98,6 +99,9 @@ class AgentLogger:
         print("Advs       ", adv[-n_steps:, 0].flatten())
 
         if self.verbosity >= 4:
+            if self.act_spec.spaces[0].is_continuous():
+                return
+
             logits = tf_run(self.agent.sess, self.agent.policy.logits[0], self.agent.model.inputs,
                                        [o[-n_steps:, 0] for o in self.agent.obs])
             action_ids = self.agent.acts[0][-n_steps:, 0].flatten()

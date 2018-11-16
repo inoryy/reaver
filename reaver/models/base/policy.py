@@ -21,7 +21,7 @@ class MultiPolicy:
         import tensorflow_probability as tfp
 
         if space.is_continuous():
-            mu, log_std = tf.split(logits, num_split=2, axis=1)
+            mu, log_std = tf.split(logits, num_or_size_splits=2, axis=-1)
             return tfp.distributions.MultivariateNormalDiag(mu, tf.exp(log_std))
         else:
             return tfp.distributions.Categorical(logits)

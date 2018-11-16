@@ -22,7 +22,7 @@ agent_cls = {
 }
 
 gin_configs = {
-    'gym_control.gin': ['CartPole-v0']
+    'gym_control.gin': ['CartPole-v0', 'Pendulum-v0']
 }
 
 

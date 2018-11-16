@@ -42,14 +42,15 @@ class Space:
                 return self.hi
             return self.hi - self.lo
 
+        sz = 1
         if len(self.shape) == 1:
-            return self.shape[0]
+            sz = self.shape[0]
 
         if self.is_continuous():
-            # mu and log_std
-            return 2
+            # mu_1, ..., mu_n, log_std_1, ..., log_std_n
+            sz = 2*sz
 
-        return 1
+        return sz
 
     def sample(self, n=1):
         if self.is_discrete():
