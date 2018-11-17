@@ -8,6 +8,10 @@ import reaver as rvr
 flags.DEFINE_bool('restore', False,
                   'Restore & continue previously executed experiment. '
                   'If experiment not specified then last modified is used.')
+flags.DEFINE_bool('test', False,
+                  'Run an agent in test mode: restore flag is set to true and number of envs set to 1'
+                  'Loss is calculated, but gradients are not applied.'
+                  'Checkpoints, summaries, log files are not updated, but console logger is enabled.')
 
 flags.DEFINE_string('env', None, 'Either Gym env id or PySC2 map name to run agent in.')
 flags.DEFINE_string('agent', 'a2c', 'Name of the agent. Must be one of (a2c, ppo).')
@@ -47,6 +51,9 @@ def main(argv):
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
+    if args.test:
+        args.envs = 1
+        args.restore = True
     expt = rvr.utils.Experiment(args.results_dir, args.env, args.agent, args.experiment, args.restore)
 
     gin_files = gin_configs.get(args.env, [])
@@ -63,13 +70,14 @@ def main(argv):
     env = env_cls(args.env, args.render, max_ep_len=args.max_ep_len)
 
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
-    sess_mgr = rvr.utils.tensorflow.SessionManager(sess, expt.path, args.ckpt_freq)
+    sess_mgr = rvr.utils.tensorflow.SessionManager(sess, expt.path, args.ckpt_freq, training_enabled=not args.test)
 
     agent = agent_cls[args.agent](sess_mgr, env.obs_spec(), env.act_spec(), args.envs, args.batch_sz)
     agent.logger = rvr.utils.StreamLogger(args.envs, agent.traj_len, args.log_freq, args.eps_avg, sess_mgr, expt.log_path)
 
-    expt.save_gin_config()
-    expt.save_model_summary(agent.model)
+    if sess_mgr.training_enabled:
+        expt.save_gin_config()
+        expt.save_model_summary(agent.model)
 
     agent.run(env, args.updates * args.batch_sz // args.envs)
 

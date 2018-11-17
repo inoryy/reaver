@@ -31,7 +31,9 @@ class StreamLogger(Logger):
 
         self.sess_mgr = sess_mgr
         self.streams = [sys.stdout]
-        self.log_file_path = log_file_path
+        self.log_file_path = None
+        if self.sess_mgr.training_enabled:
+            self.log_file_path = log_file_path
 
         ColumnParams = namedtuple("ColumnParams", ["abbr", "width", "precision"])
         self.col_params = dict(
@@ -112,11 +114,12 @@ class StreamLogger(Logger):
         self.sess_mgr.add_summary('Grads Norm', logs['grads_norm'], 'Losses', logs['updates'])
 
     def on_start(self):
-        if self.log_file_path:
-            self.restore_logs()
-            self.streams.append(open(self.log_file_path, 'w'))
-
         self.start_time = time.time()
+        if not self.log_file_path:
+            return
+
+        self.restore_logs()
+        self.streams.append(open(self.log_file_path, 'w'))
 
     def on_finish(self):
         if len(self.streams) > 1:

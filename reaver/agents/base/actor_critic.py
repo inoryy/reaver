@@ -74,13 +74,13 @@ class ActorCriticAgent(MemoryAgent):
         self.sess_mgr.on_update((step + 1) // self.traj_len)
         self.logger.on_update(step, loss_terms, grads_norm, returns, adv, next_value)
 
-    def minimize(self, advantages, returns, train=True):
+    def minimize(self, advantages, returns):
         inputs = self.obs + self.acts + [advantages, returns]
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
         tf_inputs = self.model.inputs + self.policy.inputs + self.loss_inputs
 
         ops = [self.loss_terms, self.grads_norm]
-        if train:
+        if self.sess_mgr.training_enabled:
             ops.append(self.train_op)
 
         loss_terms, grads_norm, *_ = self.sess_mgr.run(ops, tf_inputs, inputs)

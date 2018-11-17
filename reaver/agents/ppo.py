@@ -31,7 +31,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
 
         self.start_step = self.start_step // self.n_updates
 
-    def minimize(self, advantages, returns, train=True):
+    def minimize(self, advantages, returns):
         inputs = [a.reshape(-1, *a.shape[2:]) for a in self.obs + self.acts]
         tf_inputs = self.model.inputs + self.policy.inputs
         logli_old = self.sess_mgr.run(self.policy.logli, tf_inputs, inputs)
@@ -40,7 +40,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         tf_inputs += self.loss_inputs
 
         ops = [self.loss_terms, self.grads_norm]
-        if train:
+        if self.sess_mgr.training_enabled:
             ops.append(self.train_op)
 
         loss_terms = grads_norm = None

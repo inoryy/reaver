@@ -2,11 +2,12 @@ import tensorflow as tf
 
 
 class SessionManager:
-    def __init__(self, sess, base_path='results/', checkpoint_freq=100):
+    def __init__(self, sess, base_path='results/', checkpoint_freq=100, training_enabled=True):
         self.sess = sess
         self.saver = None
         self.base_path = base_path
         self.checkpoint_freq = checkpoint_freq
+        self.training_enabled = training_enabled
         self.global_step = tf.train.get_or_create_global_step()
         self.summary_writer = tf.summary.FileWriter(self.summaries_path)
 
@@ -22,7 +23,7 @@ class SessionManager:
         return self.sess.run(tf_op, feed_dict=dict(zip(tf_inputs, inputs)))
 
     def on_update(self, step):
-        if step % self.checkpoint_freq:
+        if step % self.checkpoint_freq or not self.training_enabled:
             return
         self.saver.save(self.sess, self.checkpoints_path + '/ckpt', global_step=step)
 
@@ -31,6 +32,8 @@ class SessionManager:
             self.add_summary(tag, value, prefix, step)
 
     def add_summary(self, tag, value, prefix='', step=None):
+        if not self.training_enabled:
+            return
         summary = self.create_summary(prefix + '/' + tag, value)
         self.summary_writer.add_summary(summary, global_step=step)
 
@@ -40,7 +43,9 @@ class SessionManager:
 
     @property
     def start_step(self):
-        return self.global_step.eval(session=self.sess)
+        if self.training_enabled:
+            return self.global_step.eval(session=self.sess)
+        return 0
 
     @property
     def summaries_path(self):
