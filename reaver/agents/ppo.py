@@ -47,7 +47,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         for _ in range(self.n_updates):
             idx = np.random.permutation(self.n_envs * self.traj_len)[:self.minibatch_sz]
             minibatch = [inpt[idx] for inpt in inputs]
-            loss_terms, grads_norm,  _ = self.sess_mgr.run(ops, tf_inputs, minibatch)
+            loss_terms, grads_norm, *_ = self.sess_mgr.run(ops, tf_inputs, minibatch)
 
         return loss_terms, grads_norm
 
