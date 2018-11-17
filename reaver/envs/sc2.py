@@ -9,15 +9,23 @@ from . import Env, Spec, Space
 
 @gin.configurable
 class SC2Env(Env):
-    def __init__(self, map_name='MoveToBeacon', render=False, spatial_dim=16, step_mul=8, obs_features=None, action_ids=None):
-        """
-        :param map_name:
-        :param spatial_dim:
-        :param step_mul:
-        :param render:
-        :param obs_features: observation features to use (e.g. return via step)
-        """
-        self.map_name, self.spatial_dim, self.step_mul, self.render = map_name, spatial_dim, step_mul, render
+    def __init__(
+        self,
+        map_name='MoveToBeacon',
+        render=False,
+        reset_done=True,
+        max_ep_len=None,
+        spatial_dim=16,
+        step_mul=8,
+        obs_features=None,
+        action_ids=None
+    ):
+        self.render = render
+        self.step_mul = step_mul
+        self.map_name = map_name
+        self.reset_done = reset_done
+        self.max_ep_len = max_ep_len
+        self.spatial_dim = spatial_dim
         self._env = None
 
         if not action_ids:
@@ -51,8 +59,9 @@ class SC2Env(Env):
             self.restart()
             return self.reset(), 0, 1
 
-        if done:
+        if done and self.reset_done:
             obs = self.reset()
+
         return obs, reward, done
 
     def reset(self):
@@ -62,7 +71,7 @@ class SC2Env(Env):
             # hacky fix from websocket timeout issue...
             # this results in faulty reward signals, but I guess it beats completely crashing...
             self.restart()
-            return self.reset(), 0, 1
+            return self.reset()
 
         return obs
 

@@ -40,9 +40,12 @@ agent_cls = {
 }
 
 gin_configs = {
-    'CartPole-v0':         ['gym/base.gin'],
-    'InvertedPendulum-v2': ['mujoco/base.gin'],
-    'HalfCheetah-v2':      ['mujoco/base.gin']
+    'CartPole-v0':          ['gym/base.gin'],
+    'InvertedPendulum-v2':  ['mujoco/base.gin'],
+    'HalfCheetah-v2':       ['mujoco/base.gin'],
+    'MoveToBeacon':         ['sc2/base.gin'],
+    'CollectMineralShards': ['sc2/base.gin'],
+    'DefeatRoaches':        ['sc2/base.gin'],
 }
 
 

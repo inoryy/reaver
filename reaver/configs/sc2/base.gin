@@ -1,0 +1,23 @@
+import gin.tf.external_configurables
+
+SC2Env.step_mul = 8
+SC2Env.spatial_dim = 16
+
+tf.train.AdamOptimizer.learning_rate = 0.005
+
+ActorCriticAgent.model_fn = @build_fully_conv
+ActorCriticAgent.policy_cls = @SC2MultiPolicy
+
+ActorCriticAgent.batch_sz = 500
+ActorCriticAgent.gae_lambda = 0.0
+ActorCriticAgent.clip_grads_norm = 1.0
+ActorCriticAgent.bootstrap_terminals = False
+ActorCriticAgent.normalize_advantages = False
+ActorCriticAgent.optimizer = @tf.train.AdamOptimizer()
+
+AdvantageActorCriticAgent.value_coef = 0.5
+AdvantageActorCriticAgent.entropy_coef = 0.01
+
+ProximalPolicyOptimizationAgent.value_coef = 0.5
+ProximalPolicyOptimizationAgent.entropy_coef = 0.01
+ProximalPolicyOptimizationAgent.minibatch_sz = 250

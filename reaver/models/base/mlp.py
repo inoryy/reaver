@@ -1,7 +1,7 @@
 import gin
-import tensorflow as tf
 from tensorflow.keras import Model
-from tensorflow.keras.layers import Input, Concatenate, Dense, Lambda
+from tensorflow.keras.layers import Input, Concatenate, Dense
+from reaver.models.base.layers import Squeeze
 
 
 @gin.configurable
@@ -16,7 +16,7 @@ def build_mlp(obs_spec, act_spec, layer_sizes=(64, 64), activation='relu', value
         x = build_fc(inputs_concat, layer_sizes, activation, 'value_')
 
     value = Dense(1, name="value_out")(x)
-    value = Lambda(lambda _x: tf.squeeze(_x, axis=-1))(value)
+    value = Squeeze(axis=-1)(value)
     outputs.append(value)
 
     return Model(inputs=inputs, outputs=outputs)
