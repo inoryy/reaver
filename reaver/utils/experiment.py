@@ -38,6 +38,10 @@ class Experiment:
         return '%s/%s' % (self.path, 'config.gin')
 
     @property
+    def log_path(self):
+        return '%s/%s' % (self.path, 'train.log')
+
+    @property
     def checkpoints_path(self):
         return self.path + '/checkpoints'
 

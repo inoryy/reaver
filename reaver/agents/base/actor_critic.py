@@ -61,7 +61,7 @@ class ActorCriticAgent(MemoryAgent):
 
     def on_step(self, step, obs, action, reward, done, value=None):
         MemoryAgent.on_step(self, step, obs, action, reward, done, value)
-        self.logger.on_step(step)
+        self.logger.on_step(step, reward, done)
 
         if (step + 1) % self.traj_len > 0:
             return
@@ -117,6 +117,12 @@ class ActorCriticAgent(MemoryAgent):
             adv = (adv - adv.mean()) / (adv.std() + 1e-10)
 
         return adv, returns
+
+    def on_start(self):
+        self.logger.on_start()
+
+    def on_finish(self):
+        self.logger.on_finish()
 
     @staticmethod
     def discounted_cumsum(x, discount):
