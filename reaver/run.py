@@ -43,7 +43,7 @@ gin_configs = {
     'CartPole-v0':          ['gym/base.gin'],
     'InvertedPendulum-v2':  ['mujoco/base.gin'],
     'HalfCheetah-v2':       ['mujoco/base.gin'],
-    'MoveToBeacon':         ['sc2/base.gin'],
+    'MoveToBeacon':         ['sc2/move_to_beacon.gin'],
     'CollectMineralShards': ['sc2/base.gin'],
     'DefeatRoaches':        ['sc2/base.gin'],
 }

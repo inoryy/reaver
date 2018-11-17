@@ -101,6 +101,7 @@ class StreamLogger(Logger):
 
         for stream in self.streams:
             print(log_str, file=stream)
+            stream.flush()
 
     def summarize_logs(self, logs):
         losses = [logs['policy_loss'], logs['value_loss'], logs['entropy_loss']]
