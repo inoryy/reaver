@@ -9,7 +9,7 @@ class Experiment:
             if restore:
                 experiments = [e for e in os.listdir(results_dir) if env_name in e and agent_name in e]
                 assert len(experiments) > 0, 'No experiment to restore'
-                name = min(experiments, key=lambda p: os.path.getmtime(results_dir+'/'+p))
+                name = max(experiments, key=lambda p: os.path.getmtime(results_dir+'/'+p))
                 name = '_'.join(name.split('_')[2:])
             else:
                 name = dt.now().strftime("%y-%m-%d_%H-%M")
@@ -36,6 +36,10 @@ class Experiment:
     @property
     def config_path(self):
         return '%s/%s' % (self.path, 'config.gin')
+
+    @property
+    def checkpoints_path(self):
+        return self.path + '/checkpoints'
 
     @property
     def summaries_path(self):

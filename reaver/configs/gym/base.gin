@@ -20,6 +20,3 @@ AdvantageActorCriticAgent.entropy_coef = 0.01
 ProximalPolicyOptimizationAgent.value_coef = 0.5
 ProximalPolicyOptimizationAgent.entropy_coef = 0.01
 ProximalPolicyOptimizationAgent.minibatch_sz = 400
-
-AgentLogger.n_updates = 10
-AgentLogger.verbosity = 4

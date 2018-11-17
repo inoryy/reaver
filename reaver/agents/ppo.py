@@ -11,6 +11,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
     def __init__(
         self,
         sess,
+        saver,
         obs_spec,
         act_spec,
         n_envs=4,
@@ -28,7 +29,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         self.entropy_coef = entropy_coef
 
         SyncRunningAgent.__init__(self, n_envs)
-        ActorCriticAgent.__init__(self, sess, obs_spec, act_spec, n_envs, batch_sz)
+        ActorCriticAgent.__init__(self, sess, saver, obs_spec, act_spec, n_envs, batch_sz)
 
     def minimize(self, advantages, returns, train=True):
         inputs = [a.reshape(-1, *a.shape[2:]) for a in self.obs + self.acts]

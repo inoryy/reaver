@@ -9,12 +9,13 @@ flags.DEFINE_bool('restore', False,
                   'Restore & continue previously executed experiment. '
                   'If experiment not specified then last modified is used.')
 flags.DEFINE_bool('render', False, 'Whether to render first(!) env.')
-flags.DEFINE_bool('debug', True, 'Whether to log various agents progress metrics to console.')
 flags.DEFINE_string('env', None, 'Either Gym env id or PySC2 map name to run agent in.')
 flags.DEFINE_string('agent', 'a2c', 'Name of the agent. Must be one of (a2c, ppo).')
 flags.DEFINE_integer('envs', 4, 'Number of environments to execute in parallel.')
 flags.DEFINE_integer('batch_sz', None, 'Number of training samples to gather for 1 update.')
 flags.DEFINE_integer('updates', 100, 'Number of train updates (1 update has batch_sz samples).')
+flags.DEFINE_integer('log_freq', 10, 'Number of train updates per one console log.')
+flags.DEFINE_integer('ckpt_freq', 50, 'Number of train updates per one checkpoint save.')
 flags.DEFINE_integer('max_ep_len', None, 'Max number of steps an agent can take in an episode.')
 flags.DEFINE_string('results_dir', 'results', 'Directory for model weights, train logs, etc.')
 flags.DEFINE_string('experiment', None, 'Name of the experiment. Datetime by default.')
@@ -39,12 +40,12 @@ def main(argv):
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
-    experiment = rvr.utils.Experiment(args.results_dir, args.env, args.agent, args.experiment, args.restore)
+    expt = rvr.utils.Experiment(args.results_dir, args.env, args.agent, args.experiment, args.restore)
 
     gin_files = gin_configs.get(args.env, [])
     gin_files = ['reaver/configs/' + fl for fl in gin_files]
     if args.restore:
-        gin_files += [experiment.config_path]
+        gin_files += [expt.config_path]
     gin_files += args.gin_files
     gin.parse_config_files_and_bindings(gin_files, args.gin_bindings)
 
@@ -55,14 +56,13 @@ def main(argv):
     env = env_cls(args.env, args.render, max_ep_len=args.max_ep_len)
 
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
-    agent = agent_cls[args.agent](sess, env.obs_spec(), env.act_spec(), args.envs, args.batch_sz)
+    saver = rvr.utils.tensorflow.Saver(sess, expt.checkpoints_path, args.ckpt_freq)
+    agent = agent_cls[args.agent](sess, saver, env.obs_spec(), env.act_spec(), args.envs, args.batch_sz)
 
-    experiment.save_config()
-    experiment.save_model_summary(agent.model)
-
+    expt.save_config()
+    expt.save_model_summary(agent.model)
     # TODO split console and tf summaries into separate loggers
-    if args.debug:
-        agent.logger = rvr.utils.AgentLogger(agent, experiment.summaries_path, env.act_spec())
+    agent.logger = rvr.utils.AgentLogger(agent, expt.summaries_path, env.act_spec(), args.log_freq)
 
     agent.run(env, args.updates * args.batch_sz // args.envs)
 

@@ -1,6 +1,28 @@
 import tensorflow as tf
 
 
+class Saver:
+    def __init__(self, sess, checkpoint_path, checkpoint_freq):
+        self.sess = sess
+        self.saver = None
+        self.checkpoint_path = checkpoint_path
+        self.checkpoint_freq = checkpoint_freq
+        self.global_step = tf.train.get_or_create_global_step()
+
+    def restore_or_init(self):
+        self.saver = tf.train.Saver()
+        checkpoint = tf.train.latest_checkpoint(self.checkpoint_path)
+        if checkpoint:
+            self.saver.restore(self.sess, checkpoint)
+        else:
+            self.sess.run(tf.global_variables_initializer())
+
+    def on_update(self, step):
+        if step % self.checkpoint_freq:
+            return
+        self.saver.save(self.sess, self.checkpoint_path + '/ckpt', global_step=self.global_step)
+
+
 def tf_run(sess, tf_op, tf_inputs, inputs):
     return sess.run(tf_op, feed_dict=dict(zip(tf_inputs, inputs)))
 
