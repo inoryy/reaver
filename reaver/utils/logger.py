@@ -38,11 +38,9 @@ class StreamLogger(Logger):
         ColumnParams = namedtuple("ColumnParams", ["abbr", "width", "precision"])
         self.col_params = dict(
             runtime=ColumnParams("T", 6, 0),
-            steps=ColumnParams("S", 7, 0),
-            frames=ColumnParams("F", 9, 0),
-            updates=ColumnParams("Up", 6, 0),
+            frames=ColumnParams("Fr", 9, 0),
             episodes=ColumnParams("Ep", 6, 0),
-            frames_per_second=ColumnParams("Fps", 5, 0),
+            updates=ColumnParams("Up", 6, 0),
             ep_rews_mean=ColumnParams("RMe", 7, 2),
             ep_rews_std=ColumnParams("RSd", 7, 2),
             ep_rews_max=ColumnParams("RMa", 7, 2),
@@ -51,6 +49,7 @@ class StreamLogger(Logger):
             value_loss=ColumnParams("Vl", 8, 3),
             entropy_loss=ColumnParams("El", 6, 4),
             grads_norm=ColumnParams("Gr", 8, 3),
+            frames_per_second=ColumnParams("Fps", 5, 0),
         )
 
         self.col_fmt = "| {abbr} {value:{width}.{precision}f} "
@@ -75,7 +74,6 @@ class StreamLogger(Logger):
 
         logs = dict(
             runtime=run_time,
-            steps=step+1,
             frames=frames,
             updates=update_step,
             episodes=int(np.sum(self.env_eps)),
@@ -96,10 +94,9 @@ class StreamLogger(Logger):
 
     def stream_logs(self, logs):
         log_str = ""
-        for key, value in logs.items():
-            col_params = self.col_params[key]
-            abbr, width, precision = col_params.abbr, col_params.width, col_params.precision
-            log_str += self.col_fmt.format(abbr=abbr, value=value, width=width, precision=precision)
+        for key, params in self.col_params.items():
+            abbr, width, precision = params.abbr, params.width, params.precision
+            log_str += self.col_fmt.format(abbr=abbr, value=logs[key], width=width, precision=precision)
         log_str += "|"
 
         for stream in self.streams:
@@ -133,7 +130,7 @@ class StreamLogger(Logger):
             last_line = fl.readlines()[-1]
         logs = last_line.split(" | ")
         self.run_time = int(logs[0].split(" ")[-1])
-        self.env_eps.append(int(logs[4].split(" ")[-1]))
+        self.env_eps.append(int(logs[2].split(" ")[-1]))
 
 
 class AgentDebugLogger(Logger):
