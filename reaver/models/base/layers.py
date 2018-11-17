@@ -22,6 +22,11 @@ class Log(Lambda):
         Lambda.__init__(self, lambda x: tf.log(x + 1e-10))
 
 
+class Rescale(Lambda):
+    def __init__(self, scale):
+        Lambda.__init__(self, lambda x: tf.cast(x, tf.float32) * scale)
+
+
 class Broadcast2D(Lambda):
     def __init__(self, size):
         Lambda.__init__(self, lambda x: tf.tile(tf.expand_dims(tf.expand_dims(x, 2), 3), [1, 1, size, size]))

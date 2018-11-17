@@ -41,11 +41,15 @@ agent_cls = {
 
 gin_configs = {
     'CartPole-v0':          ['gym/base.gin'],
+
     'InvertedPendulum-v2':  ['mujoco/base.gin'],
     'HalfCheetah-v2':       ['mujoco/base.gin'],
+
+    'PongNoFrameskip-v0':   ['atari/base.gin'],
+
+    'DefeatRoaches':        ['sc2/base.gin'],
     'MoveToBeacon':         ['sc2/move_to_beacon.gin'],
     'CollectMineralShards': ['sc2/collect_mineral_shards.gin'],
-    'DefeatRoaches':        ['sc2/base.gin'],
 }
 
 
@@ -64,6 +68,11 @@ def main(argv):
     if args.restore:
         gin_files += [expt.config_path]
     gin_files += args.gin_files
+
+    if not args.gpu:
+        args.gin_bindings.append("build_cnn_nature.data_format = 'channels_last'")
+        args.gin_bindings.append("build_fully_conv.data_format = 'channels_last'")
+
     gin.parse_config_files_and_bindings(gin_files, args.gin_bindings)
 
     if not args.batch_sz:

@@ -60,4 +60,7 @@ class Space:
             return np.random.uniform(self.lo, self.hi+1e-10, (n, ) + self.shape)
 
     def __repr__(self):
-        return "Space(%s, %s, %s)" % (self.name, str(self.shape), str(self.dtype).strip("<class>' "))
+        mid = str(self.shape)
+        if self.categorical:
+            mid += ", cat: " + str(self.hi)
+        return "Space(%s, %s, %s)" % (self.name, mid, str(self.dtype).strip("<class>' "))
