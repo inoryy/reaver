@@ -68,7 +68,7 @@ def main(argv):
     agent = agent_cls[args.agent](sess_mgr, env.obs_spec(), env.act_spec(), args.envs, args.batch_sz)
     agent.logger = rvr.utils.StreamLogger(args.envs, agent.traj_len, args.log_freq, args.eps_avg, sess_mgr, expt.log_path)
 
-    expt.save_config()
+    expt.save_gin_config()
     expt.save_model_summary(agent.model)
 
     agent.run(env, args.updates * args.batch_sz // args.envs)
