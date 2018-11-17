@@ -13,9 +13,9 @@ flags.DEFINE_string('env', None, 'Either Gym env id or PySC2 map name to run age
 flags.DEFINE_string('agent', 'a2c', 'Name of the agent. Must be one of (a2c, ppo).')
 flags.DEFINE_integer('envs', 4, 'Number of environments to execute in parallel.')
 flags.DEFINE_integer('batch_sz', None, 'Number of training samples to gather for 1 update.')
-flags.DEFINE_integer('updates', 100, 'Number of train updates (1 update has batch_sz samples).')
-flags.DEFINE_integer('log_freq', 10, 'Number of train updates per one console log.')
-flags.DEFINE_integer('ckpt_freq', 50, 'Number of train updates per one checkpoint save.')
+flags.DEFINE_integer('updates', 10, 'Number of train updates (1 update has batch_sz samples).')
+flags.DEFINE_integer('log_freq', 5, 'Number of train updates per one console log.')
+flags.DEFINE_integer('ckpt_freq', 5, 'Number of train updates per one checkpoint save.')
 flags.DEFINE_integer('max_ep_len', None, 'Max number of steps an agent can take in an episode.')
 flags.DEFINE_string('results_dir', 'results', 'Directory for model weights, train logs, etc.')
 flags.DEFINE_string('experiment', None, 'Name of the experiment. Datetime by default.')
@@ -56,13 +56,12 @@ def main(argv):
     env = env_cls(args.env, args.render, max_ep_len=args.max_ep_len)
 
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
-    saver = rvr.utils.tensorflow.Saver(sess, expt.checkpoints_path, args.ckpt_freq)
-    agent = agent_cls[args.agent](sess, saver, env.obs_spec(), env.act_spec(), args.envs, args.batch_sz)
+    sess_mgr = rvr.utils.tensorflow.SessionManager(sess, expt.path, args.ckpt_freq)
+    agent = agent_cls[args.agent](sess_mgr, env.obs_spec(), env.act_spec(), args.envs, args.batch_sz)
 
     expt.save_config()
     expt.save_model_summary(agent.model)
-    # TODO split console and tf summaries into separate loggers
-    agent.logger = rvr.utils.AgentLogger(agent, expt.summaries_path, env.act_spec(), args.log_freq)
+    agent.logger = rvr.utils.AgentLogger(agent, env.act_spec(), args.log_freq)
 
     agent.run(env, args.updates * args.batch_sz // args.envs)
 

@@ -3,7 +3,6 @@ import sys
 import time
 import numpy as np
 from collections import deque
-from reaver.utils.tensorflow import *
 
 
 class Logger:
@@ -14,7 +13,7 @@ class Logger:
 
 @gin.configurable
 class AgentLogger(Logger):
-    def __init__(self, agent, summaries_path, act_spec, n_updates=100, n_detailed=10, verbosity=3):
+    def __init__(self, agent, act_spec, n_updates=100, n_detailed=10, verbosity=3):
         # TODO remove dependency on agent
         self.agent = agent
         self.verbosity = verbosity
@@ -26,8 +25,6 @@ class AgentLogger(Logger):
         self.env_rews = [0] * agent.n_envs
         self.n_eps = max(10, agent.n_envs)
         self.tot_rews = deque([], maxlen=self.n_eps)
-
-        self.summary_writer = create_summary_writer(summaries_path)
 
     def on_step(self, step):
         t = step % self.agent.traj_len
@@ -69,7 +66,8 @@ class AgentLogger(Logger):
         print("Std  %.3f" % rews[1])
         print("Min  %.3f" % rews[2])
         print("Max  %.3f" % rews[3])
-        add_summaries(self.summary_writer, ['Mean', 'Std', 'Min', 'Max'], rews, update_step, 'Rewards')
+        # TODO split console and tf summaries into separate loggers
+        self.agent.sess_mgr.add_summaries(['Mean', 'Std', 'Min', 'Max'], rews, 'Rewards', update_step)
 
         if self.verbosity < 2:
             return
@@ -80,8 +78,8 @@ class AgentLogger(Logger):
         print("Value loss   ", loss_terms[1])
         print("Entropy loss ", loss_terms[2])
         print("Grads norm   ", grads_norm)
-        add_summaries(self.summary_writer, ['Policy', 'Value', 'Entropy'], loss_terms, update_step, 'Losses')
-        add_summary(self.summary_writer, 'Grads', grads_norm, update_step, 'Losses')
+        self.agent.sess_mgr.add_summaries(['Policy', 'Value', 'Entropy'], loss_terms, 'Losses', update_step)
+        self.agent.sess_mgr.add_summary('Grads', grads_norm, 'Losses', update_step)
 
         if self.verbosity < 3:
             return
@@ -98,7 +96,7 @@ class AgentLogger(Logger):
         print("Advs       ", adv[-n_steps:, 0].flatten())
 
         if self.verbosity >= 4 and self.can_v4:
-            logits = tf_run(self.agent.sess, self.agent.policy.logits[0], self.agent.model.inputs,
+            logits = self.agent.sess_mgr.run(self.agent.policy.logits[0], self.agent.model.inputs,
                             [o[-n_steps:, 0] for o in self.agent.obs])
             action_ids = self.agent.acts[0][-n_steps:, 0].flatten()
 

@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 from abc import abstractmethod
 
-from reaver.utils import Logger, tf_run
+from reaver.utils import Logger
 from reaver.agents.base import MemoryAgent
 from reaver.models import build_mlp, MultiPolicy
 
@@ -12,8 +12,7 @@ from reaver.models import build_mlp, MultiPolicy
 class ActorCriticAgent(MemoryAgent):
     def __init__(
         self,
-        sess,
-        saver,
+        sess_mgr,
         obs_spec,
         act_spec,
         n_envs=4,
@@ -31,8 +30,7 @@ class ActorCriticAgent(MemoryAgent):
     ):
         MemoryAgent.__init__(self, obs_spec, act_spec, (round(batch_sz / n_envs), n_envs))
 
-        self.sess = sess
-        self.saver = saver
+        self.sess_mgr = sess_mgr
         self.discount = discount
         self.gae_lambda = gae_lambda
         self.clip_rewards = clip_rewards
@@ -45,21 +43,21 @@ class ActorCriticAgent(MemoryAgent):
         self.policy = policy_cls(act_spec, self.model.outputs[:-1])
         self.loss_op, self.loss_terms, self.loss_inputs = self.loss_fn()
 
-        self.global_step = tf.train.get_or_create_global_step()
-
         grads, vars = zip(*optimizer.compute_gradients(self.loss_op))
         self.grads_norm = tf.global_norm(grads)
         if clip_grads_norm > 0.:
             grads, _ = tf.clip_by_global_norm(grads, clip_grads_norm, self.grads_norm)
-        self.train_op = optimizer.apply_gradients(zip(grads, vars), global_step=self.global_step)
+        self.train_op = optimizer.apply_gradients(zip(grads, vars), global_step=self.sess_mgr.global_step)
 
-        self.saver.restore_or_init()
+        self.sess_mgr.restore_or_init()
+        # NB! changing trajectory length in-between checkpoints will break the logs
+        self.start_step = self.sess_mgr.start_step * self.traj_len
 
     def get_action_and_value(self, obs):
-        return tf_run(self.sess, [self.policy.sample, self.value], self.model.inputs, obs)
+        return self.sess_mgr.run([self.policy.sample, self.value], self.model.inputs, obs)
 
     def get_action(self, obs):
-        return tf_run(self.sess, self.policy.sample, self.model.inputs, obs)
+        return self.sess_mgr.run(self.policy.sample, self.model.inputs, obs)
 
     def on_step(self, step, obs, action, reward, done, value=None):
         MemoryAgent.on_step(self, step, obs, action, reward, done, value)
@@ -68,12 +66,12 @@ class ActorCriticAgent(MemoryAgent):
         if (step + 1) % self.traj_len > 0:
             return
 
-        next_value = tf_run(self.sess, self.value, self.model.inputs, self.next_obs)
+        next_value = self.sess_mgr.run(self.value, self.model.inputs, self.next_obs)
         adv, returns = self.compute_advantages_and_returns(next_value)
 
         loss_terms, grads_norm = self.minimize(adv, returns)
 
-        self.saver.on_update((step + 1) // self.traj_len)
+        self.sess_mgr.on_update((step + 1) // self.traj_len)
         self.logger.on_update(step, loss_terms, grads_norm, returns, adv, next_value)
 
     def minimize(self, advantages, returns, train=True):
@@ -85,7 +83,7 @@ class ActorCriticAgent(MemoryAgent):
         if train:
             ops.append(self.train_op)
 
-        loss_terms, grads_norm, *_ = tf_run(self.sess, ops, tf_inputs, inputs)
+        loss_terms, grads_norm, *_ = self.sess_mgr.run(ops, tf_inputs, inputs)
         return loss_terms, grads_norm
 
     def compute_advantages_and_returns(self, bootstrap_value=0.):

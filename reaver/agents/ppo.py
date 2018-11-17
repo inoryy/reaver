@@ -2,7 +2,6 @@ import gin.tf
 import numpy as np
 import tensorflow as tf
 
-from reaver.utils import tf_run
 from reaver.agents.base import SyncRunningAgent, ActorCriticAgent
 
 
@@ -10,8 +9,7 @@ from reaver.agents.base import SyncRunningAgent, ActorCriticAgent
 class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
     def __init__(
         self,
-        sess,
-        saver,
+        sess_mgr,
         obs_spec,
         act_spec,
         n_envs=4,
@@ -29,12 +27,14 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         self.entropy_coef = entropy_coef
 
         SyncRunningAgent.__init__(self, n_envs)
-        ActorCriticAgent.__init__(self, sess, saver, obs_spec, act_spec, n_envs, batch_sz)
+        ActorCriticAgent.__init__(self, sess_mgr, obs_spec, act_spec, n_envs, batch_sz)
+
+        self.start_step = self.start_step // self.n_updates
 
     def minimize(self, advantages, returns, train=True):
         inputs = [a.reshape(-1, *a.shape[2:]) for a in self.obs + self.acts]
         tf_inputs = self.model.inputs + self.policy.inputs
-        logli_old = tf_run(self.sess, self.policy.logli, tf_inputs, inputs)
+        logli_old = self.sess_mgr.run(self.policy.logli, tf_inputs, inputs)
 
         inputs += [advantages.flatten(), returns.flatten(), logli_old]
         tf_inputs += self.loss_inputs
@@ -47,7 +47,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         for _ in range(self.n_updates):
             idx = np.random.permutation(self.n_envs * self.traj_len)[:self.minibatch_sz]
             minibatch = [inpt[idx] for inpt in inputs]
-            loss_terms, grads_norm,  _ = tf_run(self.sess, ops, tf_inputs, minibatch)
+            loss_terms, grads_norm,  _ = self.sess_mgr.run(ops, tf_inputs, minibatch)
 
         return loss_terms, grads_norm
 

@@ -6,6 +6,7 @@ class RunningAgent(Agent):
     def __init__(self):
         self.next_obs = None
         self.start_time = None
+        self.start_step = 0
 
     def run(self, env, n_steps=1000000):
         env = self.wrap_env(env)
@@ -19,7 +20,7 @@ class RunningAgent(Agent):
         self.start_time = time.time()
 
         obs, *_ = env.reset()
-        for step in range(n_steps):
+        for step in range(self.start_step, self.start_step + n_steps):
             action, value = self.get_action_and_value(obs)
             self.next_obs, reward, done = env.step(action)
             self.on_step(step, obs, action, reward, done, value)
