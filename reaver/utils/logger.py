@@ -117,7 +117,7 @@ class StreamLogger(Logger):
             return
 
         self.restore_logs()
-        self.streams.append(open(self.log_file_path, 'w'))
+        self.streams.append(open(self.log_file_path, 'a+'))
 
     def on_finish(self):
         if len(self.streams) > 1:
