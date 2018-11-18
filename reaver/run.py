@@ -47,7 +47,7 @@ gin_configs = {
 
     'PongNoFrameskip-v0':   ['atari/base.gin'],
 
-    'DefeatRoaches':        ['sc2/base.gin'],
+    'DefeatRoaches':        ['sc2/defeat_roaches.gin'],
     'MoveToBeacon':         ['sc2/move_to_beacon.gin'],
     'CollectMineralShards': ['sc2/collect_mineral_shards.gin'],
 }
