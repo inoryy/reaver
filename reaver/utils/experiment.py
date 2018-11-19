@@ -22,8 +22,9 @@ class Experiment:
 
         os.makedirs(self.path, exist_ok=True)
         os.makedirs(self.path + '/summaries', exist_ok=True)
+        os.makedirs(self.results_dir + '/summaries', exist_ok=True)
         if not os.path.exists(self.summaries_path):
-            os.symlink('../' + self.full_name + '/summaries', self.summaries_path)
+            os.symlink(self.path + '/summaries', self.summaries_path)
 
     @property
     def full_name(self):
