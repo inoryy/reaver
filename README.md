@@ -1,4 +1,4 @@
-# Deep Reinforcement Learning Agent For StarCraft II
+# Reaver: StarCraft II Deep Reinforcement Learning Agent
 
 [![MoveToBeacon](https://user-images.githubusercontent.com/195271/37241507-0d7418c2-2463-11e8-936c-18d08a81d2eb.gif)](https://youtu.be/gEyBzcPU5-w)
 [![CollectMineralShards](https://user-images.githubusercontent.com/195271/37241785-b8bd0b04-2467-11e8-9ff3-e4335a7c20ee.gif)](https://youtu.be/gEyBzcPU5-w)
@@ -12,3 +12,35 @@
 ## Introduction
 
 Deep Reinforcement Learning Agent For StarCraft II.
+
+### Implemented Algorithms
+
+### But Wait! There's more!
+
+#### Supported Environments
+
+## Installation
+
+### Requirements
+
+### As a PIP Package
+
+### Manual Installation
+
+### Optimized TensorFlow
+
+## Results
+
+### Video Recording
+
+### Reproducibility
+
+#### Pre-trained Weights
+
+#### Tensorboard Summary Logs
+
+## Roadmap
+
+## Acknowledgement
+
+## Citing
