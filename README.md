@@ -11,28 +11,43 @@
 
 ## Introduction
 
-Deep Reinforcement Learning Agent For StarCraft II.
+Reaver is a deep reinforcement learning agent designed for learning to solve various StarCraft II based tasks.
+Main focus of Reaver is following in DeepMind's footsteps in pushing state-of-the-art of the field through the lens
+of playing the game as closely to human as possible. This includes observing visual features similar (though not identical)
+to what a human player would perceive and choosing actions from similar pool of options a human player would have.
+See [SC2LE]() article for more details.
+
+Though development is research-driven, that does not mean Reaver will never have simplified options that are perhaps more
+practical when it comes to competitive one-on-one human vs AI agents that could be trained with reasonable hardware.
+See [below]() for a detailed roadmap of the project.
+
+The philosophy behind Reaver API is akin to StarCraft II game itself - it has something to offer both for novices and experts in the field.
+For hobbyist programmers Reaver offers all the tools necessary to train DRL agents by tuning some small part of it, e.g.
+hyperparameters.
+
 
 ### Example
 
-`Reaver` is designed to be very easy to experiment with. In fact, you can train a DRL agent with multiple
+Reaver is designed to be very easy to experiment with. In fact, you can train a DRL agent with multiple
 StarCraft II environments running in parallel with just four lines of code!
 
 ```python
 import reaver as rvr
 
 env = rvr.envs.SC2Env(map_name='MoveToBeacon')
-agent = rvr.agents.AdvantageActorCriticAgent(env.obs_spec(), env.act_spec(), n_envs=4)
+model_fn = rvr.models.build_fully_conv
+policy_cls = rvr.models.SC2MultiPolicy
+agent = rvr.agents.AdvantageActorCriticAgent(env.obs_spec(), env.act_spec(), model_fn, policy_cls, n_envs=4)
 agent.run(env)
 ```
 
-Moreover, `Reaver` comes with highly configurable commandline tools, so this task can be reduced to a short one-liner!
+Moreover, Reaver comes with highly configurable commandline tools, so this task can be reduced to a short one-liner!
 
 ```bash
 python -m reaver.run --env MoveToBeacon --agent a2c
 ```
 
-With the above line `Reaver` will initialize the training procedure with a set of pre-defined hyperparameters optimized
+With the above line Reaver will initialize the training procedure with a set of pre-defined hyperparameters optimized
 specifically for the given environment and agent. After awhile you will start seeing logs with many useful statistics
 in your terminal screen. Probably most important one is the `RMe`, which stands for `Mean Episode Total Rewards` 
 (averaged over 100 episodes). Please see [below]() for a detailed description of each column.
@@ -43,10 +58,10 @@ in your terminal screen. Probably most important one is the `RMe`, which stands 
     | T     86 | Fr    153600 | Ep    640 | Up    300 | RMe   25.71 | RSd    1.88 | RMa   31.00 | RMi   22.00 | Pl   -0.004 | Vl    8.799 | El 0.0164 | Gr   85.869 | Fps   512 |
     | T    114 | Fr    204800 | Ep    832 | Up    400 | RMe   26.05 | RSd    1.69 | RMa   31.00 | RMi   22.00 | Pl   -0.006 | Vl    0.096 | El 0.0174 | Gr    9.763 | Fps   512 |
 
-`Reaver` should quickly converge to about 25-26 `RMe` , which matches [DeepMind results]() for this environment.
-Specific training time depends on your hardware. On a Dell XPS15 laptop with Intel ... CPU and NVIDIA GTX 1060 GPU, the training takes around 10 minutes.
+Reaver should quickly converge to about 25-26 `RMe` , which matches [DeepMind results]() for this environment.
+Specific training time depends on your hardware. On on a laptop with Intel i5-7300HQ CPU (4 cores) and GTX 1050 GPU, the training takes around 10 minutes.
 
-After `Reaver` has finished training, you can look at how performs by appending `--test` and `--render` flags to the one-liner.
+After Reaver has finished training, you can look at how performs by appending `--test` and `--render` flags to the one-liner.
 
 ```bash
 python -m reaver.run --env MoveToBeacon --agent a2c --test --render
@@ -75,12 +90,12 @@ being bottle-necked almost exclusively by GPU input/output pipeline.
 
 #### Easy To Configure
 
-### Implemented Algorithms
+### Implemented Agents
 
 * Advantage Actor-Critic (A2C)
 * Proximal Policy Optimization (PPO)
 
-Additionally, the following features are supported:
+### Additional RL Features
 
 * Generalized Advantage Estimation (GAE)
 * Rewards clipping
@@ -94,6 +109,41 @@ Additionally, the following features are supported:
 #### Supported Environments
 
 ## Results
+
+Map                         | Human Expert | DeepMind SC2LE | DeepMind ReDRL |   Reaver (A2C) |
+:-------------------------- | -----------: | -------------: | -------------: | -------------: |
+MoveToBeacon                |           28 |             26 |             27 |   26.30 (1.88) |
+CollectMineralShards        |          177 |            103 |            196 | 102.79 (10.86) |
+DefeatRoaches               |          215 |            100 |            303 |             -- |
+DefeatZerglingsAndBanelings |          727 |             62 |            736 |             -- |
+FindAndDefeatZerglings      |           61 |             45 |             62 |             -- |
+CollectMineralsAndGas       |        7,566 |          3,978 |          5,055 |             -- |
+BuildMarines                |          133 |              3 |            123 |             -- |
+
+* `Human Expert` results were gathered by DeepMind from a GrandMaster level player.
+* `DeepMind SC2LE` are the baseline results published by DeepMind in the
+[StarCraft II: A New Challenge for Reinforcement Learning](https://arxiv.org/abs/1708.04782) article.
+* `DeepMind ReDRL` refers to current state-of-the-art results, described in [Relational Deep Reinforcement Learning](https://arxiv.org/abs/1806.01830) article.
+* `Reaver (A2C)` are results gathered by training the `reaver.agents.AdvantageActorCritic` agent with
+architecture replicating SC2LE as closely as possible on available hardware.
+Results are gathered by running the trained agent in `--test` mode for `100` episodes, calculating mean episode total rewards.
+Listed inn parenthesis are the standard deviation values.
+
+### Training
+
+Map                         |        Samples |       Episodes | Approx. Time (hr) |
+:-------------------------- | -------------: | -------------: | ----------------: |
+MoveToBeacon                |        563,200 |          2,304 |              0.25 |
+CollectMineralShards        |     74,752,000 |        311,426 |                50 |
+DefeatRoaches               |              - |              - |                 - |
+DefeatZerglingsAndBanelings |              - |              - |                 - |
+FindAndDefeatZerglings      |              - |              - |                 - |
+CollectMineralsAndGas       |              - |              - |                 - |
+BuildMarines                |              - |              - |                 - |
+
+* `Samples` refer to a number of `observer -> step -> reward` chains in *one* environment.
+* `Episodes` refer to number of `StepType.LAST` flags returned by PySC2.
+* `Approx. Time` is the time in hours required to train an agent on a `laptop` with Intel `i5-7300HQ` CPU (4 cores) and `GTX 1050` GPU.
 
 ### Video Recording
 
@@ -115,7 +165,7 @@ Additionally, the following features are supported:
 
 ## Roadmap
 
-In this section you can see a birdseye view of my high level plans for `Reaver`.
+In this section you can see a birdseye view of my high level plans for Reaver.
 If you are interested in a particular feature, then feel free to comment on the attached ticket.
 Any help with development is of course highly appreciated, assuming contributed codebase license matches (MIT).
 
@@ -152,9 +202,16 @@ Any help with development is of course highly appreciated, assuming contributed 
   * [ ] for StarCraft II through raw API
   * [ ] for StarCraft II through featured layer API
 
+## Why "Reaver"?
+
+Reaver is a very special and somewhat cute Protoss unit in the StarCraft game universe.
+Specifically, in the StarCraft: Brood War version, Reaver was notorious for being slow, clumsy,
+and borderline useless if left on its own due to buggy in-game AI. However, Reaver becomes one of the most powerful
+and game changing assets in the hands of dedicated and skilled players.
+
 ## Acknowledgement
 
-A predecessor to `Reaver`, named simply `pysc2-rl-agent`, was developed as part of [bachelor's thesis](https://github.com/inoryy/bsc-thesis)
+A predecessor to Reaver, named simply `pysc2-rl-agent`, was developed as part of [bachelor's thesis](https://github.com/inoryy/bsc-thesis)
 at the University of Tartu under the supervision of [Ilya Kuzovkin](https://github.com/kuz) and [Tambet Matiisen](https://github.com/tambetm/).
 You can still access it on the [v1.0]() branch.
 
@@ -163,12 +220,12 @@ You can still access it on the [v1.0]() branch.
 IF you encounter a codebase related problem then please open a ticket on GitHub and describe it in as much detail as possible. 
 If you have more general questions or simply seeking advice feel free to send me an email.
 
-I'm also an active member of a great [SC2AI]() online community, and we mostly use the [Discord]() for communication. 
-People of all background are welcome to join!
+I'm also a proud member of active and friendly [SC2AI](http://sc2ai.net) online community, and we mostly use the [Discord](https://discord.gg/UBCjm3) for communication. 
+People of all backgrounds and levels of expertise are welcome to join!
 
 ## Citing
 
-If you have found `Reaver` useful in your research, please consider citing it with the following bibtex:
+If you have found Reaver useful in your research, please consider citing it with the following bibtex:
 
 ```
 @misc{reaver,
