@@ -115,7 +115,48 @@ Additionally, the following features are supported:
 
 ## Roadmap
 
+In this section you can see a birdseye view of my high level plans for `Reaver`.
+If you are interested in a particular feature, then feel free to comment on the attached ticket.
+Any help with development is of course highly appreciated, assuming contributed codebase license matches (MIT).
+
+* [ ] Quality of Life improvements
+  * [ ] Plotting utility for generating research article friendly plots
+  * [ ] Running & comparing experiments across many random seeds
+  * [ ] Copying previously executed experiment
+* [ ] Documentation
+  * [ ] Codebase documentation
+  * [ ] Extending to custom environments
+  * [ ] Extending to custom agents
+  * [ ] Setup on [Google Colab]()
+* [ ] Unit tests
+  * [ ] For critical features such as advantage estimation
+  * [ ] General basic convergence guarantees of agents / models combinations
+* [ ] LSTM support
+  * [ ] for simpler gym environments
+  * [ ] for full StarCraft II environment
+* [ ] Asynchronous multiprocessing
+* [ ] Additional agents
+  * [ ] Behavior Cloning / Imitation Learning
+  * [ ] IMPALA + PopArt
+  * [ ] Ape-X
+  * [ ] ACKTR
+* [ ] StarCraft II [raw API]() support
+  * [ ] investigate if [python-sc2]() is suitable for the task
+* [ ] Support for more environments
+  * [ ] [VizDoom](https://github.com/mwydmuch/ViZDoom)
+  * [ ] [DeepMind Lab](https://github.com/deepmind/lab)
+  * [ ] [Gym Retro](https://github.com/openai/retro)
+  * [ ] [CARLA](https://github.com/carla-simulator/carla)
+* [ ] Multi-Agent setup support
+  * [ ] as a proof of concept on `Pong` environment through [retro-gym]()
+  * [ ] for StarCraft II through raw API
+  * [ ] for StarCraft II through featured layer API
+
 ## Acknowledgement
+
+A predecessor to `Reaver`, named simply `pysc2-rl-agent`, was developed as part of [bachelor's thesis](https://github.com/inoryy/bsc-thesis)
+at the University of Tartu under the supervision of [Ilya Kuzovkin](https://github.com/kuz) and [Tambet Matiisen](https://github.com/tambetm/).
+You can still access it on the [v1.0]() branch.
 
 ## Support
 
