@@ -1,5 +1,13 @@
 # Reaver: StarCraft II Deep Reinforcement Learning Agent
 
+[![MoveToBeacon](https://user-images.githubusercontent.com/195271/48730921-66b6fe00-ec44-11e8-9954-9f4891ff9672.gif)](https://youtu.be/gEyBzcPU5-w)
+[![CollectMineralShards](https://user-images.githubusercontent.com/195271/48730941-70d8fc80-ec44-11e8-95ae-acff6f5a9add.gif)](https://youtu.be/gEyBzcPU5-w)
+[![DefeatRoaches](https://user-images.githubusercontent.com/195271/48730950-78000a80-ec44-11e8-83a2-2f2bb0bf59ab.gif)](https://youtu.be/gEyBzcPU5-w)
+[![DefeatZerglingsAndBanelings](https://user-images.githubusercontent.com/195271/48731288-5fdcbb00-ec45-11e8-8826-4d5683d2c337.gif)](https://youtu.be/gEyBzcPU5-w)
+[![FindAndDefeatZerglings](https://user-images.githubusercontent.com/195271/48731379-93b7e080-ec45-11e8-9375-38016ea9c9a8.gif)](https://youtu.be/gEyBzcPU5-w)
+[![CollectMineralsAndGas](https://user-images.githubusercontent.com/195271/48730970-86e6bd00-ec44-11e8-8e8c-0181e44b351c.gif)](https://youtu.be/gEyBzcPU5-w)
+[![BuildMarines](https://user-images.githubusercontent.com/195271/48730972-89491700-ec44-11e8-8842-4a6b76f08563.gif)](https://youtu.be/gEyBzcPU5-w)
+
 [![MoveToBeacon](https://user-images.githubusercontent.com/195271/37241507-0d7418c2-2463-11e8-936c-18d08a81d2eb.gif)](https://youtu.be/gEyBzcPU5-w)
 [![CollectMineralShards](https://user-images.githubusercontent.com/195271/37241785-b8bd0b04-2467-11e8-9ff3-e4335a7c20ee.gif)](https://youtu.be/gEyBzcPU5-w)
 [![DefeatRoaches](https://user-images.githubusercontent.com/195271/37241527-32a43ffa-2463-11e8-8e69-c39a8532c4ce.gif)](https://youtu.be/gEyBzcPU5-w)
