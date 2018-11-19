@@ -15,11 +15,11 @@ Reaver is a deep reinforcement learning agent designed for learning to solve var
 Main focus of Reaver is following in DeepMind's footsteps in pushing state-of-the-art of the field through the lens
 of playing the game as closely to human as possible. This includes observing visual features similar (though not identical)
 to what a human player would perceive and choosing actions from similar pool of options a human player would have.
-See [SC2LE]() article for more details.
+See [StarCraft II: A New Challenge for Reinforcement Learning](https://arxiv.org/abs/1708.04782) article for more details.
 
 Though development is research-driven, that does not mean Reaver will never have simplified options that are perhaps more
 practical when it comes to competitive one-on-one human vs AI agents that could be trained with reasonable hardware.
-See [below]() for a detailed roadmap of the project.
+Available below is a detailed roadmap for the project.
 
 The philosophy behind Reaver API is akin to StarCraft II game itself - it has something to offer both for novices and experts in the field.
 For hobbyist programmers Reaver offers all the tools necessary to train DRL agents by tuning some small part of it, e.g.
@@ -110,19 +110,19 @@ being bottle-necked almost exclusively by GPU input/output pipeline.
 
 ## Results
 
-Map                         | Human Expert | DeepMind SC2LE | DeepMind ReDRL |   Reaver (A2C) |
-:-------------------------- | -----------: | -------------: | -------------: | -------------: |
-MoveToBeacon                |           28 |             26 |             27 |   26.30 (1.88) |
-CollectMineralShards        |          177 |            103 |            196 | 102.79 (10.86) |
-DefeatRoaches               |          215 |            100 |            303 |             -- |
-DefeatZerglingsAndBanelings |          727 |             62 |            736 |             -- |
-FindAndDefeatZerglings      |           61 |             45 |             62 |             -- |
-CollectMineralsAndGas       |        7,566 |          3,978 |          5,055 |             -- |
-BuildMarines                |          133 |              3 |            123 |             -- |
+Map                         |    Reaver (A2C)| DeepMind SC2LE | DeepMind ReDRL | Human Expert |
+:-------------------------- | -------------: | -------------: | -------------: | -----------: |
+MoveToBeacon                |   26.30 (1.88) |             26 |             27 |           28 |
+CollectMineralShards        | 102.79 (10.86) |            103 |            196 |          177 |
+DefeatRoaches               |             -- |            100 |            303 |          215 |
+DefeatZerglingsAndBanelings |             -- |             62 |            736 |          727 |
+FindAndDefeatZerglings      |             -- |             45 |             62 |           61 |
+CollectMineralsAndGas       |             -- |          3,978 |          5,055 |        7,566 |
+BuildMarines                |             -- |              3 |            123 |          133 |
 
 * `Human Expert` results were gathered by DeepMind from a GrandMaster level player.
-* `DeepMind SC2LE` are baseline results published by DeepMind in [StarCraft II: A New Challenge for Reinforcement Learning](https://arxiv.org/abs/1708.04782) article.
 * `DeepMind ReDRL` refers to current state-of-the-art results, described in [Relational Deep Reinforcement Learning](https://arxiv.org/abs/1806.01830) article.
+* `DeepMind SC2LE` are results published in [StarCraft II: A New Challenge for Reinforcement Learning](https://arxiv.org/abs/1708.04782) article.
 * `Reaver (A2C)` are results gathered by training the `reaver.agents.A2C` agent, replicating `SC2LE` architecture as closely as possible on available hardware.
 Results are gathered by running the trained agent in `--test` mode for `100` episodes, calculating mean episode total rewards. Listed in parenthesis are the standard deviation values.
 
@@ -222,7 +222,7 @@ By installing with `-e` flag `Python` will now look for `reaver` in the specifie
 
 The `TensorFlow` that is distributed through `PIP` is built to target as many architectures / devices as possible, which
 means that various optimization flags are disabled by default. For example, if your CPU supports `AVX2` (is newer than 5 years),
-it is highly recommended to use a custom built TensorFlow instead. If building is not an option for you, then my []() repository
+it is highly recommended to use a custom built TensorFlow instead. If building is not an option for you, then [my repository](https://github.com/inoryy/tensorflow-optimized-wheels) 
 might be useful - it contains newest `TensorFlow` releases built for newest CUDA / CuDNN versions, 
 which often come with performance boosts even for older GPUs.
 
@@ -267,10 +267,10 @@ Any help with development is of course highly appreciated, assuming contributed 
 
 ## Why "Reaver"?
 
-Reaver is a very special and somewhat cute Protoss unit in the StarCraft game universe.
-Specifically, in the StarCraft: Brood War version, Reaver was notorious for being slow, clumsy,
-and borderline useless if left on its own due to buggy in-game AI. However, Reaver becomes one of the most powerful
-and game changing assets in the hands of dedicated and skilled players.
+Reaver is a very special and subjectively cute Protoss unit in the StarCraft game universe.
+In the StarCraft: Brood War version of the game, Reaver was notorious for being slow, clumsy,
+and often borderline useless if left on its own due to buggy in-game AI. However, in the hands of dedicated players that invested
+many hours into mastery of the unit, Reaver became one of the most powerful and game changing asset in the game, often playing a key role in tournament games.
 
 ## Acknowledgement
 
