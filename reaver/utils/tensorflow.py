@@ -21,6 +21,9 @@ class SessionManager:
                 tf.SessionLog(status=tf.SessionLog.START), self.sess.run(self.global_step))
         else:
             self.sess.run(tf.global_variables_initializer())
+        # this call locks the computational graph into read-only state,
+        # as a safety measure against memory leaks caused by mistakingly adding new ops to it
+        self.sess.graph.finalize()
 
     def run(self, tf_op, tf_inputs, inputs):
         return self.sess.run(tf_op, feed_dict=dict(zip(tf_inputs, inputs)))
