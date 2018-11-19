@@ -121,13 +121,10 @@ CollectMineralsAndGas       |        7,566 |          3,978 |          5,055 |  
 BuildMarines                |          133 |              3 |            123 |             -- |
 
 * `Human Expert` results were gathered by DeepMind from a GrandMaster level player.
-* `DeepMind SC2LE` are the baseline results published by DeepMind in the
-[StarCraft II: A New Challenge for Reinforcement Learning](https://arxiv.org/abs/1708.04782) article.
+* `DeepMind SC2LE` are baseline results published by DeepMind in [StarCraft II: A New Challenge for Reinforcement Learning](https://arxiv.org/abs/1708.04782) article.
 * `DeepMind ReDRL` refers to current state-of-the-art results, described in [Relational Deep Reinforcement Learning](https://arxiv.org/abs/1806.01830) article.
-* `Reaver (A2C)` are results gathered by training the `reaver.agents.AdvantageActorCritic` agent with
-architecture replicating SC2LE as closely as possible on available hardware.
-Results are gathered by running the trained agent in `--test` mode for `100` episodes, calculating mean episode total rewards.
-Listed inn parenthesis are the standard deviation values.
+* `Reaver (A2C)` are results gathered by training the `reaver.agents.A2C` agent, replicating `SC2LE` architecture as closely as possible on available hardware.
+Results are gathered by running the trained agent in `--test` mode for `100` episodes, calculating mean episode total rewards. Listed in parenthesis are the standard deviation values.
 
 ### Training
 
@@ -141,27 +138,93 @@ FindAndDefeatZerglings      |              - |              - |                 
 CollectMineralsAndGas       |              - |              - |                 - |
 BuildMarines                |              - |              - |                 - |
 
-* `Samples` refer to a number of `observer -> step -> reward` chains in *one* environment.
-* `Episodes` refer to number of `StepType.LAST` flags returned by PySC2.
-* `Approx. Time` is the time in hours required to train an agent on a `laptop` with Intel `i5-7300HQ` CPU (4 cores) and `GTX 1050` GPU.
+* `Samples` refer to total number of `observer -> step -> reward` chains in *one* environment.
+* `Episodes` refer to total number of `StepType.LAST` flags returned by PySC2.
+* `Approx. Time` is the training time on a `laptop` with Intel `i5-7300HQ` CPU (4 cores) and `GTX 1050` GPU.
 
 ### Video Recording
 
+A video recording of the agent performing on all six minigames is available online at: [https://youtu.be/gEyBzcPU5-w](https://youtu.be/gEyBzcPU5-w).
+In the video on the left is the agent acting in with randomly initialized weights and no training, whereas on the right he is trained to target scores.
+
 ### Reproducibility
+
+The problem of reproducibility of research has become a subject of many debates in science [in general](), and Reinforcement Learning is [not an exception]().
+One of the goals of Reaver as a scientific project is to help facilitate reproducible research.
+To this end Reaver comes bundled with various tools that simplify the process:
+
+* All experiments are saved into separate folders with automatic model checkpoints enabled by default
+* All configuration is handled through [gin-config]() Python library and saved to experiment results directory
+* During training various statistics metrics are duplicated into experiment results directory
+* Results directory structure simplifies sharing individual experiments with full information
 
 #### Pre-trained Weights
 
+To lead the way with reproducibility, Reaver is bundled with pre-trained weights for all six minigames. 
+To use pre-trained weights, download them from the [releases]() tab, unzip into `results/` directory and execute
+`python reaver.run --map <map_name> --experiment reaver_<map_name>`, replacing `<map_name>` for desired map name.
+
 #### Tensorboard Summary Logs
+
+Full summary logs are also available, bundled with the pre-trained weights. To compare them with your own run, one more step is needed: create a symbolic link
+`results/reaver_<map_name>/summaries` directory to `results/summaries/reaver_<map_name>`. On a Linux machine this can be done in one line:
+
+```
+$ ln -s results/reaver_<map_name>/summaries results/summaries/reaver_<map_name>
+```
+
+Now whenever you launch `Tensorboard` with `tensorboard --logidr=results/summaries` you will see Reaver logs as well.
 
 ## Installation
 
 ### Requirements
 
+* numpy >= 1.13
+* PySC2 >= 2.0
+* absl-py >= 0.2.2
+* gin-config >= 0.1.1
+* TensorFlow >= 1.10
+* TensorFlow Probability >= 0.4
+* StarCraft II >= 4.1.2 ([instructions]())
+
+It is highly recommended to use Reaver on `Linux OS`, both due to stability and performance considerations.
+To view results with full graphics you can save a replay of the agent on Linux and open it on Windows. This is how video recording above was made.
+
 ### As a PIP Package
+
+Easiest way to install Reaver is through the `PIP` package manager:
+
+```
+pip install reaver
+```
+
+You should now be able to both execute it as a script and use inside your codebase as described in the introduction section.
+Note that Reaver specifies `TensorFlow` only as a soft dependency and it will not be installed by default. This is to avoid
+`tensorflow` overwriting `tensorflow-gpu` and vise-versa. You can install `tensorflow` along with Reaver by specifying either
+`tf-cpu` or `tf-gpu` flag with `pip install` command:
+
+```
+pip install reaver[tf-gpu]
+```
 
 ### Manual Installation
 
+If you plan to significantly modify `Reaver` codebase you can retain its module functionality by installing from source:
+
+```
+$ git clone https://github.com/inoryy/reaver
+$ pip install -e reaver/
+```
+
+By installing with `-e` flag `Python` will now look for `reaver` in the specified folder, rather than `site-packages` storage.
+
 ### Optimized TensorFlow
+
+The `TensorFlow` that is distributed through `PIP` is built to target as many architectures / devices as possible, which
+means that various optimization flags are disabled by default. For example, if your CPU supports `AVX2` (is newer than 5 years),
+it is highly recommended to use a custom built TensorFlow instead. If building is not an option for you, then my []() repository
+might be useful - it contains newest `TensorFlow` releases built for newest CUDA / CuDNN versions, 
+which often come with performance boosts even for older GPUs.
 
 ## Roadmap
 
