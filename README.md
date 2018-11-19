@@ -93,16 +93,6 @@ Additionally, the following features are supported:
 
 #### Supported Environments
 
-## Installation
-
-### Requirements
-
-### As a PIP Package
-
-### Manual Installation
-
-### Optimized TensorFlow
-
 ## Results
 
 ### Video Recording
@@ -113,8 +103,39 @@ Additionally, the following features are supported:
 
 #### Tensorboard Summary Logs
 
+## Installation
+
+### Requirements
+
+### As a PIP Package
+
+### Manual Installation
+
+### Optimized TensorFlow
+
 ## Roadmap
 
 ## Acknowledgement
 
+## Support
+
+IF you encounter a codebase related problem then please open a ticket on GitHub and describe it in as much detail as possible. 
+If you have more general questions or simply seeking advice feel free to send me an email.
+
+I'm also an active member of a great [SC2AI]() online community, and we mostly use the [Discord]() for communication. 
+People of all background are welcome to join!
+
 ## Citing
+
+If you have found `Reaver` useful in your research, please consider citing it with the following bibtex:
+
+```
+@misc{reaver,
+  author = {Ring, Roman},
+  title = {Reaver: StarCraft II Deep Reinforcement Learning Agent},
+  year = {2018},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/inoryy/reaver}},
+}
+```
