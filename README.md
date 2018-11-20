@@ -8,6 +8,12 @@
 [![CollectMineralsAndGas](https://user-images.githubusercontent.com/195271/37241521-29594b48-2463-11e8-8b43-04ad0af6ff3e.gif)](https://youtu.be/gEyBzcPU5-w)
 [![BuildMarines](https://user-images.githubusercontent.com/195271/37241515-1a2a5c8e-2463-11e8-8ac4-588d7826e374.gif)](https://youtu.be/gEyBzcPU5-w)
 
+# Project Status
+
+This project version is mostly usable (aside from the two bugs listed in issues) and will not be further developed. I have verified that it can be installed on a fresh environment with requirements listed (taking care to use the old pysc2 fork) and will successfully train to similar results with ~8 parallel environments (you can run 2 per core)
+
+I am actively working on a complete rewrite and will publish it on this repository when it's ready. Current rewrite status is alpha-ish: I have finished writing core functionality and am polishing out the kinks while verifying it can train on various minigames. **ETA: 1-2 weeks.**
+
 
 ## Introduction
 
