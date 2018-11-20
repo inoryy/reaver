@@ -118,23 +118,24 @@ being bottle-necked almost exclusively by GPU input/output pipeline.
 
 ## Results
 
-Map                         |    Reaver (A2C)| DeepMind SC2LE | DeepMind ReDRL | Human Expert |
-:-------------------------- | -------------: | -------------: | -------------: | -----------: |
-MoveToBeacon                |   26.30 (1.88) |             26 |             27 |           28 |
-CollectMineralShards        | 102.79 (10.86) |            103 |            196 |          177 |
-DefeatRoaches               |             -- |            100 |            303 |          215 |
-DefeatZerglingsAndBanelings |             -- |             62 |            736 |          727 |
-FindAndDefeatZerglings      |             -- |             45 |             62 |           61 |
-CollectMineralsAndGas       |             -- |          3,978 |          5,055 |        7,566 |
-BuildMarines                |             -- |              3 |            123 |          133 |
+Map                         |                   Reaver (A2C) | DeepMind SC2LE | DeepMind ReDRL | Human Expert |
+:-------------------------- | -----------------------------: | -------------: | -------------: | -----------: |
+MoveToBeacon                |        26.3 (±1.8)<br>[21, 31] |             26 |             27 |           28 |
+CollectMineralShards        |     102.8 (±10.8)<br>[81, 135] |            103 |            196 |          177 |
+DefeatRoaches               |                             -- |            100 |            303 |          215 |
+DefeatZerglingsAndBanelings |                             -- |             62 |            736 |          727 |
+FindAndDefeatZerglings      |                             -- |             45 |             62 |           61 |
+CollectMineralsAndGas       |                             -- |          3,978 |          5,055 |        7,566 |
+BuildMarines                |                             -- |              3 |            123 |          133 |
 
 * `Human Expert` results were gathered by DeepMind from a GrandMaster level player.
 * `DeepMind ReDRL` refers to current state-of-the-art results, described in [Relational Deep Reinforcement Learning](https://arxiv.org/abs/1806.01830) article.
 * `DeepMind SC2LE` are results published in [StarCraft II: A New Challenge for Reinforcement Learning](https://arxiv.org/abs/1708.04782) article.
 * `Reaver (A2C)` are results gathered by training the `reaver.agents.A2C` agent, replicating `SC2LE` architecture as closely as possible on available hardware.
-Results are gathered by running the trained agent in `--test` mode for `100` episodes, calculating mean episode total rewards. Listed in parenthesis are the standard deviation values.
+Results are gathered by running the trained agent in `--test` mode for `100` episodes, calculating episode total rewards.
+Listed are the mean, standard deviation (in parentheses) and min-max (in square brackets).
 
-### Training
+### Training Details
 
 Map                         |        Samples |       Episodes | Approx. Time (hr) |
 :-------------------------- | -------------: | -------------: | ----------------: |
