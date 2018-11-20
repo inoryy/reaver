@@ -50,6 +50,7 @@ gin_configs = {
     'DefeatRoaches':        ['sc2/defeat_roaches.gin'],
     'MoveToBeacon':         ['sc2/move_to_beacon.gin'],
     'CollectMineralShards': ['sc2/collect_mineral_shards.gin'],
+    'CollectMineralsAndGas': ['sc2/collect_minerals_and_gas.gin'],
 }
 
 

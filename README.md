@@ -124,12 +124,12 @@ being bottle-necked almost exclusively by GPU input/output pipeline.
 
 Map                         |                   Reaver (A2C) | DeepMind SC2LE | DeepMind ReDRL | Human Expert |
 :-------------------------- | -----------------------------: | -------------: | -------------: | -----------: |
-MoveToBeacon                |        26.3 (±1.8)<br>[21, 31] |             26 |             27 |           28 |
-CollectMineralShards        |     102.8 (±10.8)<br>[81, 135] |            103 |            196 |          177 |
-DefeatRoaches               |     72.49 (±43.5)<br>[21, 283] |            100 |            303 |          215 |
+MoveToBeacon                |       26.3 (± 1.8)<br>[21, 31] |             26 |             27 |           28 |
+CollectMineralShards        |    102.8 (± 10.8)<br>[81, 135] |            103 |            196 |          177 |
+DefeatRoaches               |     72.5 (± 43.5)<br>[21, 283] |            100 |            303 |          215 |
 FindAndDefeatZerglings      |                             -- |             45 |             62 |           61 |
 DefeatZerglingsAndBanelings |                             -- |             62 |            736 |          727 |
-CollectMineralsAndGas       |                             -- |          3,978 |          5,055 |        7,566 |
+CollectMineralsAndGas       |  2267.5 (± 488.8)<br>[0, 3320] |          3,978 |          5,055 |        7,566 |
 BuildMarines                |                             -- |              3 |            123 |          133 |
 
 * `Human Expert` results were gathered by DeepMind from a GrandMaster level player.
@@ -148,7 +148,7 @@ CollectMineralShards        |     74,752,000 |        311,426 |                5
 DefeatRoaches               |    172,800,000 |      1,609,211 |               150 |
 FindAndDefeatZerglings      |              - |              - |                 - |
 DefeatZerglingsAndBanelings |              - |              - |                 - |
-CollectMineralsAndGas       |              - |              - |                 - |
+CollectMineralsAndGas       |     16,864,000 |         20,544 |                10 |
 BuildMarines                |              - |              - |                 - |
 
 * `Samples` refer to total number of `observer -> step -> reward` chains in *one* environment.
