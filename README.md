@@ -205,6 +205,14 @@ Now whenever you launch `Tensorboard` with `tensorboard --logidr=results/summari
 * TensorFlow Probability >= 0.4
 * StarCraft II >= 4.1.2 ([instructions]())
 
+### Optional Extras
+If you would like to use Reaver with other supported environments, you must install relevant packages as well:
+
+* gym >= 0.10.0
+* atari-py >= 0.1.5
+* mujoco-py >= 1.50.0
+  * roboschool >= 1.0(alternative)
+
 It is highly recommended to use Reaver on `Linux OS`, both due to stability and performance considerations.
 To view results with full graphics you can save a replay of the agent on Linux and open it on Windows. This is how video recording above was made.
 
@@ -216,14 +224,15 @@ Easiest way to install Reaver is through the `PIP` package manager:
 pip install reaver
 ```
 
-You should now be able to both execute it as a script and use inside your codebase as described in the introduction section.
-Note that Reaver specifies `TensorFlow` only as a soft dependency and it will not be installed by default. This is to avoid
+**NB!** Reaver specifies `TensorFlow` only as a soft dependency and it will not be installed by default. This is to avoid
 `tensorflow` overwriting `tensorflow-gpu` and vise-versa. You can install `tensorflow` along with Reaver by specifying either
 `tf-cpu` or `tf-gpu` flag with `pip install` command:
 
 ```
 pip install reaver[tf-gpu]
 ```
+
+You should now be able to both execute Reaver as a script and use inside your codebase as described in the introduction section.
 
 ### Manual Installation
 
