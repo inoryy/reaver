@@ -59,7 +59,10 @@ def main(argv):
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
     if args.test:
-        args.envs = 1
+        args.envs = 4
+        args.log_freq = 10
+        args.updates = 100
+        args.batch_sz = 500
         args.restore = True
     expt = rvr.utils.Experiment(args.results_dir, args.env, args.agent, args.experiment, args.restore)
 
