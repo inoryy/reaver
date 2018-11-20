@@ -34,7 +34,7 @@ For hobbyist programmers Reaver offers all the tools necessary to train DRL agen
 hyperparameters.
 
 
-### Example
+### Quick Start
 
 Reaver is designed to be very easy to experiment with. In fact, you can train a DRL agent with multiple
 StarCraft II environments running in parallel with just four lines of code!
@@ -75,9 +75,13 @@ After Reaver has finished training, you can look at how performs by appending `-
 python -m reaver.run --env MoveToBeacon --agent a2c --test --render
 ```
 
-### Key Features
+### Google Colab
 
-#### Performance
+...
+
+## Key Features
+
+### Performance
 
 Many modern DRL algorithms rely on being executed in multiple environments at the same time in parallel. 
 As Python has [GIL](), this requirement must be implemented as a multiprocessing solution. 
@@ -92,13 +96,13 @@ for this use case by making use of shared memory in a lock-free manner. This app
 boost of up to **300%** speed-up in StarCraft II sampling rate (and up to 100x speedup in general case), 
 being bottle-necked almost exclusively by GPU input/output pipeline.
 
-#### Easy To Use
+### Easy To Use
 
-#### Easy To Extend
+### Easy To Extend
 
-#### Easy To Configure
+### Easy To Configure
 
-### Implemented Agents
+## Implemented Agents
 
 * Advantage Actor-Critic (A2C)
 * Proximal Policy Optimization (PPO)
@@ -112,9 +116,9 @@ being bottle-necked almost exclusively by GPU input/output pipeline.
 * Baseline (critic) bootstrapping
 * Separate baseline network
 
-### But Wait! There's more!
+## But Wait! There's more!
 
-#### Supported Environments
+### Supported Environments
 
 ## Results
 
@@ -139,7 +143,7 @@ Listed are the mean, standard deviation (in parentheses) and min-max (in square 
 
 Map                         |        Samples |       Episodes | Approx. Time (hr) |
 :-------------------------- | -------------: | -------------: | ----------------: |
-MoveToBeacon                |        563,200 |          2,304 |              0.25 |
+MoveToBeacon                |        563,200 |          2,304 |               0.5 |
 CollectMineralShards        |     74,752,000 |        311,426 |                50 |
 DefeatRoaches               |              - |              - |                 - |
 DefeatZerglingsAndBanelings |              - |              - |                 - |
@@ -151,12 +155,17 @@ BuildMarines                |              - |              - |                 
 * `Episodes` refer to total number of `StepType.LAST` flags returned by PySC2.
 * `Approx. Time` is the training time on a `laptop` with Intel `i5-7300HQ` CPU (4 cores) and `GTX 1050` GPU.
 
+Note that I did not put much time into hyperparameter tuning, focusing mostly on verifying that the agent is capable of learning
+rather than maximizing sample efficiency. For example, naive first try on `MoveToBeacon` required about `4 million` samples,
+however after some playing around I was able to reduce it down all the way to `102,400` (~40x reduction) with PPO agent.
+
+
 ### Video Recording
 
 A video recording of the agent performing on all six minigames is available online at: [https://youtu.be/gEyBzcPU5-w](https://youtu.be/gEyBzcPU5-w).
 In the video on the left is the agent acting in with randomly initialized weights and no training, whereas on the right he is trained to target scores.
 
-### Reproducibility
+## Reproducibility
 
 The problem of reproducibility of research has become a subject of many debates in science [in general](), and Reinforcement Learning is [not an exception]().
 One of the goals of Reaver as a scientific project is to help facilitate reproducible research.
@@ -167,13 +176,13 @@ To this end Reaver comes bundled with various tools that simplify the process:
 * During training various statistics metrics are duplicated into experiment results directory
 * Results directory structure simplifies sharing individual experiments with full information
 
-#### Pre-trained Weights
+### Pre-trained Weights
 
 To lead the way with reproducibility, Reaver is bundled with pre-trained weights for all six minigames. 
 To use pre-trained weights, download them from the [releases]() tab, unzip into `results/` directory and execute
 `python reaver.run --map <map_name> --experiment reaver_<map_name>`, replacing `<map_name>` for desired map name.
 
-#### Tensorboard Summary Logs
+### Tensorboard Summary Logs
 
 Full summary logs are also available, bundled with the pre-trained weights. To compare them with your own run, one more step is needed: create a symbolic link
 `results/reaver_<map_name>/summaries` directory to `results/summaries/reaver_<map_name>`. On a Linux machine this can be done in one line:
