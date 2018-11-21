@@ -1,7 +1,7 @@
 import gin
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Input, Concatenate, Dense, Conv2D, Flatten
-from reaver.models.base.layers import Squeeze, Rescale
+from reaver.models.base.layers import Squeeze, Rescale, Transpose
 
 
 @gin.configurable
@@ -11,6 +11,11 @@ def build_cnn_nature(obs_spec, act_spec, data_format='channels_first', value_sep
 
     inputs = [Input(s.shape, name="input_" + s.name) for s in obs_spec]
     inputs_concat = Concatenate()(inputs) if len(inputs) > 1 else inputs[0]
+
+    # expected NxCxHxW, but got NxHxWxC
+    if data_format == 'channels_first' and inputs_concat.shape[1] > 3:
+        inputs_concat = Transpose([0, 3, 1, 2])(inputs_concat)
+
     inputs_scaled = Rescale(1./255)(inputs_concat)
 
     x = build_cnn(inputs_scaled, conv_spec, conv_cfg, dense=512, prefix='policy_')
