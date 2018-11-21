@@ -36,6 +36,7 @@ setup(
         'gym': [
             'PyOpenGL',
             'gym >= 0.9',
+            'opencv-python'
         ],
         'atari': [
             'Pillow',

@@ -1,4 +1,3 @@
-import atari_py
 import numpy as np
 from . import Env, Spec, Space
 from reaver.envs.atari import AtariPreprocessing
@@ -20,6 +19,11 @@ class GymEnv(Env):
         gym.logger.set_level(40)  # avoid annoying internal warn messages
 
         self._env = gym.make(self.id)
+
+        try:
+            import atari_py
+        except ImportError:
+            return
 
         if any([env_name in self.id.lower() for env_name in atari_py.list_games()]):
             self._env = AtariPreprocessing(self._env.env)
