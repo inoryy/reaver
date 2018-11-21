@@ -2,15 +2,13 @@ include 'reaver/configs/sc2/base.gin'
 
 tf.train.AdamOptimizer.learning_rate = 0.0005
 
-ActorCriticAgent.gae_lambda = 0.0
+ActorCriticAgent.gae_lambda = 0.95
 ActorCriticAgent.clip_grads_norm = 10.0
 ActorCriticAgent.bootstrap_terminals = False
-ActorCriticAgent.normalize_advantages = False
+ActorCriticAgent.normalize_advantages = True
 
 AdvantageActorCriticAgent.entropy_coef = 0.001
 
 ProximalPolicyOptimizationAgent.entropy_coef = 0.001
 ProximalPolicyOptimizationAgent.n_updates = 2
 ProximalPolicyOptimizationAgent.minibatch_sz = 500
-# ActorCriticAgent.normalize_advantages = True
-# ActorCriticAgent.gae_lambda = 0.95
