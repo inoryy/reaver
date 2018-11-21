@@ -51,6 +51,7 @@ gin_configs = {
     'MoveToBeacon':         ['sc2/move_to_beacon.gin'],
     'CollectMineralShards': ['sc2/collect_mineral_shards.gin'],
     'CollectMineralsAndGas': ['sc2/collect_minerals_and_gas.gin'],
+    'FindAndDefeatZerglings': ['sc2/find_and_defeat_zerglings.gin'],
 }
 
 
