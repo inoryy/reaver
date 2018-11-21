@@ -8,31 +8,56 @@ setup(
     version='2.0.0',
     author='Roman Ring',
     author_email='inoryy@gmail.com',
-    license='MIT',
-    description='Deep Reinforcement Learning Agent for StarCraft II',
+    description='Reaver: Deep Reinforcement Learning Agent for StarCraft II',
     long_description=long_description,
-    url='https://github.com/inoryy/reaver/',
     keywords='reaver starcraft tensorflow machine reinforcement learning neural network',
     packages=[
         'reaver',
         'reaver.envs',
         'reaver.models',
-        'reaver.agents'
+        'reaver.agents',
+        'reaver.utils'
     ],
     install_requires=[
-        'numpy>=1.13',
-        'PySC2>=2.0',
+        'numpy >= 1.13',
+        'PySC2 >= 2.0',
         'absl-py >= 0.2.2',
-        'gin-config >= 0.1.1'
+        'gin-config >= 0.1.1',
     ],
     extras_require={
         'tf-cpu': [
-            'tensorflow>=1.8.0',
-            'tensorflow-probability>=0.4.0'
+            'tensorflow >= 1.8.0',
+            'tensorflow-probability >= 0.4.0'
         ],
         'tf-gpu': [
-            'tensorflow-gpu>=1.8.0',
-            'tensorflow-probability-gpu>=0.4.0'
+            'tensorflow-gpu >= 1.8.0',
+            'tensorflow-probability-gpu >= 0.4.0'
         ],
-    }
+        'gym': [
+            'PyOpenGL',
+            'gym >= 0.9',
+        ],
+        'atari': [
+            'Pillow',
+            'PyOpenGL',
+            'gym >= 0.9',
+            'atari_py >= 0.1.4',
+        ],
+        'mujoco': [
+            'imageio',
+            'gym >= 0.9',
+            'mujoco_py >= 1.50',
+        ]
+    },
+    license='MIT',
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
+    ],
+    url='https://github.com/inoryy/reaver-pysc2',
 )
