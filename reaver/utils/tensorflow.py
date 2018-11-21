@@ -2,7 +2,10 @@ import tensorflow as tf
 
 
 class SessionManager:
-    def __init__(self, sess, base_path='results/', checkpoint_freq=100, training_enabled=True):
+    def __init__(self, sess=None, base_path='results/', checkpoint_freq=100, training_enabled=True):
+        if not sess:
+            sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+
         self.sess = sess
         self.saver = None
         self.base_path = base_path
