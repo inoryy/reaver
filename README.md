@@ -122,15 +122,15 @@ being bottle-necked almost exclusively by GPU input/output pipeline.
 
 ## Results
 
-Map                         |                   Reaver (A2C) | DeepMind SC2LE | DeepMind ReDRL | Human Expert |
-:-------------------------- | -----------------------------: | -------------: | -------------: | -----------: |
-MoveToBeacon                |       26.3 (± 1.8)<br>[21, 31] |             26 |             27 |           28 |
-CollectMineralShards        |    102.8 (± 10.8)<br>[81, 135] |            103 |            196 |          177 |
-DefeatRoaches               |     72.5 (± 43.5)<br>[21, 283] |            100 |            303 |          215 |
-FindAndDefeatZerglings      |                             -- |             45 |             62 |           61 |
-DefeatZerglingsAndBanelings |                             -- |             62 |            736 |          727 |
-CollectMineralsAndGas       |  2267.5 (± 488.8)<br>[0, 3320] |          3,978 |          5,055 |        7,566 |
-BuildMarines                |                             -- |              3 |            123 |          133 |
+Map                         |                 Reaver (A2C) | DeepMind SC2LE | DeepMind ReDRL | Human Expert |
+:-------------------------- | ---------------------------: | -------------: | -------------: | -----------: |
+MoveToBeacon                |       26.3 (1.8)<br>[21, 31] |             26 |             27 |           28 |
+CollectMineralShards        |    102.8 (10.8)<br>[81, 135] |            103 |            196 |          177 |
+DefeatRoaches               |     72.5 (43.5)<br>[21, 283] |            100 |            303 |          215 |
+FindAndDefeatZerglings      |                           -- |             45 |             62 |           61 |
+DefeatZerglingsAndBanelings |     56.8 (20.8)<br>[21, 154] |             62 |            736 |          727 |
+CollectMineralsAndGas       |  2267.5 (488.8)<br>[0, 3320] |          3,978 |          5,055 |        7,566 |
+BuildMarines                |                           -- |              3 |            123 |          133 |
 
 * `Human Expert` results were gathered by DeepMind from a GrandMaster level player.
 * `DeepMind ReDRL` refers to current state-of-the-art results, described in [Relational Deep Reinforcement Learning](https://arxiv.org/abs/1806.01830) article.
@@ -147,7 +147,7 @@ MoveToBeacon                |        563,200 |          2,304 |               0.
 CollectMineralShards        |     74,752,000 |        311,426 |                50 |
 DefeatRoaches               |    172,800,000 |      1,609,211 |               150 |
 FindAndDefeatZerglings      |              - |              - |                 - |
-DefeatZerglingsAndBanelings |              - |              - |                 - |
+DefeatZerglingsAndBanelings |     10,496,000 |        273,463 |                15 |
 CollectMineralsAndGas       |     16,864,000 |         20,544 |                10 |
 BuildMarines                |              - |              - |                 - |
 
