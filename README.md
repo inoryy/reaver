@@ -59,12 +59,15 @@ With the above line Reaver will initialize the training procedure with a set of 
 specifically for the given environment and agent. After awhile you will start seeing logs with many useful statistics
 in your terminal screen. Probably most important one is the `RMe`, which stands for `Mean Episode Total Rewards` 
 (averaged over 100 episodes). Please see [below]() for a detailed description of each column.
-    
-    | T      5 | Fr      1024 | Ep      2 | Up      1 | RMe    0.50 | RSd    0.50 | RMa    1.00 | RMi    0.00 | Pl    0.049 | Vl    0.362 | El 0.0135 | Gr  190.362 | Fps   204 |
-    | T    413 | Fr     51712 | Ep    213 | Up    100 | RMe   22.45 | RSd    4.30 | RMa   28.00 | RMi    1.00 | Pl    0.019 | Vl    0.761 | El 0.0164 | Gr    7.084 | Fps   125 |
-    | T    830 | Fr    102912 | Ep    426 | Up    200 | RMe   23.66 | RSd    1.94 | RMa   29.00 | RMi   18.00 | Pl    0.046 | Vl    1.163 | El 0.0172 | Gr    5.438 | Fps   123 |
-    | T   1242 | Fr    154112 | Ep    640 | Up    300 | RMe   24.22 | RSd    2.12 | RMa   31.00 | RMi   19.00 | Pl   -0.020 | Vl    1.558 | El 0.0174 | Gr   13.541 | Fps   124 |
-    | T   1659 | Fr    205312 | Ep    853 | Up    400 | RMe   25.31 | RSd    1.72 | RMa   31.00 | RMi   21.00 | Pl    0.009 | Vl    1.317 | El 0.0172 | Gr    4.970 | Fps   123 |
+
+    | T    118 | Fr     51200 | Ep    212 | Up    100 | RMe    0.14 | RSd    0.49 | RMa    3.00 | RMi    0.00 | Pl    0.017 | Vl    0.008 | El 0.0225 | Gr    3.493 | Fps   433 |
+    | T    238 | Fr    102400 | Ep    424 | Up    200 | RMe    0.92 | RSd    0.97 | RMa    4.00 | RMi    0.00 | Pl   -0.196 | Vl    0.012 | El 0.0249 | Gr    1.791 | Fps   430 |
+    | T    359 | Fr    153600 | Ep    640 | Up    300 | RMe    1.80 | RSd    1.30 | RMa    6.00 | RMi    0.00 | Pl   -0.035 | Vl    0.041 | El 0.0253 | Gr    1.832 | Fps   427 |
+    ...
+    | T   1578 | Fr    665600 | Ep   2772 | Up   1300 | RMe   24.26 | RSd    3.19 | RMa   29.00 | RMi    0.00 | Pl    0.050 | Vl    1.242 | El 0.0174 | Gr    4.814 | Fps   421 |
+    | T   1695 | Fr    716800 | Ep   2984 | Up   1400 | RMe   24.31 | RSd    2.55 | RMa   30.00 | RMi   16.00 | Pl    0.005 | Vl    0.202 | El 0.0178 | Gr   56.385 | Fps   422 |
+    | T   1812 | Fr    768000 | Ep   3200 | Up   1500 | RMe   24.97 | RSd    1.89 | RMa   31.00 | RMi   21.00 | Pl   -0.075 | Vl    1.385 | El 0.0176 | Gr   17.619 | Fps   423 |
+
 
 Reaver should quickly converge to about 25-26 `RMe` , which matches [DeepMind results]() for this environment.
 Specific training time depends on your hardware. On on a laptop with Intel i5-7300HQ CPU (4 cores) and GTX 1050 GPU, the training takes around 30 minutes.
