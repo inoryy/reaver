@@ -60,14 +60,14 @@ specifically for the given environment and agent. After awhile you will start se
 in your terminal screen. Probably most important one is the `RMe`, which stands for `Mean Episode Total Rewards` 
 (averaged over 100 episodes). Please see [below]() for a detailed description of each column.
     
-    | T      1 | Fr       512 | Ep      0 | Up      1 | RMe    0.00 | RSd    0.00 | RMa    0.00 | RMi    0.00 | Pl    0.749 | Vl    4.084 | El 0.0165 | Gr   23.691 | Fps   512 |
-    | T     29 | Fr     51200 | Ep    192 | Up    100 | RMe    0.23 | RSd    0.58 | RMa    4.00 | RMi    0.00 | Pl   -0.001 | Vl    0.029 | El 0.0190 | Gr   10.231 | Fps   562 |
-    | T     57 | Fr    102400 | Ep    416 | Up    200 | RMe   25.16 | RSd    2.74 | RMa   30.00 | RMi   16.00 | Pl   -0.007 | Vl    0.156 | El 0.0159 | Gr    8.420 | Fps   498 |
-    | T     86 | Fr    153600 | Ep    640 | Up    300 | RMe   25.71 | RSd    1.88 | RMa   31.00 | RMi   22.00 | Pl   -0.004 | Vl    8.799 | El 0.0164 | Gr   85.869 | Fps   512 |
-    | T    114 | Fr    204800 | Ep    832 | Up    400 | RMe   26.05 | RSd    1.69 | RMa   31.00 | RMi   22.00 | Pl   -0.006 | Vl    0.096 | El 0.0174 | Gr    9.763 | Fps   512 |
+    | T      5 | Fr      1024 | Ep      2 | Up      1 | RMe    0.50 | RSd    0.50 | RMa    1.00 | RMi    0.00 | Pl    0.049 | Vl    0.362 | El 0.0135 | Gr  190.362 | Fps   204 |
+    | T    413 | Fr     51712 | Ep    213 | Up    100 | RMe   22.45 | RSd    4.30 | RMa   28.00 | RMi    1.00 | Pl    0.019 | Vl    0.761 | El 0.0164 | Gr    7.084 | Fps   125 |
+    | T    830 | Fr    102912 | Ep    426 | Up    200 | RMe   23.66 | RSd    1.94 | RMa   29.00 | RMi   18.00 | Pl    0.046 | Vl    1.163 | El 0.0172 | Gr    5.438 | Fps   123 |
+    | T   1242 | Fr    154112 | Ep    640 | Up    300 | RMe   24.22 | RSd    2.12 | RMa   31.00 | RMi   19.00 | Pl   -0.020 | Vl    1.558 | El 0.0174 | Gr   13.541 | Fps   124 |
+    | T   1659 | Fr    205312 | Ep    853 | Up    400 | RMe   25.31 | RSd    1.72 | RMa   31.00 | RMi   21.00 | Pl    0.009 | Vl    1.317 | El 0.0172 | Gr    4.970 | Fps   123 |
 
 Reaver should quickly converge to about 25-26 `RMe` , which matches [DeepMind results]() for this environment.
-Specific training time depends on your hardware. On on a laptop with Intel i5-7300HQ CPU (4 cores) and GTX 1050 GPU, the training takes around 10 minutes.
+Specific training time depends on your hardware. On on a laptop with Intel i5-7300HQ CPU (4 cores) and GTX 1050 GPU, the training takes around 30 minutes.
 
 After Reaver has finished training, you can look at how performs by appending `--test` and `--render` flags to the one-liner.
 

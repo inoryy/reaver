@@ -15,8 +15,8 @@ class ActorCriticAgent(MemoryAgent):
         sess_mgr,
         obs_spec,
         act_spec,
-        n_envs=4,
-        batch_sz=128,
+        traj_len=16,
+        batch_sz=16,
         model_fn=build_mlp,
         policy_cls=MultiPolicy,
         discount=0.99,
@@ -28,7 +28,7 @@ class ActorCriticAgent(MemoryAgent):
         optimizer=tf.train.AdamOptimizer(),
         logger=Logger()
     ):
-        MemoryAgent.__init__(self, obs_spec, act_spec, (round(batch_sz / n_envs), n_envs))
+        MemoryAgent.__init__(self, obs_spec, act_spec, traj_len, batch_sz)
 
         self.sess_mgr = sess_mgr
         self.discount = discount
@@ -63,16 +63,16 @@ class ActorCriticAgent(MemoryAgent):
         MemoryAgent.on_step(self, step, obs, action, reward, done, value)
         self.logger.on_step(step, reward, done)
 
-        if (step + 1) % self.traj_len > 0:
+        if not self.batch_ready():
             return
 
-        next_value = self.sess_mgr.run(self.value, self.model.inputs, self.next_obs)
-        adv, returns = self.compute_advantages_and_returns(next_value)
+        next_values = self.sess_mgr.run(self.value, self.model.inputs, self.last_obs)
+        adv, returns = self.compute_advantages_and_returns(next_values)
 
         loss_terms, grads_norm = self.minimize(adv, returns)
 
-        self.sess_mgr.on_update((step + 1) // self.traj_len)
-        self.logger.on_update(step, loss_terms, grads_norm, returns, adv, next_value)
+        self.sess_mgr.on_update(self.n_batches)
+        self.logger.on_update(self.n_batches, loss_terms, grads_norm, returns, adv, next_values)
 
     def minimize(self, advantages, returns):
         inputs = self.obs + self.acts + [advantages, returns]
@@ -86,7 +86,7 @@ class ActorCriticAgent(MemoryAgent):
         loss_terms, grads_norm, *_ = self.sess_mgr.run(ops, tf_inputs, inputs)
         return loss_terms, grads_norm
 
-    def compute_advantages_and_returns(self, bootstrap_value=0.):
+    def compute_advantages_and_returns(self, bootstrap_value):
         """
         Bootstrap helps with stabilizing advantages with sparse rewards
         GAE can help with reducing variance of policy gradient estimates

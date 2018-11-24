@@ -16,9 +16,8 @@ class Logger:
 
 
 class StreamLogger(Logger):
-    def __init__(self, n_envs, traj_len, log_freq=100, rew_avg_eps=100, sess_mgr=None, log_file_path=None):
+    def __init__(self, n_envs, log_freq=100, rew_avg_eps=100, sess_mgr=None, log_file_path=None):
         self.n_envs = n_envs
-        self.traj_len = traj_len
         self.log_freq = log_freq
         self.rew_avg_eps = rew_avg_eps
 
@@ -64,18 +63,17 @@ class StreamLogger(Logger):
             self.env_eps[i] += 1
 
     def on_update(self, step, loss_terms, grads_norm, returns, adv, next_value):
-        update_step = (step + 1) // self.traj_len
-        if update_step > 1 and update_step % self.log_freq:
+        if step > 1 and step % self.log_freq:
             return
 
-        frames = (step+1) * self.n_envs
+        frames = step * np.prod(returns.shape)
         run_time = max(1, int(time.time() - self.start_time)) + self.run_time
         ep_rews = np.array(self.ep_rews_sum or [0])
 
         logs = dict(
             runtime=run_time,
             frames=frames,
-            updates=update_step,
+            updates=step,
             episodes=int(np.sum(self.env_eps)),
             frames_per_second=frames // run_time,
             ep_rews_mean=ep_rews.mean(),

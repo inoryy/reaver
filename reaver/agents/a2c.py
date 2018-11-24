@@ -12,7 +12,8 @@ class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
         obs_spec,
         act_spec,
         n_envs=4,
-        batch_sz=128,
+        traj_len=16,
+        batch_sz=16,
         value_coef=0.5,
         entropy_coef=0.001,
     ):
@@ -20,7 +21,7 @@ class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
         self.entropy_coef = entropy_coef
 
         SyncRunningAgent.__init__(self, n_envs)
-        ActorCriticAgent.__init__(self, sess_mgr, obs_spec, act_spec, n_envs, batch_sz)
+        ActorCriticAgent.__init__(self, sess_mgr, obs_spec, act_spec, traj_len, batch_sz)
 
     def loss_fn(self):
         adv = tf.placeholder(tf.float32, [None], name="advantages")

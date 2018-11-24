@@ -19,9 +19,11 @@ class SessionManager:
         checkpoint = tf.train.latest_checkpoint(self.checkpoints_path)
         if checkpoint:
             self.saver.restore(self.sess, checkpoint)
-            # merge with previous summary session
-            self.summary_writer.add_session_log(
-                tf.SessionLog(status=tf.SessionLog.START), self.sess.run(self.global_step))
+
+            if self.training_enabled:
+                # merge with previous summary session
+                self.summary_writer.add_session_log(
+                    tf.SessionLog(status=tf.SessionLog.START), self.sess.run(self.global_step))
         else:
             self.sess.run(tf.global_variables_initializer())
         # this call locks the computational graph into read-only state,

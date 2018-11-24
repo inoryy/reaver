@@ -20,8 +20,9 @@ flags.DEFINE_bool('render', False, 'Whether to render first(!) env.')
 flags.DEFINE_string('gpu', '0', 'GPU(s) id(s) to use. If not set TensorFlow will use CPU.')
 
 flags.DEFINE_integer('envs', 4, 'Number of environments to execute in parallel.')
-flags.DEFINE_integer('batch_sz', None, 'Number of training samples to gather for 1 update.')
-flags.DEFINE_integer('updates', 1000000, 'Number of train updates (1 update has batch_sz samples).')
+flags.DEFINE_integer('traj_len', None, 'Number of training samples to gather per one trajectory.')
+flags.DEFINE_integer('batch_sz', None, 'Number of trajectories(!) to gather per one update.')
+flags.DEFINE_integer('updates', 1000000, 'Number of train updates (1 update has batch_sz * traj_len samples).')
 
 flags.DEFINE_integer('ckpt_freq', 500, 'Number of train updates per one checkpoint save.')
 flags.DEFINE_integer('log_freq', 100, 'Number of train updates per one console log.')
@@ -63,9 +64,8 @@ def main(argv):
 
     if args.test:
         args.envs = 4
+        args.batch_sz = 4
         args.log_freq = 10
-        args.updates = 100
-        args.batch_sz = 500
         args.restore = True
     expt = rvr.utils.Experiment(args.results_dir, args.env, args.agent, args.experiment, args.restore)
 
@@ -81,6 +81,10 @@ def main(argv):
 
     gin.parse_config_files_and_bindings(gin_files, args.gin_bindings)
 
+    # TODO: do this the other way around - put these as gin bindings
+    if not args.traj_len:
+        args.traj_len = int(gin.query_parameter('ActorCriticAgent.traj_len'))
+
     if not args.batch_sz:
         args.batch_sz = int(gin.query_parameter('ActorCriticAgent.batch_sz'))
 
@@ -90,14 +94,14 @@ def main(argv):
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     sess_mgr = rvr.utils.tensorflow.SessionManager(sess, expt.path, args.ckpt_freq, training_enabled=not args.test)
 
-    agent = agent_cls[args.agent](sess_mgr, env.obs_spec(), env.act_spec(), args.envs, args.batch_sz)
-    agent.logger = rvr.utils.StreamLogger(args.envs, agent.traj_len, args.log_freq, args.eps_avg, sess_mgr, expt.log_path)
+    agent = agent_cls[args.agent](sess_mgr, env.obs_spec(), env.act_spec(), args.envs, args.traj_len, args.batch_sz)
+    agent.logger = rvr.utils.StreamLogger(args.envs, args.log_freq, args.eps_avg, sess_mgr, expt.log_path)
 
     if sess_mgr.training_enabled:
         expt.save_gin_config()
         expt.save_model_summary(agent.model)
 
-    agent.run(env, args.updates * args.batch_sz // args.envs)
+    agent.run(env, args.updates)
 
 
 if __name__ == '__main__':
