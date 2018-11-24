@@ -10,8 +10,8 @@ ActorCriticAgent.normalize_advantages = True
 ActorCriticAgent.clip_rewards = 0.0
 
 AdvantageActorCriticAgent.value_coef = 0.5
-AdvantageActorCriticAgent.entropy_coef = 0.0001
+AdvantageActorCriticAgent.entropy_coef = 0.001
 
-ProximalPolicyOptimizationAgent.entropy_coef = 0.0001
+ProximalPolicyOptimizationAgent.entropy_coef = 0.0005
 ProximalPolicyOptimizationAgent.n_updates = 2
 ProximalPolicyOptimizationAgent.minibatch_sz = 500
