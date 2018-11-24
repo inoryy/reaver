@@ -162,6 +162,9 @@ Note that I did not put much time into hyperparameter tuning, focusing mostly on
 rather than maximizing sample efficiency. For example, naive first try on `MoveToBeacon` required about `4 million` samples,
 however after some playing around I was able to reduce it down all the way to `102,400` (~40x reduction) with PPO agent.
 
+[![](https://i.imgur.com/rIoc6rTl.png)](https://i.imgur.com/rIoc6rT.png)  
+Figure: Episode rewards mean with std.dev filled in-between. Click to enlarge.
+
 
 ### Video Recording
 
