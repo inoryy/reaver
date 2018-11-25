@@ -130,6 +130,11 @@ After Reaver has finished training, you can look at how it performs by appending
 python -m reaver.run --env MoveToBeacon --agent a2c --test --render 2> stderr.log
 ```
 
+### Google Colab
+
+A companion [Google Colab notebook](https://colab.research.google.com/drive/1DvyCUdymqgjk85FB5DrTtAwTFbI494x7) 
+notebook is available to try out Reaver online.
+
 ## Key Features
 
 ### Performance
