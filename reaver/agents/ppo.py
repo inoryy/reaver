@@ -2,6 +2,8 @@ import gin.tf
 import numpy as np
 import tensorflow as tf
 
+from reaver.utils import Logger
+from reaver.models import build_mlp, MultiPolicy
 from reaver.agents.base import SyncRunningAgent, ActorCriticAgent
 
 
@@ -9,17 +11,27 @@ from reaver.agents.base import SyncRunningAgent, ActorCriticAgent
 class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
     def __init__(
         self,
-        sess_mgr,
         obs_spec,
         act_spec,
+        model_fn=build_mlp,
+        policy_cls=MultiPolicy,
+        sess_mgr=None,
         n_envs=4,
         traj_len=16,
         batch_sz=16,
+        discount=0.99,
+        gae_lambda=0.95,
+        clip_rewards=0.0,
+        normalize_advantages=True,
+        bootstrap_terminals=False,
+        clip_grads_norm=0.0,
         n_updates=3,
         minibatch_sz=128,
         clip_ratio=0.2,
         value_coef=0.5,
         entropy_coef=0.001,
+        optimizer=tf.train.AdamOptimizer(),
+        logger=Logger(),
     ):
         self.n_updates = n_updates
         self.minibatch_sz = minibatch_sz
@@ -28,7 +40,10 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         self.entropy_coef = entropy_coef
 
         SyncRunningAgent.__init__(self, n_envs)
-        ActorCriticAgent.__init__(self, sess_mgr, obs_spec, act_spec, traj_len, batch_sz)
+        ActorCriticAgent.__init__(
+            obs_spec, act_spec, model_fn, policy_cls, sess_mgr, traj_len, batch_sz, discount,
+            gae_lambda, clip_rewards, normalize_advantages, bootstrap_terminals, clip_grads_norm, optimizer, logger
+        )
 
         self.start_step = self.start_step // self.n_updates
 

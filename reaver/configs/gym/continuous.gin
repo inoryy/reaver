@@ -2,11 +2,11 @@ include 'reaver/configs/gym/base.gin'
 
 tf.train.AdamOptimizer.learning_rate = 0.01
 
-ActorCriticAgent.batch_sz = 1000
-ActorCriticAgent.discount = 0.99
-ActorCriticAgent.gae_lambda = 0.95
-ActorCriticAgent.clip_rewards = 10.0
-ActorCriticAgent.normalize_advantages = True
-ActorCriticAgent.clip_grads_norm = 100.0
+AdvantageActorCriticAgent.batch_sz = 1000
+AdvantageActorCriticAgent.discount = 0.99
+AdvantageActorCriticAgent.gae_lambda = 0.95
+AdvantageActorCriticAgent.clip_rewards = 10.0
+AdvantageActorCriticAgent.normalize_advantages = True
+AdvantageActorCriticAgent.clip_grads_norm = 100.0
 
 ProximalPolicyOptimizationAgent.minibatch_sz = 500

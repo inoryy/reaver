@@ -2,10 +2,10 @@ import gin.tf.external_configurables
 
 tf.train.AdamOptimizer.learning_rate = 0.005
 
-ActorCriticAgent.batch_sz = 1000
-ActorCriticAgent.policy_cls = @MultiPolicy
-ActorCriticAgent.model_fn = @build_cnn_nature
-ActorCriticAgent.optimizer = @tf.train.AdamOptimizer()
+AdvantageActorCriticAgent.batch_sz = 1000
+AdvantageActorCriticAgent.policy_cls = @MultiPolicy
+AdvantageActorCriticAgent.model_fn = @build_cnn_nature
+AdvantageActorCriticAgent.optimizer = @tf.train.AdamOptimizer()
 
 AdvantageActorCriticAgent.value_coef = 0.5
 AdvantageActorCriticAgent.entropy_coef = 0.01

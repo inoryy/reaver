@@ -6,19 +6,19 @@ from abc import abstractmethod
 from reaver.utils import Logger
 from reaver.agents.base import MemoryAgent
 from reaver.models import build_mlp, MultiPolicy
+from reaver.utils.tensorflow import SessionManager
 
 
-@gin.configurable
 class ActorCriticAgent(MemoryAgent):
     def __init__(
         self,
-        sess_mgr,
         obs_spec,
         act_spec,
-        traj_len=16,
-        batch_sz=16,
         model_fn=build_mlp,
         policy_cls=MultiPolicy,
+        sess_mgr=None,
+        traj_len=16,
+        batch_sz=16,
         discount=0.99,
         gae_lambda=0.95,
         clip_rewards=0.0,
@@ -28,7 +28,8 @@ class ActorCriticAgent(MemoryAgent):
         optimizer=tf.train.AdamOptimizer(),
         logger=Logger()
     ):
-        MemoryAgent.__init__(self, obs_spec, act_spec, traj_len, batch_sz)
+        if not sess_mgr:
+            sess_mgr = SessionManager()
 
         self.sess_mgr = sess_mgr
         self.discount = discount
@@ -51,7 +52,9 @@ class ActorCriticAgent(MemoryAgent):
 
         self.sess_mgr.restore_or_init()
         # NB! changing trajectory length in-between checkpoints will break the logs
-        self.start_step = self.sess_mgr.start_step * self.traj_len
+        self.start_step = self.sess_mgr.start_step * traj_len
+
+        MemoryAgent.__init__(self, obs_spec, act_spec, traj_len, batch_sz)
 
     def get_action_and_value(self, obs):
         return self.sess_mgr.run([self.policy.sample, self.value], self.model.inputs, obs)

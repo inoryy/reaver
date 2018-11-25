@@ -94,7 +94,8 @@ def main(argv):
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     sess_mgr = rvr.utils.tensorflow.SessionManager(sess, expt.path, args.ckpt_freq, training_enabled=not args.test)
 
-    agent = agent_cls[args.agent](sess_mgr, env.obs_spec(), env.act_spec(), args.envs, args.traj_len, args.batch_sz)
+    agent = agent_cls[args.agent](env.obs_spec(), env.act_spec(), sess_mgr=sess_mgr,
+                                  n_envs=args.envs, traj_len=args.traj_len, batch_sz=args.batch_sz)
     agent.logger = rvr.utils.StreamLogger(args.envs, args.log_freq, args.eps_avg, sess_mgr, expt.log_path)
 
     if sess_mgr.training_enabled:
