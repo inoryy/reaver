@@ -83,10 +83,10 @@ def main(argv):
 
     # TODO: do this the other way around - put these as gin bindings
     if not args.traj_len:
-        args.traj_len = int(gin.query_parameter('ActorCriticAgent.traj_len'))
+        args.traj_len = int(gin.query_parameter('AdvantageActorCriticAgent.traj_len'))
 
     if not args.batch_sz:
-        args.batch_sz = int(gin.query_parameter('ActorCriticAgent.batch_sz'))
+        args.batch_sz = int(gin.query_parameter('AdvantageActorCriticAgent.batch_sz'))
 
     env_cls = rvr.envs.GymEnv if '-v' in args.env else rvr.envs.SC2Env
     env = env_cls(args.env, args.render, max_ep_len=args.max_ep_len)

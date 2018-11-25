@@ -41,7 +41,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
 
         SyncRunningAgent.__init__(self, n_envs)
         ActorCriticAgent.__init__(
-            obs_spec, act_spec, model_fn, policy_cls, sess_mgr, traj_len, batch_sz, discount,
+            self, obs_spec, act_spec, model_fn, policy_cls, sess_mgr, traj_len, batch_sz, discount,
             gae_lambda, clip_rewards, normalize_advantages, bootstrap_terminals, clip_grads_norm, optimizer, logger
         )
 
