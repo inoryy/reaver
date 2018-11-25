@@ -31,7 +31,59 @@ necessary to train DRL agents by modifying only a small and isolated part of the
 For veteran researchers Reaver offers simple, but performance-optimized codebase with modular architecture: 
 agent, model, and environment are decoupled and can be swapped at will.
 
-### Quick Start
+## Installation
+
+### Requirements
+
+* numpy >= 1.13
+* absl-py >= 0.2.2
+* gin-config >= 0.1.1
+* TensorFlow >= 1.10
+* TensorFlow Probability >= 0.4
+* StarCraft II >= 4.1.2 ([instructions](https://github.com/Blizzard/s2client-proto#downloads))
+* PySC2 > 2.0.1 (**NB**! As of 25/11/18 you must [install from source](https://github.com/deepmind/pysc2#git) since PIP version is outdated)
+
+#### Optional Extras
+If you would like to use Reaver with other supported environments, you must install relevant packages as well:
+
+* gym >= 0.10.0
+* atari-py >= 0.1.5
+* mujoco-py >= 1.50.0
+  * roboschool >= 1.0(alternative)
+
+It is highly recommended to use Reaver on `Linux OS`, both due to stability and performance considerations.
+To view results with full graphics you can save a replay of the agent on Linux and open it on Windows. This is how the video recording was made.
+
+### PIP Package
+
+Easiest way to install Reaver is through the `PIP` package manager: `pip install reaver`.  
+
+**NB!** Reaver specifies `TensorFlow` only as a soft dependency and it will not be installed by default. This is to avoid
+`tensorflow` overwriting `tensorflow-gpu` and vise-versa. You can install `tensorflow` along with Reaver by specifying either
+`tf-cpu` or `tf-gpu` flag with `pip install` command: `pip install reaver[tf-gpu]`.  
+
+You can also install additional extras (e.g. `gym`) through the helper flags: `pip install reaver[tf-gpu,gym,atari,mujoco]`.
+
+### Manual Installation
+
+If you plan to modify `Reaver` codebase you can retain its module functionality by installing from source:
+
+```
+$ git clone https://github.com/inoryy/reaver
+$ pip install -e reaver/
+```
+
+By installing with `-e` flag `Python` will now look for `reaver` in the specified folder, rather than `site-packages` storage.
+
+### Optimized TensorFlow
+
+The `TensorFlow` that is distributed through `PIP` is built to target as many architectures / devices as possible, which
+means that various optimization flags are disabled by default. For example, if your CPU supports `AVX2` (is newer than 5 years),
+it is highly recommended to use a custom built TensorFlow instead. If building from source is not an option for you,
+then [this repository](https://github.com/inoryy/tensorflow-optimized-wheels) might be useful - it contains newest `TensorFlow`
+releases built for newest CUDA / CuDNN versions, which often come with performance boosts even for older GPUs.
+
+## Quick Start
 
 You can train a DRL agent with multiple StarCraft II environments running in parallel with just four lines of code!
 
@@ -98,12 +150,12 @@ This ensures that extending functionality in one module is seamlessly integrated
 All configuration is handled through [gin-config](https://github.com/google/gin-config) and can be easily shared as `.gin` files. 
 This includes all hyperparameters, environment arguments, and model definitions.
 
-## Implemented Agents
+### Implemented Agents
 
 * Advantage Actor-Critic (A2C)
 * Proximal Policy Optimization (PPO)
 
-### Additional RL Features
+#### Additional RL Features
 
 * Generalized Advantage Estimation (GAE)
 * Rewards clipping
@@ -112,7 +164,7 @@ This includes all hyperparameters, environment arguments, and model definitions.
 * Baseline (critic) bootstrapping
 * Separate baseline network
 
-## But Wait! There's more!
+### But Wait! There's more!
 
 When experimenting with novel ideas it is important to get feedback quickly, which is often not realistic with complex environments like StarCraft II.
 As Reaver was built with modular architecture, its agent implementations are not actually tied to StarCraft II at all.
@@ -175,8 +227,8 @@ BuildMarines                |              - |              - |                 
 * `Approx. Time` is the approximate training time on a `laptop` with Intel `i5-7300HQ` CPU (4 cores) and `GTX 1050` GPU.
 
 Note that I did not put much time into hyperparameter tuning, focusing mostly on verifying that the agent is capable of learning
-rather than maximizing sample efficiency. For example, naive first try on `MoveToBeacon` required about `4 million` samples,
-however after some playing around I was able to reduce it down all the way to `102,400` (~40x reduction) with PPO agent.
+rather than maximizing sample efficiency. For example, naive first try on `MoveToBeacon` required about 4 million samples,
+however after some playing around I was able to reduce it down all the way to 102,000 (~40x reduction) with PPO agent.
 
 [![](https://i.imgur.com/rIoc6rTl.png)](https://i.imgur.com/rIoc6rT.png)  
 Mean episode rewards with std.dev filled in-between. Click to enlarge.
@@ -209,70 +261,6 @@ You can use pre-trained weights by appending `--experiment` flag to `reaver.run`
     python reaver.run --map <map_name> --experiment <map_name>_reaver --test
 
 Tensorboard logs are available if you launch `tensorboard --logidr=results/summaries`.
-
-## Installation
-
-### Requirements
-
-* numpy >= 1.13
-* absl-py >= 0.2.2
-* gin-config >= 0.1.1
-* TensorFlow >= 1.10
-* TensorFlow Probability >= 0.4
-* StarCraft II >= 4.1.2 ([instructions](https://github.com/Blizzard/s2client-proto#downloads))
-* PySC2 > 2.0.1 (**NB**! As of 25/11/18 you must [install from source](https://github.com/deepmind/pysc2#git) since PIP version is outdated)
-
-#### Optional Extras
-If you would like to use Reaver with other supported environments, you must install relevant packages as well:
-
-* gym >= 0.10.0
-* atari-py >= 0.1.5
-* mujoco-py >= 1.50.0
-  * roboschool >= 1.0(alternative)
-
-It is highly recommended to use Reaver on `Linux OS`, both due to stability and performance considerations.
-To view results with full graphics you can save a replay of the agent on Linux and open it on Windows. This is how the video recording was made.
-
-### PIP Package
-
-Easiest way to install Reaver is through the `PIP` package manager:
-
-```
-pip install reaver
-```
-
-**NB!** Reaver specifies `TensorFlow` only as a soft dependency and it will not be installed by default. This is to avoid
-`tensorflow` overwriting `tensorflow-gpu` and vise-versa. You can install `tensorflow` along with Reaver by specifying either
-`tf-cpu` or `tf-gpu` flag with `pip install` command:
-
-```
-pip install reaver[tf-gpu]
-```
-
-You can also install additional optional requirements (e.g. `Gym`) through the helper flags:
-
-```
-pip install reaver[tf-gpu,gym,atari,mujoco]
-```
-
-### Manual Installation
-
-If you plan to modify `Reaver` codebase you can retain its module functionality by installing from source:
-
-```
-$ git clone https://github.com/inoryy/reaver
-$ pip install -e reaver/
-```
-
-By installing with `-e` flag `Python` will now look for `reaver` in the specified folder, rather than `site-packages` storage.
-
-### Optimized TensorFlow
-
-The `TensorFlow` that is distributed through `PIP` is built to target as many architectures / devices as possible, which
-means that various optimization flags are disabled by default. For example, if your CPU supports `AVX2` (is newer than 5 years),
-it is highly recommended to use a custom built TensorFlow instead. If building from source is not an option for you,
-then [this repository](https://github.com/inoryy/tensorflow-optimized-wheels) might be useful - it contains newest `TensorFlow`
-releases built for newest CUDA / CuDNN versions, which often come with performance boosts even for older GPUs.
 
 ## Roadmap
 
@@ -327,7 +315,7 @@ You can still access it on the [v1.0](https://github.com/inoryy/reaver-pysc2/tre
 
 ## Support
 
-IF you encounter a codebase related problem then please open a ticket on GitHub and describe it in as much detail as possible. 
+If you encounter a codebase related problem then please open a ticket on GitHub and describe it in as much detail as possible. 
 If you have more general questions or simply seeking advice feel free to send me an email.
 
 I am also a proud member of an active and friendly [SC2AI](http://sc2ai.net) online community, 
