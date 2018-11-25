@@ -104,7 +104,7 @@ agent.run(env)
 Moreover, Reaver comes with highly configurable commandline tools, so this task can be reduced to a short one-liner!
 
 ```bash
-python -m reaver.run --env MoveToBeacon --agent a2c --envs 4
+python -m reaver.run --env MoveToBeacon --agent a2c --envs 4 2> results/stderr.log
 ```
 
 With the line above Reaver will initialize the training procedure with a set of pre-defined hyperparameters, optimized
