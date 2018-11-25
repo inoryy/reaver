@@ -23,15 +23,14 @@ setup(
         'PySC2 >= 2.0',
         'absl-py >= 0.2.2',
         'gin-config >= 0.1.1',
+        'tensorflow-probability >= 0.4.0'
     ],
     extras_require={
         'tf-cpu': [
-            'tensorflow >= 1.8.0',
-            'tensorflow-probability >= 0.4.0'
+            'tensorflow >= 1.10.0',
         ],
         'tf-gpu': [
-            'tensorflow-gpu >= 1.8.0',
-            'tensorflow-probability-gpu >= 0.4.0'
+            'tensorflow-gpu >= 1.10.0',
         ],
         'gym': [
             'PyOpenGL',
