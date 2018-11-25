@@ -198,7 +198,7 @@ Map                         |                 Reaver (A2C) | DeepMind SC2LE | De
 MoveToBeacon                |       26.3 (1.8)<br>[21, 31] |             26 |             27 |           28 |
 CollectMineralShards        |    102.8 (10.8)<br>[81, 135] |            103 |            196 |          177 |
 DefeatRoaches               |     72.5 (43.5)<br>[21, 283] |            100 |            303 |          215 |
-FindAndDefeatZerglings      |                           -- |             45 |             62 |           61 |
+FindAndDefeatZerglings      |       22.1 (3.6)<br>[12, 40] |             45 |             62 |           61 |
 DefeatZerglingsAndBanelings |     56.8 (20.8)<br>[21, 154] |             62 |            736 |          727 |
 CollectMineralsAndGas       |  2267.5 (488.8)<br>[0, 3320] |          3,978 |          5,055 |        7,566 |
 BuildMarines                |                           -- |              3 |            123 |          133 |
@@ -217,7 +217,7 @@ Map                         |        Samples |       Episodes | Approx. Time (hr
 MoveToBeacon                |        563,200 |          2,304 |               0.5 |
 CollectMineralShards        |     74,752,000 |        311,426 |                50 |
 DefeatRoaches               |    172,800,000 |      1,609,211 |               150 |
-FindAndDefeatZerglings      |              - |              - |                 - |
+FindAndDefeatZerglings      |     29,760,000 |         89,654 |                20 |
 DefeatZerglingsAndBanelings |     10,496,000 |        273,463 |                15 |
 CollectMineralsAndGas       |     16,864,000 |         20,544 |                10 |
 BuildMarines                |              - |              - |                 - |
