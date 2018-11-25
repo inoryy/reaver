@@ -104,7 +104,7 @@ agent.run(env)
 Moreover, Reaver comes with highly configurable commandline tools, so this task can be reduced to a short one-liner!
 
 ```bash
-python -m reaver.run --env MoveToBeacon --agent a2c --envs 4 2> results/stderr.log
+python -m reaver.run --env MoveToBeacon --agent a2c --envs 4 2> stderr.log
 ```
 
 With the line above Reaver will initialize the training procedure with a set of pre-defined hyperparameters, optimized
@@ -127,7 +127,7 @@ and GTX 1050 GPU, the training took around 30 minutes.
 After Reaver has finished training, you can look at how it performs by appending `--test` and `--render` flags to the one-liner.
 
 ```bash
-python -m reaver.run --env MoveToBeacon --agent a2c --test --render 2> results/stderr.log
+python -m reaver.run --env MoveToBeacon --agent a2c --test --render 2> stderr.log
 ```
 
 ## Key Features
@@ -177,7 +177,7 @@ As Reaver was built with modular architecture, its agent implementations are not
 You can make drop-in replacements for many popular game environments (e.g. `openAI gym`) and verify implementations work with those first:
 
 ```bash
-python -m reaver.run --env CartPole-v0 --agent a2c 2> results/stderr.log
+python -m reaver.run --env CartPole-v0 --agent a2c 2> stderr.log
 ```
 
 ```python
@@ -264,7 +264,7 @@ Simply download an experiment archive from the [releases](https://github.com/ino
 
 You can use pre-trained weights by appending `--experiment` flag to `reaver.run` command:
 
-    python reaver.run --map <map_name> --experiment <map_name>_reaver --test 2> results/stderr.log
+    python reaver.run --map <map_name> --experiment <map_name>_reaver --test 2> stderr.log
 
 Tensorboard logs are available if you launch `tensorboard --logidr=results/summaries`.
 

@@ -41,19 +41,20 @@ agent_cls = {
 }
 
 gin_configs = {
-    'CartPole-v0':          ['gym/base.gin'],
+    'CartPole-v0': ['gym/base.gin'],
 
-    'InvertedPendulum-v2':  ['mujoco/base.gin'],
-    'HalfCheetah-v2':       ['mujoco/base.gin'],
+    'PongNoFrameskip-v0': ['atari/base.gin'],
 
-    'PongNoFrameskip-v0':   ['atari/base.gin'],
+    'InvertedPendulum-v2': ['mujoco/base.gin'],
+    'HalfCheetah-v2':      ['mujoco/base.gin'],
 
-    'DefeatRoaches':        ['sc2/defeat_roaches.gin'],
-    'MoveToBeacon':         ['sc2/move_to_beacon.gin'],
-    'CollectMineralShards': ['sc2/collect_mineral_shards.gin'],
-    'CollectMineralsAndGas': ['sc2/collect_minerals_and_gas.gin'],
-    'FindAndDefeatZerglings': ['sc2/find_and_defeat_zerglings.gin'],
+    'MoveToBeacon':                ['sc2/move_to_beacon.gin'],
+    'CollectMineralShards':        ['sc2/collect_mineral_shards.gin'],
+    'DefeatRoaches':               ['sc2/defeat_roaches.gin'],
     'DefeatZerglingsAndBanelings': ['sc2/defeat_zerglings_and_banelings.gin'],
+    'FindAndDefeatZerglings':      ['sc2/find_and_defeat_zerglings.gin'],
+    'CollectMineralsAndGas':       ['sc2/collect_minerals_and_gas.gin'],
+    'BuildMarines':                ['sc2/build_marines.gin'],
 }
 
 
@@ -67,10 +68,12 @@ def main(argv):
         args.batch_sz = 4
         args.log_freq = 10
         args.restore = True
+
     expt = rvr.utils.Experiment(args.results_dir, args.env, args.agent, args.experiment, args.restore)
 
+    base_path = os.path.dirname(os.path.abspath(__file__))
     gin_files = gin_configs.get(args.env, [])
-    gin_files = ['reaver/configs/' + fl for fl in gin_files]
+    gin_files = [base_path + '/configs/' + fl for fl in gin_files]
     if args.restore:
         gin_files += [expt.config_path]
     gin_files += args.gin_files
