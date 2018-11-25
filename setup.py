@@ -1,9 +1,9 @@
-from setuptools import setup
+import setuptools
 
 with open("README.md", 'r') as f:
     long_description = f.read()
 
-setup(
+setuptools.setup(
     name='reaver',
     version='2.0.0',
     author='Roman Ring',
@@ -11,13 +11,8 @@ setup(
     description='Reaver: Deep Reinforcement Learning Agent for StarCraft II',
     long_description=long_description,
     keywords='reaver starcraft tensorflow machine reinforcement learning neural network',
-    packages=[
-        'reaver',
-        'reaver.envs',
-        'reaver.models',
-        'reaver.agents',
-        'reaver.utils'
-    ],
+    include_package_data=True,
+    packages=setuptools.find_packages(),
     install_requires=[
         'numpy >= 1.13',
         'PySC2 >= 2.0',
