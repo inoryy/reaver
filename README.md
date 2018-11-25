@@ -56,13 +56,19 @@ To view results with full graphics you can save a replay of the agent on Linux a
 
 ### PIP Package
 
-Easiest way to install Reaver is through the `PIP` package manager: `pip install reaver`.  
+Easiest way to install Reaver is through the `PIP` package manager:
+ 
+    pip install reaver
 
 **NB!** Reaver specifies `TensorFlow` only as a soft dependency and it will not be installed by default. This is to avoid
 `tensorflow` overwriting `tensorflow-gpu` and vise-versa. You can install `tensorflow` along with Reaver by specifying either
-`tf-cpu` or `tf-gpu` flag with `pip install` command: `pip install reaver[tf-gpu]`.  
+`tf-cpu` or `tf-gpu` flag with `pip install` command: 
 
-You can also install additional extras (e.g. `gym`) through the helper flags: `pip install reaver[tf-gpu,gym,atari,mujoco]`.
+    pip install reaver[tf-gpu]
+
+You can also install additional extras (e.g. `gym`) through the helper flags: 
+
+    pip install reaver[tf-gpu,gym,atari,mujoco]
 
 ### Manual Installation
 
@@ -91,14 +97,14 @@ You can train a DRL agent with multiple StarCraft II environments running in par
 import reaver as rvr
 
 env = rvr.envs.SC2Env(map_name='MoveToBeacon')
-agent = rvr.agents.A2C(env.obs_spec(), env.act_spec(), rvr.models.build_fully_conv, rvr.models.SC2MultiPolicy)
+agent = rvr.agents.A2C(env.obs_spec(), env.act_spec(), rvr.models.build_fully_conv, rvr.models.SC2MultiPolicy, n_envs=4)
 agent.run(env)
 ```
 
 Moreover, Reaver comes with highly configurable commandline tools, so this task can be reduced to a short one-liner!
 
 ```bash
-python -m reaver.run --env MoveToBeacon --agent a2c
+python -m reaver.run --env MoveToBeacon --agent a2c --envs 4
 ```
 
 With the line above Reaver will initialize the training procedure with a set of pre-defined hyperparameters, optimized
@@ -258,7 +264,7 @@ Simply download an experiment archive from the [releases](https://github.com/ino
 
 You can use pre-trained weights by appending `--experiment` flag to `reaver.run` command:
 
-> python reaver.run --map <map_name> --experiment <map_name>_reaver --test 2> results/stderr.log
+    python reaver.run --map <map_name> --experiment <map_name>_reaver --test 2> results/stderr.log
 
 Tensorboard logs are available if you launch `tensorboard --logidr=results/summaries`.
 
