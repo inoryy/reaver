@@ -105,7 +105,7 @@ def main(argv):
         expt.save_gin_config()
         expt.save_model_summary(agent.model)
 
-    agent.run(env, args.updates)
+    agent.run(env, args.updates * args.traj_len * args.batch_sz // args.envs)
 
 
 if __name__ == '__main__':
