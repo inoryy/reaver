@@ -28,6 +28,8 @@ class ActorCriticAgent(MemoryAgent):
         optimizer=tf.train.AdamOptimizer(),
         logger=Logger()
     ):
+        MemoryAgent.__init__(self, obs_spec, act_spec, traj_len, batch_sz)
+
         if not sess_mgr:
             sess_mgr = SessionManager()
 
@@ -52,9 +54,8 @@ class ActorCriticAgent(MemoryAgent):
 
         self.sess_mgr.restore_or_init()
         # NB! changing trajectory length in-between checkpoints will break the logs
+        self.n_batches = self.sess_mgr.start_step
         self.start_step = self.sess_mgr.start_step * traj_len
-
-        MemoryAgent.__init__(self, obs_spec, act_spec, traj_len, batch_sz)
 
     def get_action_and_value(self, obs):
         return self.sess_mgr.run([self.policy.sample, self.value], self.model.inputs, obs)
