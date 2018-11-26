@@ -75,8 +75,8 @@ You can also install additional extras (e.g. `gym`) through the helper flags:
 If you plan to modify `Reaver` codebase you can retain its module functionality by installing from source:
 
 ```
-$ git clone https://github.com/inoryy/reaver
-$ pip install -e reaver/
+$ git clone https://github.com/inoryy/reaver-pysc2
+$ pip install -e reaver-pysc2/
 ```
 
 By installing with `-e` flag `Python` will now look for `reaver` in the specified folder, rather than `site-packages` storage.
