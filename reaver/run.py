@@ -72,7 +72,7 @@ def main(argv):
     expt = rvr.utils.Experiment(args.results_dir, args.env, args.agent, args.experiment, args.restore)
 
     base_path = os.path.dirname(os.path.abspath(__file__))
-    gin_files = gin_configs.get(args.env, [])
+    gin_files = gin_configs.get(args.env, ['base.gin'])
     gin_files = [base_path + '/configs/' + fl for fl in gin_files]
     if args.restore:
         gin_files += [expt.config_path]
