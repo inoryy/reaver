@@ -4,19 +4,27 @@ import tensorflow as tf
 from abc import abstractmethod
 
 from reaver.utils import Logger
+from reaver.envs.base import Spec
 from reaver.agents.base import MemoryAgent
-from reaver.models import build_mlp, MultiPolicy
 from reaver.utils.tensorflow import SessionManager
+from reaver.utils.typing import ModelBuilder, PolicyType
 
 
 class ActorCriticAgent(MemoryAgent):
+    """
+    Abstract class, unifies deep actor critic functionality
+    Handles on_step callbacks, either updating current batch
+    or executing one training step if the batch is ready
+
+    Extending classes only need to implement loss_fn method
+    """
     def __init__(
         self,
-        obs_spec,
-        act_spec,
-        model_fn=build_mlp,
-        policy_cls=MultiPolicy,
-        sess_mgr=None,
+        obs_spec: Spec,
+        act_spec: Spec,
+        model_fn: ModelBuilder,
+        policy_cls: PolicyType,
+        sess_mgr: SessionManager = None,
         traj_len=16,
         batch_sz=16,
         discount=0.99,

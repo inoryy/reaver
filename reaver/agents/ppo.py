@@ -3,19 +3,35 @@ import numpy as np
 import tensorflow as tf
 
 from reaver.utils import Logger
-from reaver.models import build_mlp, MultiPolicy
+from reaver.envs.base import Spec
+from reaver.utils.tensorflow import SessionManager
+from reaver.utils.typing import ModelBuilder, PolicyType
 from reaver.agents.base import SyncRunningAgent, ActorCriticAgent
 
 
 @gin.configurable
 class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
+    """
+    PPO: clipped version of the Proximal Policy Optimization algorithm
+
+    Here "clipped" refers to how trusted policy region is enforced.
+    While orig. PPO relied on KL divergence, this clips the pi / pi_old ratio.
+
+    See article for more details: https://arxiv.org/abs/1707.06347
+
+    PPO specific parameters:
+
+    :param n_updates: number of minibatch optimization steps
+    :param minibatch_sz: size of the randomly sampled minibatch
+    :param clip_ratio: max interval for pi / pi_old: [1-clip_ratio, 1+clip_ratio]
+    """
     def __init__(
         self,
-        obs_spec,
-        act_spec,
-        model_fn=build_mlp,
-        policy_cls=MultiPolicy,
-        sess_mgr=None,
+        obs_spec: Spec,
+        act_spec: Spec,
+        model_fn: ModelBuilder,
+        policy_cls: PolicyType,
+        sess_mgr: SessionManager = None,
         n_envs=4,
         traj_len=16,
         batch_sz=16,

@@ -20,11 +20,9 @@ class SC2Env(Env):
         obs_features=None,
         action_ids=None
     ):
-        self.render = render
+        super().__init__(map_name, render, reset_done, max_ep_len)
+
         self.step_mul = step_mul
-        self.map_name = map_name
-        self.reset_done = reset_done
-        self.max_ep_len = max_ep_len
         self.spatial_dim = spatial_dim
         self._env = None
 
@@ -40,7 +38,7 @@ class SC2Env(Env):
         from pysc2.env import sc2_env
 
         self._env = sc2_env.SC2Env(
-            map_name=self.map_name,
+            map_name=self.id,
             visualize=self.render,
             agent_interface_format=[features.parse_agent_interface_format(
                 feature_screen=self.spatial_dim,
@@ -95,7 +93,7 @@ class SC2Env(Env):
     def make_specs(self):
         # importing here to lazy-load
         from pysc2.env import mock_sc2_env
-        mock_env = mock_sc2_env.SC2TestEnv(map_name=self.map_name, agent_interface_format=[
+        mock_env = mock_sc2_env.SC2TestEnv(map_name=self.id, agent_interface_format=[
             features.parse_agent_interface_format(feature_screen=self.spatial_dim, feature_minimap=self.spatial_dim)])
         self.act_wrapper.make_spec(mock_env.action_spec())
         self.obs_wrapper.make_spec(mock_env.observation_spec())

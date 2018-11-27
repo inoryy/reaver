@@ -9,7 +9,7 @@ START, STEP, RESET, STOP, DONE = range(5)
 
 class ProcEnv(Env):
     def __init__(self, env, idx, shm):
-        super().__init__()
+        super().__init__(env.id)
         self._env, self.idx, self.shm = env, idx, shm
         self.conn = self.w_conn = self.proc = None
 
@@ -61,7 +61,7 @@ class ProcEnv(Env):
 
 class MultiProcEnv(Env):
     def __init__(self, envs):
-        super().__init__()
+        super().__init__(envs[0].id)
         self.shm = [make_shared(len(envs), s) for s in envs[0].obs_spec().spaces]
         self.shm.append(make_shared(len(envs), Space((1,), name="reward")))
         self.shm.append(make_shared(len(envs), Space((1,), name="done")))

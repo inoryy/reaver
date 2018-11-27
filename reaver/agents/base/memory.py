@@ -1,9 +1,15 @@
 import numpy as np
 from .running import RunningAgent
+from reaver.envs.base import Spec
 
 
 class MemoryAgent(RunningAgent):
-    def __init__(self, obs_spec, act_spec, traj_len, batch_sz):
+    """
+    Handles experience memory storage - up to (B, T, ?),
+    where B is batch size, T is trajectory length
+    and ? is either 1 (None) for rewards/dones or act/obs shapes
+    """
+    def __init__(self, obs_spec: Spec, act_spec: Spec, traj_len, batch_sz):
         RunningAgent.__init__(self)
 
         self.traj_len = traj_len
@@ -21,7 +27,10 @@ class MemoryAgent(RunningAgent):
 
     def on_step(self, step, obs, action, reward, done, value=None):
         """
-        Note: memory agent will overwrite previous batch without warning
+        Used as a callback by extending agents.
+        Note that here "step" refers to update step, rather than agent timestep
+
+        NB! Agent will overwrite previous batch without warning
         Keeping track of memory state is up to extending subclasses
         """
         step = step % self.traj_len
@@ -50,4 +59,7 @@ class MemoryAgent(RunningAgent):
             self.n_batches += 1
 
     def batch_ready(self):
+        """
+        Returns true if on_step was called batch_sz times
+        """
         return self.batch_ptr == self.batch_sz

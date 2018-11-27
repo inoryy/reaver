@@ -5,10 +5,7 @@ from reaver.envs.atari import AtariPreprocessing
 
 class GymEnv(Env):
     def __init__(self, _id='CartPole-v0', render=False, reset_done=True, max_ep_len=None):
-        self.id = _id
-        self.render = render
-        self.reset_done = reset_done
-        self.max_ep_len = max_ep_len if max_ep_len else float('inf')
+        super().__init__(_id, render, reset_done, max_ep_len)
 
         self._env = None
         self.specs = None

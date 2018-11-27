@@ -1,13 +1,17 @@
-import time
+import copy
 from . import Agent
+from reaver.envs.base import Env, MultiProcEnv
 
 
 class RunningAgent(Agent):
+    """
+    Generic abstract class, defines API for interacting with an environment
+    """
     def __init__(self):
         self.next_obs = None
         self.start_step = 0
 
-    def run(self, env, n_steps=1000000):
+    def run(self, env: Env, n_steps=1000000):
         env = self.wrap_env(env)
         env.start()
         try:
@@ -35,21 +39,22 @@ class RunningAgent(Agent):
 
     def on_finish(self): ...
 
-    def wrap_env(self, env):
+    def wrap_env(self, env: Env) -> Env:
         return env
 
 
 class SyncRunningAgent(RunningAgent):
+    """
+    Abstract class that handles synchronous multiprocessing via MultiProcEnv helper
+    Not meant to be used directly, extending classes automatically get the feature
+    """
     def __init__(self, n_envs):
         RunningAgent.__init__(self)
         self.n_envs = n_envs
 
-    def wrap_env(self, env):
-        import copy
-        import reaver
-
+    def wrap_env(self, env: Env) -> Env:
         render, env.render = env.render, False
         envs = [env] + [copy.deepcopy(env) for _ in range(self.n_envs-1)]
         env.render = render
 
-        return reaver.envs.base.MultiProcEnv(envs)
+        return MultiProcEnv(envs)
