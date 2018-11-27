@@ -1,0 +1,20 @@
+import gin.tf.external_configurables
+
+ProximalPolicyOptimizationAgent.model_fn = @build_fully_conv
+ProximalPolicyOptimizationAgent.policy_cls = @SC2MultiPolicy
+
+ProximalPolicyOptimizationAgent.batch_sz = 32
+ProximalPolicyOptimizationAgent.traj_len = 16
+
+tf.train.AdamOptimizer.learning_rate = 0.0001
+ProximalPolicyOptimizationAgent.clip_grads_norm = 100.0
+ProximalPolicyOptimizationAgent.optimizer = @tf.train.AdamOptimizer()
+
+ProximalPolicyOptimizationAgent.discount = 0.99
+ProximalPolicyOptimizationAgent.gae_lambda = 0.0
+
+ProximalPolicyOptimizationAgent.value_coef = 0.1
+ProximalPolicyOptimizationAgent.entropy_coef = 0.0005
+
+ProximalPolicyOptimizationAgent.bootstrap_terminals = False
+ProximalPolicyOptimizationAgent.normalize_advantages = True

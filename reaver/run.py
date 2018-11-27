@@ -73,7 +73,7 @@ def main(argv):
 
     base_path = os.path.dirname(os.path.abspath(__file__))
     gin_files = gin_configs.get(args.env, ['base.gin'])
-    gin_files = [base_path + '/configs/' + fl for fl in gin_files]
+    gin_files = [os.path.join(base_path, 'configs', args.agent, fl) for fl in gin_files]
     if args.restore:
         gin_files += [expt.config_path]
     gin_files += args.gin_files
@@ -85,11 +85,13 @@ def main(argv):
     gin.parse_config_files_and_bindings(gin_files, args.gin_bindings)
 
     # TODO: do this the other way around - put these as gin bindings
+    full_agent_name = str(agent_cls[args.agent])[:-2].split('.')[-1]
+
     if not args.traj_len:
-        args.traj_len = int(gin.query_parameter('AdvantageActorCriticAgent.traj_len'))
+        args.traj_len = int(gin.query_parameter(full_agent_name + '.traj_len'))
 
     if not args.batch_sz:
-        args.batch_sz = int(gin.query_parameter('AdvantageActorCriticAgent.batch_sz'))
+        args.batch_sz = int(gin.query_parameter(full_agent_name + '.batch_sz'))
 
     env_cls = rvr.envs.GymEnv if '-v' in args.env else rvr.envs.SC2Env
     env = env_cls(args.env, args.render, max_ep_len=args.max_ep_len)
@@ -102,7 +104,7 @@ def main(argv):
     agent.logger = rvr.utils.StreamLogger(args.envs, args.log_freq, args.eps_avg, sess_mgr, expt.log_path)
 
     if sess_mgr.training_enabled:
-        expt.save_gin_config()
+        expt.save_gin_config(full_agent_name)
         expt.save_model_summary(agent.model)
 
     agent.run(env, args.updates * args.traj_len * args.batch_sz // args.envs)

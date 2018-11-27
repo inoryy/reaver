@@ -50,19 +50,19 @@ class Experiment:
     def summaries_path(self):
         return '%s/summaries/%s' % (self.results_dir, self.full_name)
 
-    def save_gin_config(self):
+    def save_gin_config(self, full_agent_name='AdvantageActorCriticAgent'):
         config_str = gin.operative_config_str()
 
-        if 'AdvantageActorCriticAgent.batch_sz' not in config_str:
+        if full_agent_name + '.batch_sz' not in config_str:
             # gin ignores batch size since it's passed manually from args
             # as a hacky workaround - insert it manually as the first param
-            batch_sz = gin.query_parameter('AdvantageActorCriticAgent.batch_sz')
+            batch_sz = gin.query_parameter(full_agent_name + '.batch_sz')
             config_lines = config_str.split('\n')
             first_ac_line = 0
             for first_ac_line in range(0, len(config_lines)):
-                if 'AdvantageActorCriticAgent.' in config_lines[first_ac_line]:
+                if full_agent_name + '.' in config_lines[first_ac_line]:
                     break
-            config_lines.insert(first_ac_line, 'AdvantageActorCriticAgent.batch_sz = ' + str(batch_sz))
+            config_lines.insert(first_ac_line, full_agent_name + '.batch_sz = ' + str(batch_sz))
             config_str = '\n'.join(config_lines)
 
         with open(self.config_path, 'w') as cfg_file:
