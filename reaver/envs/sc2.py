@@ -1,5 +1,7 @@
+import sys
 import gin
 import numpy as np
+from absl import flags
 from pysc2.lib import actions
 from pysc2.lib import features
 from pysc2.lib import protocol
@@ -36,6 +38,10 @@ class SC2Env(Env):
     def start(self):
         # importing here to lazy-load
         from pysc2.env import sc2_env
+
+        # fail-safe if executed not as absl app
+        if not flags.FLAGS.is_parsed():
+            flags.FLAGS(sys.argv)
 
         self._env = sc2_env.SC2Env(
             map_name=self.id,
