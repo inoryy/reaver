@@ -34,8 +34,9 @@ class SessionManager:
         return self.sess.run(tf_op, feed_dict=dict(zip(tf_inputs, inputs)))
 
     def on_update(self, step):
-        if step % self.checkpoint_freq or not self.training_enabled:
+        if not self.checkpoint_freq or not self.training_enabled or step % self.checkpoint_freq:
             return
+
         self.saver.save(self.sess, self.checkpoints_path + '/ckpt', global_step=step)
 
     def add_summaries(self, tags, values, prefix='', step=None):

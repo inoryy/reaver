@@ -6,18 +6,18 @@ build_mlp.value_separate = True
 AdvantageActorCriticAgent.model_fn = @build_mlp
 AdvantageActorCriticAgent.policy_cls = @MultiPolicy
 
-AdvantageActorCriticAgent.batch_sz = 32
+AdvantageActorCriticAgent.batch_sz = 64
 AdvantageActorCriticAgent.traj_len = 16
 
 tf.train.AdamOptimizer.learning_rate = 0.005
-AdvantageActorCriticAgent.clip_grads_norm = 1.0
+AdvantageActorCriticAgent.clip_grads_norm = 100.0
 AdvantageActorCriticAgent.optimizer = @tf.train.AdamOptimizer()
 
 AdvantageActorCriticAgent.discount = 0.99
 AdvantageActorCriticAgent.gae_lambda = 0.0
 
 AdvantageActorCriticAgent.value_coef = 0.5
-AdvantageActorCriticAgent.entropy_coef = 0.01
+AdvantageActorCriticAgent.entropy_coef = 0.0
 
 AdvantageActorCriticAgent.bootstrap_terminals = False
-AdvantageActorCriticAgent.normalize_advantages = False
+AdvantageActorCriticAgent.normalize_advantages = True

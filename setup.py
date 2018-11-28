@@ -5,7 +5,7 @@ with open("README.md", 'r') as f:
 
 setuptools.setup(
     name='reaver',
-    version='2.0.2',
+    version='2.0.3',
     author='Roman Ring',
     author_email='inoryy@gmail.com',
     description='Reaver: Deep Reinforcement Learning Agent for StarCraft II',
