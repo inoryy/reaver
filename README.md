@@ -148,7 +148,7 @@ This is a valid and most likely only reasonable approach for large-scale distrib
 However, for a typical researcher or hobbyist a much more common scenario is having access only to a 
 single machine environment, whether it is a laptop or a node on a HPC cluster. Reaver is optimized specifically 
 for this case by making use of shared memory in a lock-free manner. This approach nets significant performance
-boost of up to **3x speed-up** in StarCraft II sampling rate (and up to 100x speedup in general case),
+boost of up to **1.5x speed-up** in StarCraft II sampling rate (and up to 100x speedup in general case),
 being bottle-necked almost exclusively by GPU input/output pipeline.
 
 ### Extensibility
