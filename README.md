@@ -51,9 +51,6 @@ If you would like to use Reaver with other supported environments, you must inst
 * mujoco-py >= 1.50.0
   * roboschool >= 1.0(alternative)
 
-It is highly recommended to use Reaver on `Linux OS`, both due to stability and performance considerations.
-To view results with full graphics you can save a replay of the agent on Linux and open it on Windows. This is how the video recording was made.
-
 ### PIP Package
 
 Easiest way to install Reaver is through the `PIP` package manager:
@@ -88,6 +85,15 @@ means that various optimization flags are disabled by default. For example, if y
 it is highly recommended to use a custom built TensorFlow instead. If building from source is not an option for you,
 then [this repository](https://github.com/inoryy/tensorflow-optimized-wheels) might be useful - it contains newest `TensorFlow`
 releases built for newest CUDA / CuDNN versions, which often come with performance boosts even for older GPUs.
+
+### Windows
+
+Please see the [wiki](https://github.com/inoryy/reaver-pysc2/wiki/Windows) page for detailed instructions on setting up Reaver on Windows.
+
+However, if possible please consider using `Linux OS` instead - due to performance and stability considerations.
+If you would like to see your agent perform with full graphics enabled you can save a replay of the agent on Linux and open it on Windows.
+This is how the video recording listed below was made.
+
 
 ## Quick Start
 
