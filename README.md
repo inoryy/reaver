@@ -277,7 +277,8 @@ You can use pre-trained weights by appending `--experiment` flag to `reaver.run`
 
     python reaver.run --map <map_name> --experiment <map_name>_reaver --test 2> stderr.log
 
-Tensorboard logs are available if you launch `tensorboard --logidr=results/summaries`.
+Tensorboard logs are available if you launch `tensorboard --logidr=results/summaries`.  
+You can also view them [directly online](https://boards.aughie.org/board/HWi4xmuvuOSuw09QBfyDD-oNF1U) via [Aughie Boards](https://boards.aughie.org/).
 
 ## Roadmap
 
