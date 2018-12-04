@@ -31,7 +31,6 @@ class ActorCriticAgent(MemoryAgent):
         gae_lambda=0.95,
         clip_rewards=0.0,
         normalize_advantages=True,
-        bootstrap_terminals=False,
         clip_grads_norm=0.0,
         optimizer=tf.train.AdamOptimizer(),
         logger=Logger()
@@ -46,7 +45,6 @@ class ActorCriticAgent(MemoryAgent):
         self.gae_lambda = gae_lambda
         self.clip_rewards = clip_rewards
         self.normalize_advantages = normalize_advantages
-        self.bootstrap_terminals = bootstrap_terminals
         self.logger = logger
 
         self.model = model_fn(obs_spec, act_spec)
@@ -100,28 +98,23 @@ class ActorCriticAgent(MemoryAgent):
 
     def compute_advantages_and_returns(self, bootstrap_value):
         """
-        Bootstrap helps with stabilizing advantages with sparse rewards
         GAE can help with reducing variance of policy gradient estimates
         """
-        bootstrap_value = np.expand_dims(bootstrap_value, 0)
-        values = np.append(self.values, bootstrap_value, axis=0)
-        rewards = self.rewards.copy()
-
         if self.clip_rewards > 0.0:
-            np.clip(rewards, -self.clip_rewards, self.clip_rewards, out=rewards)
+            np.clip(self.rewards, -self.clip_rewards, self.clip_rewards, out=self.rewards)
 
-        if self.bootstrap_terminals:
-            rewards += self.dones * self.discount * values[:-1]
-        discounts = self.discount * (1-self.dones)
+        rewards = self.rewards.copy()
+        rewards[-1] += (1-self.dones[-1]) * self.discount * bootstrap_value
 
-        rewards[-1] += (1-self.dones[-1]) * self.discount * values[-1]
-        returns = self.discounted_cumsum(rewards, discounts)
+        masked_discounts = self.discount * (1-self.dones)
+
+        returns = self.discounted_cumsum(rewards, masked_discounts)
 
         if self.gae_lambda > 0.:
-            deltas = self.rewards + discounts * values[1:] - values[:-1]
-            if self.bootstrap_terminals:
-                deltas += self.dones * self.discount * values[:-1]
-            adv = self.discounted_cumsum(deltas, self.gae_lambda * discounts)
+            values = np.append(self.values, np.expand_dims(bootstrap_value, 0), axis=0)
+            # d_t = r_t + g * V(s_{t+1}) - V(s_t)
+            deltas = self.rewards + masked_discounts * values[1:] - values[:-1]
+            adv = self.discounted_cumsum(deltas, self.gae_lambda * masked_discounts)
         else:
             adv = returns - self.values
 
@@ -140,8 +133,8 @@ class ActorCriticAgent(MemoryAgent):
     def discounted_cumsum(x, discount):
         y = np.zeros_like(x)
         y[-1] = x[-1]
-        for t in range(x.shape[0] - 2, -1, -1):
-            y[t] = x[t] + discount[t] * y[t + 1]
+        for t in range(x.shape[0]-2, -1, -1):
+            y[t] = x[t] + discount[t] * y[t+1]
         return y
 
     @abstractmethod

@@ -28,7 +28,6 @@ class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
         gae_lambda=0.95,
         clip_rewards=0.0,
         normalize_advantages=True,
-        bootstrap_terminals=False,
         clip_grads_norm=0.0,
         value_coef=0.5,
         entropy_coef=0.001,
@@ -41,7 +40,7 @@ class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
         SyncRunningAgent.__init__(self, n_envs)
         ActorCriticAgent.__init__(
             self, obs_spec, act_spec, model_fn, policy_cls, sess_mgr, traj_len, batch_sz, discount,
-            gae_lambda, clip_rewards, normalize_advantages, bootstrap_terminals, clip_grads_norm, optimizer, logger
+            gae_lambda, clip_rewards, normalize_advantages, clip_grads_norm, optimizer, logger
         )
 
     def loss_fn(self):
