@@ -337,7 +337,7 @@ If you encounter a codebase related problem then please open a ticket on GitHub 
 If you have more general questions or simply seeking advice feel free to send me an email.
 
 I am also a proud member of an active and friendly [SC2AI](http://sc2ai.net) online community, 
-we mostly use [Discord](https://discord.gg/UBCjm3) for communication. People of all backgrounds and levels of expertise are welcome to join!
+we mostly use [Discord](https://discordapp.com/invite/Emm5Ztz) for communication. People of all backgrounds and levels of expertise are welcome to join!
 
 ## Citing
 
