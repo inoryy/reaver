@@ -20,4 +20,3 @@ AdvantageActorCriticAgent.value_coef = 0.5
 AdvantageActorCriticAgent.entropy_coef = 0.01
 
 AdvantageActorCriticAgent.clip_rewards = 10.0
-AdvantageActorCriticAgent.bootstrap_terminals = False

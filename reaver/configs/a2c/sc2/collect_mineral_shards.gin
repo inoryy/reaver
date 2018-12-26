@@ -16,5 +16,4 @@ AdvantageActorCriticAgent.gae_lambda = 0.0
 AdvantageActorCriticAgent.value_coef = 0.1
 AdvantageActorCriticAgent.entropy_coef = 0.0005
 
-AdvantageActorCriticAgent.bootstrap_terminals = False
 AdvantageActorCriticAgent.normalize_advantages = True

@@ -19,5 +19,4 @@ ProximalPolicyOptimizationAgent.gae_lambda = 0.0
 ProximalPolicyOptimizationAgent.value_coef = 0.5
 ProximalPolicyOptimizationAgent.entropy_coef = 0.01
 
-ProximalPolicyOptimizationAgent.bootstrap_terminals = False
 ProximalPolicyOptimizationAgent.normalize_advantages = False

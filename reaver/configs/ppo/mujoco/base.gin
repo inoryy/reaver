@@ -20,6 +20,5 @@ ProximalPolicyOptimizationAgent.value_coef = 0.5
 ProximalPolicyOptimizationAgent.entropy_coef = 0.01
 
 ProximalPolicyOptimizationAgent.clip_rewards = 10.0
-ProximalPolicyOptimizationAgent.bootstrap_terminals = False
 ProximalPolicyOptimizationAgent.normalize_advantages = True
 
