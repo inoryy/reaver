@@ -1,7 +1,7 @@
 import gin
-from tensorflow.keras import Model
+import tensorflow as tf
 from tensorflow.keras.layers import Input, Concatenate, Dense
-from reaver.models.base.layers import Squeeze
+from reaver.models.base.layers import Squeeze, DenseWithVar
 
 
 @gin.configurable
@@ -10,7 +10,7 @@ def build_mlp(obs_spec, act_spec, layer_sizes=(64, 64), activation='relu', value
     inputs_concat = Concatenate()(inputs) if len(inputs) > 1 else inputs[0]
 
     x = build_fc(inputs_concat, layer_sizes, activation)
-    outputs = [Dense(s.size(), name="logits_" + s.name)(x) for s in act_spec]
+    outputs = [logits_layer(space)(x) for space in act_spec]
 
     if value_separate:
         x = build_fc(inputs_concat, layer_sizes, activation, 'value_')
@@ -19,7 +19,13 @@ def build_mlp(obs_spec, act_spec, layer_sizes=(64, 64), activation='relu', value
     value = Squeeze(axis=-1)(value)
     outputs.append(value)
 
-    return Model(inputs=inputs, outputs=outputs)
+    return tf.keras.Model(inputs=inputs, outputs=outputs)
+
+
+def logits_layer(space):
+    if space.is_continuous():
+        return DenseWithVar(space.size(), name="logits_" + space.name, var_name="logstd")
+    return Dense(space.size(), name="logits_" + space.name)
 
 
 def build_fc(input_layer, layer_sizes, activation, prefix=''):

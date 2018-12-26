@@ -47,10 +47,6 @@ class Space:
         if len(self.shape) == 1:
             sz = self.shape[0]
 
-        if self.is_continuous():
-            # mu_1, ..., mu_n, log_std_1, ..., log_std_n
-            sz = 2*sz
-
         return sz
 
     def sample(self, n=1):

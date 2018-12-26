@@ -1,5 +1,31 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Lambda
+from tensorflow.keras.layers import Lambda, Dense
+
+
+class DenseWithVar(Dense):
+    """
+    attaches an extra trainable variable to the dense layer as "extra_var"
+    it is "invincible" to keras (e.g. missing in model summary)
+    but in return keeps most of the glue code relatively simple
+
+    example use case is mean + std for continuous control tasks where
+    mean is defined as dense output from NN (inherited from Dense layer)
+    std is defined as a separate (trainable!) variable
+    """
+    def __init__(self, units, var_name=None, **kwargs):
+        self._var = None
+        self._var_name = var_name
+        super().__init__(units, **kwargs)
+
+    def build(self, input_shape):
+        super().build(input_shape)
+        # have to do through backend to ensure it plays nice with Keras internally
+        self._var = tf.keras.backend.variable([0.0]*self.units, name=self._name + "_" + self._var_name)
+
+    def call(self, inputs):
+        x = super().call(inputs)
+        x.extra_var = self._var
+        return x
 
 
 class Squeeze(Lambda):
