@@ -1,31 +1,22 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Lambda, Dense
+from tensorflow.keras.layers import Lambda, Layer
 
 
-class DenseWithVar(Dense):
+class Variable(Layer):
     """
-    attaches an extra trainable variable to the dense layer as "extra_var"
-    it is "invincible" to keras (e.g. missing in model summary)
-    but in return keeps most of the glue code relatively simple
-
-    example use case is mean + std for continuous control tasks where
-    mean is defined as dense output from NN (inherited from Dense layer)
-    std is defined as a separate (trainable!) variable
+    Concatenate an extra trainable variable to the dense layer
+    This variable is disconnected from the rest of the NN, including inputs
     """
-    def __init__(self, units, var_name=None, **kwargs):
+    def __init__(self, **kwargs):
         self._var = None
-        self._var_name = var_name
-        super().__init__(units, **kwargs)
+        super().__init__(**kwargs)
 
     def build(self, input_shape):
+        self._var = self.add_weight('var', (1, input_shape[-1]), initializer='zeros', trainable=True)
         super().build(input_shape)
-        # have to do through backend to ensure it plays nice with Keras internally
-        self._var = tf.keras.backend.variable([0.0]*self.units, name=self._name + "_" + self._var_name)
 
-    def call(self, inputs):
-        x = super().call(inputs)
-        x.extra_var = self._var
-        return x
+    def call(self, inputs, **kwargs):
+        return tf.concat([inputs, tf.tile(self._var, tf.shape(inputs))], axis=-1)
 
 
 class Squeeze(Lambda):
