@@ -19,7 +19,7 @@ class RunningStatsNorm(Layer):
 
     def call(self, inputs, **kwargs):
         mu, var = self._update_stats(inputs)
-        return (inputs - mu) / tf.sqrt(var + 1e-10)
+        return (inputs - mu) / tf.sqrt(var)
 
     def _update_stats(self, x):
         ct = tf.maximum(1e-10, self._ct)
@@ -56,7 +56,10 @@ class Variable(Layer):
         super().build(input_shape)
 
     def call(self, inputs, **kwargs):
-        return tf.concat([inputs, tf.tile(self._var, tf.shape(inputs))], axis=-1)
+        """
+        repeat _var N times to match inputs dim and then concatenate them
+        """
+        return tf.concat([inputs, tf.tile(self._var, (tf.shape(inputs)[0], 1))], axis=-1)
 
 
 class Squeeze(Lambda):
