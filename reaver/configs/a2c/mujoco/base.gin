@@ -2,6 +2,7 @@ import gin.tf.external_configurables
 
 build_mlp.activation = 'tanh'
 build_mlp.value_separate = True
+build_mlp.normalize_obs = True
 
 AdvantageActorCriticAgent.model_fn = @build_mlp
 AdvantageActorCriticAgent.policy_cls = @MultiPolicy

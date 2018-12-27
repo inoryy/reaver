@@ -70,15 +70,11 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         inputs += [advantages.flatten(), returns.flatten(), logli_old]
         tf_inputs += self.loss_inputs
 
-        ops = [self.loss_terms, self.grads_norm]
-        if self.sess_mgr.training_enabled:
-            ops.append(self.train_op)
-
         loss_terms = grads_norm = None
         for _ in range(self.n_updates):
             idx = np.random.permutation(self.batch_sz * self.traj_len)[:self.minibatch_sz]
             minibatch = [inpt[idx] for inpt in inputs]
-            loss_terms, grads_norm, *_ = self.sess_mgr.run(ops, tf_inputs, minibatch)
+            loss_terms, grads_norm, *_ = self.sess_mgr.run(self.minimize_ops, tf_inputs, minibatch)
 
         return loss_terms, grads_norm
 

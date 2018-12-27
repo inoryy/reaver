@@ -2,6 +2,46 @@ import tensorflow as tf
 from tensorflow.keras.layers import Lambda, Layer
 
 
+class RunningStatsNorm(Layer):
+    """
+    Normalizes inputs by running mean / std.dev statistics
+    """
+    def __init__(self, **kwargs):
+        self._ct = self._mu = self._var = None
+        super().__init__(**kwargs)
+
+    def build(self, input_shape):
+        shape = (input_shape[-1],)
+        self._ct = self.add_weight('running_ct', (), initializer='zeros', trainable=False)
+        self._mu = self.add_weight('running_mu', shape, initializer='zeros', trainable=False)
+        self._var = self.add_weight('running_var', shape, initializer='ones', trainable=False)
+        super().build(input_shape)
+
+    def call(self, inputs, **kwargs):
+        mu, var = self._update_stats(inputs)
+        return (inputs - mu) / tf.sqrt(var + 1e-10)
+
+    def _update_stats(self, x):
+        ct = tf.maximum(1e-10, self._ct)
+
+        ct_b = tf.to_float(tf.shape(x)[0])
+        mu_b, var_b = tf.nn.moments(x, axes=[0])
+
+        delta = mu_b - self._mu
+
+        new_ct = ct + ct_b
+        new_mu = self._mu + delta * ct_b / new_ct
+        new_var = (self._var * ct + var_b * ct_b + delta ** 2 * ct * ct_b / new_ct) / new_ct
+
+        self.add_update([
+            tf.assign(self._ct, new_ct),
+            tf.assign(self._mu, new_mu),
+            tf.assign(self._var, new_var)
+        ])
+
+        return new_mu, new_var
+
+
 class Variable(Layer):
     """
     Concatenate an extra trainable variable to the dense layer

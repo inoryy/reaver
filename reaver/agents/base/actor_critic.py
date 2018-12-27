@@ -89,11 +89,8 @@ class ActorCriticAgent(MemoryAgent):
         inputs = [a.reshape(-1, *a.shape[2:]) for a in inputs]
         tf_inputs = self.model.inputs + self.policy.inputs + self.loss_inputs
 
-        ops = [self.loss_terms, self.grads_norm]
-        if self.sess_mgr.training_enabled:
-            ops.append(self.train_op)
+        loss_terms, grads_norm, *_ = self.sess_mgr.run(self.minimize_ops, tf_inputs, inputs)
 
-        loss_terms, grads_norm, *_ = self.sess_mgr.run(ops, tf_inputs, inputs)
         return loss_terms, grads_norm
 
     def compute_advantages_and_returns(self, bootstrap_value):
@@ -128,6 +125,16 @@ class ActorCriticAgent(MemoryAgent):
 
     def on_finish(self):
         self.logger.on_finish()
+
+    @property
+    def minimize_ops(self):
+        ops = [self.loss_terms, self.grads_norm]
+        if self.sess_mgr.training_enabled:
+            ops.append(self.train_op)
+        # appending extra model update ops (e.g. running stats)
+        # note: this will most likely break if model.compile() is used
+        ops.extend(self.model.get_updates_for(None))
+        return ops
 
     @staticmethod
     def discounted_cumsum(x, discount):
