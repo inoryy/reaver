@@ -5,6 +5,7 @@ class SessionManager:
     def __init__(self, sess=None, base_path='results/', checkpoint_freq=100, training_enabled=True):
         if not sess:
             sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+        tf.keras.backend.set_session(sess)
 
         self.sess = sess
         self.saver = None
