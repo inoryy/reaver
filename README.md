@@ -33,6 +33,8 @@ agent, model, and environment are decoupled and can be swapped at will.
 
 ## Installation
 
+**NB!** As of 25/11/18 you must install **PySC2** [from source](https://github.com/deepmind/pysc2#git) since PIP version is outdated.
+
 ### Requirements
 
 * numpy >= 1.13
@@ -41,7 +43,7 @@ agent, model, and environment are decoupled and can be swapped at will.
 * TensorFlow >= 1.10
 * TensorFlow Probability >= 0.4
 * StarCraft II >= 4.1.2 ([instructions](https://github.com/Blizzard/s2client-proto#downloads))
-* PySC2 > 2.0.1 (**NB**! As of 25/11/18 you must [install from source](https://github.com/deepmind/pysc2#git) since PIP version is outdated)
+* PySC2 > 2.0.1 (**NB!** PIP version is outdated)
 
 #### Optional Extras
 If you would like to use Reaver with other supported environments, you must install relevant packages as well:
@@ -49,13 +51,15 @@ If you would like to use Reaver with other supported environments, you must inst
 * gym >= 0.10.0
 * atari-py >= 0.1.5
 * mujoco-py >= 1.50.0
-  * roboschool >= 1.0(alternative)
+  * roboschool >= 1.0 (alternative)
 
 ### PIP Package
 
 Easiest way to install Reaver is through the `PIP` package manager:
  
     pip install reaver
+
+**NB!** PySC2 PIP version is outdated, so you will need to install it from source as described above.
 
 **NB!** Reaver specifies `TensorFlow` only as a soft dependency and it will not be installed by default. This is to avoid
 `tensorflow` overwriting `tensorflow-gpu` and vise-versa. You can install `tensorflow` along with Reaver by specifying either
@@ -282,16 +286,17 @@ You can also view them [directly online](https://boards.aughie.org/board/HWi4xmu
 
 ## Roadmap
 
-In this section you can get a birdseye overview of my high level plans for Reaver.
+In this section you can get a birdseye overview of my plans for the project in no particular order. You can also follow 
+what I'm currently working on in the [projects tab](https://github.com/inoryy/reaver-pysc2/projects). 
 Any help with development is of course highly appreciated, assuming contributed codebase license matches (MIT).
 
 * [ ] Documentation
   * [ ] Codebase documentation
   * [ ] Extending to custom environments
   * [ ] Extending to custom agents
-  * [ ] Setup on [Google Colab](https://colab.research.google.com)
+  * [x] Setup on [Google Colab](https://colab.research.google.com)
 * [ ] Unit tests
-  * [ ] For critical features such as advantage estimation
+  * [x] For critical features such as advantage estimation
   * [ ] General basic convergence guarantees of agents / models combinations
 * [ ] LSTM support
   * [ ] for simpler gym environments
