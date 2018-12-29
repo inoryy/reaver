@@ -1,12 +1,14 @@
 import gin.tf.external_configurables
 
+build_cnn_nature.normalize_obs = True
+
 AdvantageActorCriticAgent.model_fn = @build_cnn_nature
 AdvantageActorCriticAgent.policy_cls = @MultiPolicy
 
-AdvantageActorCriticAgent.batch_sz = 32
-AdvantageActorCriticAgent.traj_len = 16
+AdvantageActorCriticAgent.batch_sz = 16
+AdvantageActorCriticAgent.traj_len = 8
 
-tf.train.AdamOptimizer.learning_rate = 0.005
+tf.train.AdamOptimizer.learning_rate = 0.00025
 AdvantageActorCriticAgent.clip_grads_norm = 1.0
 AdvantageActorCriticAgent.optimizer = @tf.train.AdamOptimizer()
 
@@ -16,4 +18,5 @@ AdvantageActorCriticAgent.gae_lambda = 0.0
 AdvantageActorCriticAgent.value_coef = 0.5
 AdvantageActorCriticAgent.entropy_coef = 0.01
 
+AdvantageActorCriticAgent.clip_rewards = 0.0
 AdvantageActorCriticAgent.normalize_advantages = False
