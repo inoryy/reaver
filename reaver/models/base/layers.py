@@ -11,7 +11,7 @@ class RunningStatsNorm(Layer):
         super().__init__(**kwargs)
 
     def build(self, input_shape):
-        shape = (input_shape[-1],)
+        shape = (*input_shape[1:],)
         self._ct = self.add_weight('running_ct', (), initializer='zeros', trainable=False)
         self._mu = self.add_weight('running_mu', shape, initializer='zeros', trainable=False)
         self._var = self.add_weight('running_var', shape, initializer='ones', trainable=False)

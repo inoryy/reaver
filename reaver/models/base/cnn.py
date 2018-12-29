@@ -1,11 +1,11 @@
 import gin
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Input, Concatenate, Dense, Conv2D, Flatten
-from reaver.models.base.layers import Squeeze, Rescale, Transpose
+from reaver.models.base.layers import Squeeze, Rescale, Transpose, RunningStatsNorm
 
 
 @gin.configurable
-def build_cnn_nature(obs_spec, act_spec, data_format='channels_first', value_separate=False):
+def build_cnn_nature(obs_spec, act_spec, data_format='channels_first', value_separate=False, normalize_obs=False):
     conv_cfg = dict(padding='same', data_format=data_format, activation='relu')
     conv_spec = [(32, 8, 4), (64, 4, 2), (64, 3, 1)]
 
@@ -17,6 +17,8 @@ def build_cnn_nature(obs_spec, act_spec, data_format='channels_first', value_sep
         inputs_concat = Transpose([0, 3, 1, 2])(inputs_concat)
 
     inputs_scaled = Rescale(1./255)(inputs_concat)
+    if normalize_obs:
+        inputs_scaled = RunningStatsNorm()(inputs_scaled)
 
     x = build_cnn(inputs_scaled, conv_spec, conv_cfg, dense=512, prefix='policy_')
     outputs = [Dense(s.size(), name="logits_" + s.name)(x) for s in act_spec]
