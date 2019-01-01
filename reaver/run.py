@@ -38,6 +38,7 @@ flags.DEFINE_alias('a', 'agent')
 flags.DEFINE_alias('p', 'n_envs')
 flags.DEFINE_alias('lf', 'log_freq')
 flags.DEFINE_alias('cf', 'ckpt_freq')
+flags.DEFINE_alias('la', 'log_eps_avg')
 flags.DEFINE_alias('n', 'experiment')
 flags.DEFINE_alias('c', 'gin_bindings')
 

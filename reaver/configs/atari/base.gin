@@ -1,5 +1,6 @@
 # params for generic actor-critic:
 # ==========================================
+build_cnn_nature.value_separate = False
 build_cnn_nature.normalize_obs = True
 
 ACAgent.model_fn = @build_cnn_nature
@@ -9,14 +10,14 @@ ACAgent.learning_rate = 0.00025
 ACAgent.value_coef = 0.5
 ACAgent.entropy_coef = 0.01
 
-ACAgent.batch_sz = 16
-ACAgent.traj_len = 8
+ACAgent.batch_sz = 32
+ACAgent.traj_len = 16
 
 ACAgent.discount = 0.99
 ACAgent.gae_lambda = 0.0
 
-ACAgent.clip_rewards = 0.0
-ACAgent.clip_grads_norm = 1.0
+ACAgent.clip_rewards = 1.0
+ACAgent.clip_grads_norm = 40.0
 
 ACAgent.normalize_advantages = False
 
@@ -26,6 +27,11 @@ ACAgent.normalize_advantages = False
 
 # params for PPO:
 # ==========================================
-PPOAgent.n_updates = 3
-PPOAgent.minibatch_sz = 128
+PPOAgent.batch_sz = 128
+PPOAgent.traj_len = 16
+
+PPOAgent.gae_lambda = 0.95
+
+PPOAgent.n_updates = 10
+PPOAgent.minibatch_sz = 512
 PPOAgent.clip_ratio = 0.2
