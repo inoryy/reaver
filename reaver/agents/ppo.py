@@ -28,9 +28,9 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         self,
         obs_spec: Spec,
         act_spec: Spec,
-        sess_mgr: SessionManager=None,
         model_fn: ModelBuilder=None,
         policy_cls: PolicyType=None,
+        sess_mgr: SessionManager=None,
         n_envs=4,
         n_updates=3,
         minibatch_sz=128,
@@ -53,7 +53,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         kwargs = {k: v for k, v in locals().items() if k in DEFAULTS and DEFAULTS[k] != v}
 
         SyncRunningAgent.__init__(self, n_envs)
-        ActorCriticAgent.__init__(self, obs_spec, act_spec, sess_mgr, **kwargs)
+        ActorCriticAgent.__init__(self, obs_spec, act_spec, sess_mgr=sess_mgr, **kwargs)
 
         self.start_step = self.start_step // self.n_updates
 

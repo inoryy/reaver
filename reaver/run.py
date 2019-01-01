@@ -12,7 +12,7 @@ flags.DEFINE_bool('render', False, 'Whether to render first(!) env.')
 flags.DEFINE_string('gpu', '0', 'GPU(s) id(s) to use. If not set TensorFlow will use CPU.')
 
 flags.DEFINE_integer('n_envs', 4, 'Number of environments to execute in parallel.')
-flags.DEFINE_integer('updates', 1000000, 'Number of train updates (1 update has batch_sz * traj_len samples).')
+flags.DEFINE_integer('n_updates', 1000000, 'Number of train updates (1 update has batch_sz * traj_len samples).')
 
 flags.DEFINE_integer('ckpt_freq', 500, 'Number of train updates per one checkpoint save.')
 flags.DEFINE_integer('log_freq', 100, 'Number of train updates per one console log.')
@@ -36,11 +36,12 @@ flags.DEFINE_bool('test', False,
 flags.DEFINE_alias('e', 'env')
 flags.DEFINE_alias('a', 'agent')
 flags.DEFINE_alias('p', 'n_envs')
+flags.DEFINE_alias('u', 'n_updates')
 flags.DEFINE_alias('lf', 'log_freq')
 flags.DEFINE_alias('cf', 'ckpt_freq')
 flags.DEFINE_alias('la', 'log_eps_avg')
 flags.DEFINE_alias('n', 'experiment')
-flags.DEFINE_alias('c', 'gin_bindings')
+flags.DEFINE_alias('g', 'gin_bindings')
 
 
 def main(argv):
@@ -74,14 +75,14 @@ def main(argv):
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     sess_mgr = rvr.utils.tensorflow.SessionManager(sess, expt.path, args.ckpt_freq, training_enabled=not args.test)
 
-    agent = rvr.agents.registry[args.agent](env.obs_spec(), env.act_spec(), sess_mgr, n_envs=args.n_envs)
+    agent = rvr.agents.registry[args.agent](env.obs_spec(), env.act_spec(), sess_mgr=sess_mgr, n_envs=args.n_envs)
     agent.logger = rvr.utils.StreamLogger(args.n_envs, args.log_freq, args.log_eps_avg, sess_mgr, expt.log_path)
 
     if sess_mgr.training_enabled:
         expt.save_gin_config()
         expt.save_model_summary(agent.model)
 
-    agent.run(env, args.updates * agent.traj_len * agent.batch_sz // args.n_envs)
+    agent.run(env, args.n_updates * agent.traj_len * agent.batch_sz // args.n_envs)
 
 
 if __name__ == '__main__':

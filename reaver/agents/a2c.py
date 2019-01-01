@@ -17,9 +17,9 @@ class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
         self,
         obs_spec: Spec,
         act_spec: Spec,
-        sess_mgr: SessionManager=None,
         model_fn: ModelBuilder=None,
         policy_cls: PolicyType=None,
+        sess_mgr: SessionManager=None,
         n_envs=4,
         learning_rate=DEFAULTS['learning_rate'],
         value_coef=DEFAULTS['value_coef'],
@@ -35,7 +35,7 @@ class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
         kwargs = {k: v for k, v in locals().items() if k in DEFAULTS and DEFAULTS[k] != v}
 
         SyncRunningAgent.__init__(self, n_envs)
-        ActorCriticAgent.__init__(self, obs_spec, act_spec, sess_mgr, **kwargs)
+        ActorCriticAgent.__init__(self, obs_spec, act_spec, sess_mgr=sess_mgr, **kwargs)
 
     def loss_fn(self):
         adv = tf.placeholder(tf.float32, [None], name="advantages")
