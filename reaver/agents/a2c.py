@@ -1,14 +1,13 @@
 import gin.tf
 import tensorflow as tf
 
-from reaver.utils import Logger
 from reaver.envs.base import Spec
 from reaver.utils.tensorflow import SessionManager
 from reaver.utils.typing import ModelBuilder, PolicyType
-from reaver.agents.base import SyncRunningAgent, ActorCriticAgent
+from reaver.agents.base import SyncRunningAgent, ActorCriticAgent, DEFAULTS
 
 
-@gin.configurable
+@gin.configurable('A2CAgent')
 class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
     """
     A2C: a synchronous version of Asynchronous Advantage Actor Critic (A3C)
@@ -18,30 +17,25 @@ class AdvantageActorCriticAgent(SyncRunningAgent, ActorCriticAgent):
         self,
         obs_spec: Spec,
         act_spec: Spec,
-        model_fn: ModelBuilder,
-        policy_cls: PolicyType,
-        sess_mgr: SessionManager = None,
+        sess_mgr: SessionManager=None,
+        model_fn: ModelBuilder=None,
+        policy_cls: PolicyType=None,
         n_envs=4,
-        traj_len=16,
-        batch_sz=16,
-        discount=0.99,
-        gae_lambda=0.95,
-        clip_rewards=0.0,
-        normalize_advantages=True,
-        clip_grads_norm=0.0,
-        value_coef=0.5,
-        entropy_coef=0.001,
-        optimizer=tf.train.AdamOptimizer(),
-        logger=Logger(),
+        learning_rate=DEFAULTS['learning_rate'],
+        value_coef=DEFAULTS['value_coef'],
+        entropy_coef=DEFAULTS['entropy_coef'],
+        traj_len=DEFAULTS['traj_len'],
+        batch_sz=DEFAULTS['batch_sz'],
+        discount=DEFAULTS['discount'],
+        gae_lambda=DEFAULTS['gae_lambda'],
+        clip_rewards=DEFAULTS['clip_rewards'],
+        clip_grads_norm=DEFAULTS['clip_grads_norm'],
+        normalize_advantages=DEFAULTS['normalize_advantages'],
     ):
-        self.value_coef = value_coef
-        self.entropy_coef = entropy_coef
+        kwargs = {k: v for k, v in locals().items() if k in DEFAULTS and DEFAULTS[k] != v}
 
         SyncRunningAgent.__init__(self, n_envs)
-        ActorCriticAgent.__init__(
-            self, obs_spec, act_spec, model_fn, policy_cls, sess_mgr, traj_len, batch_sz, discount,
-            gae_lambda, clip_rewards, normalize_advantages, clip_grads_norm, optimizer, logger
-        )
+        ActorCriticAgent.__init__(self, obs_spec, act_spec, sess_mgr, **kwargs)
 
     def loss_fn(self):
         adv = tf.placeholder(tf.float32, [None], name="advantages")

@@ -8,4 +8,4 @@ class Agent(ABC):
 
 from .memory import MemoryAgent
 from .running import SyncRunningAgent
-from .actor_critic import ActorCriticAgent
+from .actor_critic import ActorCriticAgent, DEFAULTS

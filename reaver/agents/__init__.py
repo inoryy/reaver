@@ -5,3 +5,8 @@ from .ppo import ProximalPolicyOptimizationAgent
 
 A2C = AdvantageActorCriticAgent
 PPO = ProximalPolicyOptimizationAgent
+
+registry = {
+    'a2c': A2C,
+    'ppo': PPO
+}

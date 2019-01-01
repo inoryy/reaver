@@ -9,7 +9,23 @@ from reaver.agents.base import MemoryAgent
 from reaver.utils.tensorflow import SessionManager
 from reaver.utils.typing import ModelBuilder, PolicyType
 
+DEFAULTS = dict(
+    model_fn=None,
+    policy_cls=None,
+    learning_rate=0.0003,
+    value_coef=0.5,
+    entropy_coef=0.01,
+    traj_len=16,
+    batch_sz=16,
+    discount=0.99,
+    gae_lambda=0.95,
+    clip_rewards=0.0,
+    normalize_advantages=True,
+    clip_grads_norm=0.0,
+)
 
+
+@gin.configurable('ACAgent')
 class ActorCriticAgent(MemoryAgent):
     """
     Abstract class, unifies deep actor critic functionality
@@ -22,46 +38,50 @@ class ActorCriticAgent(MemoryAgent):
         self,
         obs_spec: Spec,
         act_spec: Spec,
-        model_fn: ModelBuilder,
-        policy_cls: PolicyType,
-        sess_mgr: SessionManager = None,
-        traj_len=16,
-        batch_sz=16,
-        discount=0.99,
-        gae_lambda=0.95,
-        clip_rewards=0.0,
-        normalize_advantages=True,
-        clip_grads_norm=0.0,
-        optimizer=tf.train.AdamOptimizer(),
-        logger=Logger()
+        sess_mgr: SessionManager=None,
+        model_fn: ModelBuilder=None,
+        policy_cls: PolicyType=None,
+        learning_rate=DEFAULTS['learning_rate'],
+        value_coef=DEFAULTS['value_coef'],
+        entropy_coef=DEFAULTS['entropy_coef'],
+        traj_len=DEFAULTS['traj_len'],
+        batch_sz=DEFAULTS['batch_sz'],
+        discount=DEFAULTS['discount'],
+        gae_lambda=DEFAULTS['gae_lambda'],
+        clip_rewards=DEFAULTS['clip_rewards'],
+        clip_grads_norm=DEFAULTS['clip_grads_norm'],
+        normalize_advantages=DEFAULTS['normalize_advantages'],
     ):
         MemoryAgent.__init__(self, obs_spec, act_spec, traj_len, batch_sz)
 
         if not sess_mgr:
             sess_mgr = SessionManager()
-
         self.sess_mgr = sess_mgr
+
+        self.value_coef = value_coef
+        self.entropy_coef = entropy_coef
         self.discount = discount
         self.gae_lambda = gae_lambda
         self.clip_rewards = clip_rewards
         self.normalize_advantages = normalize_advantages
-        self.logger = logger
 
         self.model = model_fn(obs_spec, act_spec)
         self.value = self.model.outputs[-1]
         self.policy = policy_cls(act_spec, self.model.outputs[:-1])
         self.loss_op, self.loss_terms, self.loss_inputs = self.loss_fn()
 
+        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+
         grads, vars = zip(*optimizer.compute_gradients(self.loss_op))
         self.grads_norm = tf.global_norm(grads)
         if clip_grads_norm > 0.:
             grads, _ = tf.clip_by_global_norm(grads, clip_grads_norm, self.grads_norm)
-        self.train_op = optimizer.apply_gradients(zip(grads, vars), global_step=self.sess_mgr.global_step)
+        self.train_op = optimizer.apply_gradients(zip(grads, vars), global_step=sess_mgr.global_step)
 
-        self.sess_mgr.restore_or_init()
+        sess_mgr.restore_or_init()
         # NB! changing trajectory length in-between checkpoints will break the logs
-        self.n_batches = self.sess_mgr.start_step
-        self.start_step = self.sess_mgr.start_step * traj_len
+        self.n_batches = sess_mgr.start_step
+        self.start_step = sess_mgr.start_step * traj_len
 
     def get_action_and_value(self, obs):
         return self.sess_mgr.run([self.policy.sample, self.value], self.model.inputs, obs)

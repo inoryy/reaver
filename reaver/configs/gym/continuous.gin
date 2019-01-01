@@ -1,0 +1,14 @@
+build_mlp.activation = 'tanh'
+
+ACAgent.learning_rate = 0.01
+ACAgent.entropy_coef = 0.01
+
+ACAgent.batch_sz = 16
+ACAgent.traj_len = 128
+
+ACAgent.clip_rewards = 10.0
+ACAgent.clip_grads_norm = 100.0
+
+ACAgent.gae_lambda = 0.95
+
+ACAgent.normalize_advantages = True
