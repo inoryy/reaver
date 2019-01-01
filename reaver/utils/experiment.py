@@ -12,7 +12,7 @@ class Experiment:
                 name = max(experiments, key=lambda p: os.path.getmtime(results_dir+'/'+p))
                 name = '_'.join(name.split('_')[2:])
             else:
-                name = dt.now().strftime("%y-%m-%d_%H-%M")
+                name = dt.now().strftime("%y-%m-%d_%H-%M-%S")
 
         self.name = name
         self.restore = restore
