@@ -25,6 +25,8 @@ class GymEnv(Env):
         if any([env_name in self.id.lower() for env_name in atari_py.list_games()]):
             self._env = AtariPreprocessing(self._env.env)
 
+        self.make_specs(running=True)
+
     def step(self, action):
         obs, reward, done, _ = self._env.step(self.wrap_act(action))
 
@@ -81,14 +83,16 @@ class GymEnv(Env):
             self.make_specs()
         return self.specs['act']
 
-    def make_specs(self):
+    def make_specs(self, running=False):
         render, self.render = self.render, False
-        self.start()
+        if not running:
+            self.start()
         self.specs = {
             'obs': Spec(parse(self._env.observation_space), 'Observation'),
             'act': Spec(parse(self._env.action_space), 'Action')
         }
-        self.stop()
+        if not running:
+            self.stop()
         self.render = render
 
 
