@@ -69,11 +69,11 @@ def main(argv):
     gin.parse_config_files_and_bindings(gin_files, args.gin_bindings)
     args.n_envs = min(args.n_envs, gin.query_parameter('ACAgent.batch_sz'))
 
-    env_cls = rvr.envs.GymEnv if '-v' in args.env else rvr.envs.SC2Env
-    env = env_cls(args.env, args.render, max_ep_len=args.max_ep_len)
-
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     sess_mgr = rvr.utils.tensorflow.SessionManager(sess, expt.path, args.ckpt_freq, training_enabled=not args.test)
+
+    env_cls = rvr.envs.GymEnv if '-v' in args.env else rvr.envs.SC2Env
+    env = env_cls(args.env, args.render, max_ep_len=args.max_ep_len)
 
     agent = rvr.agents.registry[args.agent](env.obs_spec(), env.act_spec(), sess_mgr=sess_mgr, n_envs=args.n_envs)
     agent.logger = rvr.utils.StreamLogger(args.n_envs, args.log_freq, args.log_eps_avg, sess_mgr, expt.log_path)

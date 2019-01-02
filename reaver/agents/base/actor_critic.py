@@ -3,7 +3,6 @@ import numpy as np
 import tensorflow as tf
 from abc import abstractmethod
 
-from reaver.utils import Logger
 from reaver.envs.base import Spec
 from reaver.agents.base import MemoryAgent
 from reaver.utils.tensorflow import SessionManager
@@ -12,6 +11,7 @@ from reaver.utils.typing import ModelBuilder, PolicyType
 DEFAULTS = dict(
     model_fn=None,
     policy_cls=None,
+    optimizer=None,
     learning_rate=0.0003,
     value_coef=0.5,
     entropy_coef=0.01,
@@ -41,7 +41,7 @@ class ActorCriticAgent(MemoryAgent):
         model_fn: ModelBuilder=None,
         policy_cls: PolicyType=None,
         sess_mgr: SessionManager=None,
-        learning_rate=DEFAULTS['learning_rate'],
+        optimizer: tf.train.Optimizer=None,
         value_coef=DEFAULTS['value_coef'],
         entropy_coef=DEFAULTS['entropy_coef'],
         traj_len=DEFAULTS['traj_len'],
@@ -56,8 +56,11 @@ class ActorCriticAgent(MemoryAgent):
 
         if not sess_mgr:
             sess_mgr = SessionManager()
-        self.sess_mgr = sess_mgr
 
+        if not optimizer:
+            optimizer = tf.train.AdamOptimizer(learning_rate=DEFAULTS['learning_rate'])
+
+        self.sess_mgr = sess_mgr
         self.value_coef = value_coef
         self.entropy_coef = entropy_coef
         self.discount = discount
@@ -70,8 +73,6 @@ class ActorCriticAgent(MemoryAgent):
         self.policy = policy_cls(act_spec, self.model.outputs[:-1])
         self.loss_op, self.loss_terms, self.loss_inputs = self.loss_fn()
 
-        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-
         grads, vars = zip(*optimizer.compute_gradients(self.loss_op))
         self.grads_norm = tf.global_norm(grads)
         if clip_grads_norm > 0.:
@@ -79,7 +80,6 @@ class ActorCriticAgent(MemoryAgent):
         self.train_op = optimizer.apply_gradients(zip(grads, vars), global_step=sess_mgr.global_step)
 
         sess_mgr.restore_or_init()
-        # NB! changing trajectory length in-between checkpoints will break the logs
         self.n_batches = sess_mgr.start_step
         self.start_step = sess_mgr.start_step * traj_len
 

@@ -3,7 +3,9 @@
 ACAgent.model_fn = @build_fully_conv
 ACAgent.policy_cls = @SC2MultiPolicy
 
-ACAgent.learning_rate = 0.0005
+ACAgent.optimizer = @tf.train.AdamOptimizer()
+tf.train.AdamOptimizer.learning_rate = 0.0005
+
 ACAgent.value_coef = 0.1
 ACAgent.entropy_coef = 0.001
 

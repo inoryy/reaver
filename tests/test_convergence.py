@@ -24,8 +24,8 @@ class TestConvergence(unittest.TestCase):
         self._test_agent(rvr.agents.PPO, n_epochs=3, minibatch_sz=128)
 
     def _test_agent(self, agent_cls, **kwargs):
-        _kwargs = dict(learning_rate=0.0007, entropy_coef=0.1, batch_sz=32, gae_lambda=0.0, clip_grads_norm=0.0,
-                       clip_rewards=1.0, normalize_advantages=False, **kwargs)
+        _kwargs = dict(optimizer=tf.train.AdamOptimizer(learning_rate=0.0007), entropy_coef=0.1, batch_sz=32,
+                       gae_lambda=0.0, clip_grads_norm=0.0, clip_rewards=1.0, normalize_advantages=False, **kwargs)
 
         tf.reset_default_graph()
         tf.set_random_seed(self.seed)

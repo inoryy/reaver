@@ -1,6 +1,7 @@
 build_mlp.activation = 'tanh'
 
-ACAgent.learning_rate = 0.01
+tf.train.AdamOptimizer.learning_rate = 0.01
+
 ACAgent.entropy_coef = 0.01
 
 ACAgent.batch_sz = 16

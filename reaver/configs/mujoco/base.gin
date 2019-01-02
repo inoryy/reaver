@@ -8,7 +8,9 @@ build_mlp.obs_scale = True
 ACAgent.model_fn = @build_mlp
 ACAgent.policy_cls = @MultiPolicy
 
-ACAgent.learning_rate = 0.0003
+ACAgent.optimizer = @tf.train.AdamOptimizer()
+tf.train.AdamOptimizer.learning_rate = 0.0003
+
 ACAgent.value_coef = 0.5
 ACAgent.entropy_coef = 0.0
 

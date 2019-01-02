@@ -7,9 +7,15 @@ build_cnn_nature.obs_scale = True
 ACAgent.model_fn = @build_cnn_nature
 ACAgent.policy_cls = @MultiPolicy
 
-ACAgent.learning_rate = 0.00025
+ACAgent.optimizer = @tf.train.AdamOptimizer()
+tf.train.AdamOptimizer.learning_rate = @tf.train.polynomial_decay()
+tf.train.polynomial_decay.decay_steps = 20000
+tf.train.polynomial_decay.learning_rate = 0.00025
+tf.train.polynomial_decay.end_learning_rate = 0.0
+tf.train.polynomial_decay.global_step = @tf.train.get_global_step()
+
 ACAgent.value_coef = 0.5
-ACAgent.entropy_coef = 0.01
+ACAgent.entropy_coef = 0.005
 
 ACAgent.batch_sz = 32
 ACAgent.traj_len = 16
