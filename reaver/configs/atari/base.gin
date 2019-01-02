@@ -1,7 +1,8 @@
 # params for generic actor-critic:
 # ==========================================
 build_cnn_nature.value_separate = False
-build_cnn_nature.normalize_obs = True
+build_cnn_nature.obs_shift = True
+build_cnn_nature.obs_scale = True
 
 ACAgent.model_fn = @build_cnn_nature
 ACAgent.policy_cls = @MultiPolicy
@@ -32,6 +33,7 @@ PPOAgent.traj_len = 16
 
 PPOAgent.gae_lambda = 0.95
 
-PPOAgent.n_updates = 10
+PPOAgent.n_epochs = 3
 PPOAgent.minibatch_sz = 512
 PPOAgent.clip_ratio = 0.2
+PPOAgent.clip_value = 0.0

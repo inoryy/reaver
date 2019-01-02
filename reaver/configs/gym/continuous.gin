@@ -12,3 +12,5 @@ ACAgent.clip_grads_norm = 100.0
 ACAgent.gae_lambda = 0.95
 
 ACAgent.normalize_advantages = True
+
+PPOAgent.minibatch_sz = 256

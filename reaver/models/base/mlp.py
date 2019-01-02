@@ -7,7 +7,8 @@ from reaver.models.base.layers import Squeeze, Variable, RunningStatsNorm
 @gin.configurable
 def build_mlp(obs_spec, act_spec, layer_sizes=(64, 64), activation='relu', value_separate=False, obs_shift=False, obs_scale=False):
     inputs = inputs_ = [Input(s.shape, name="input_" + s.name) for s in obs_spec]
-    inputs_ = [RunningStatsNorm(obs_shift, obs_scale, name="norm_" + s.name)(x) for s, x in zip(obs_spec, inputs_)]
+    if obs_shift or obs_scale:
+        inputs_ = [RunningStatsNorm(obs_shift, obs_scale, name="norm_" + s.name)(x) for s, x in zip(obs_spec, inputs_)]
     inputs_concat = Concatenate()(inputs_) if len(inputs_) > 1 else inputs_[0]
 
     x = build_fc(inputs_concat, layer_sizes, activation)

@@ -2,7 +2,8 @@
 # ==========================================
 build_mlp.activation = 'relu'
 build_mlp.value_separate = True
-build_mlp.normalize_obs = True
+build_mlp.obs_shift = True
+build_mlp.obs_scale = True
 
 ACAgent.model_fn = @build_mlp
 ACAgent.policy_cls = @MultiPolicy
@@ -28,8 +29,9 @@ ACAgent.normalize_advantages = False
 
 # params for PPO:
 # ==========================================
-PPOAgent.n_updates = 320
+PPOAgent.n_epochs = 10
 PPOAgent.minibatch_sz = 64
 PPOAgent.clip_ratio = 0.2
+PPOAgent.clip_value = 0.0
 
 PPOAgent.gae_lambda = 0.95

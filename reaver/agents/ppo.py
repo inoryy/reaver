@@ -20,9 +20,10 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
 
     PPO specific parameters:
 
-    :param n_updates: number of minibatch optimization steps
+    :param n_epochs: number of times optimizer goes through full batch_sz*traj_len set
     :param minibatch_sz: size of the randomly sampled minibatch
     :param clip_ratio: max interval for pi / pi_old: [1-clip_ratio, 1+clip_ratio]
+    :param clip_value: max interval for new value error: [old_value-clip_value, old_value+clip_value]
     """
     def __init__(
         self,
@@ -32,9 +33,10 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         policy_cls: PolicyType=None,
         sess_mgr: SessionManager=None,
         n_envs=4,
-        n_updates=3,
+        n_epochs=3,
         minibatch_sz=128,
         clip_ratio=0.2,
+        clip_value=0.5,
         learning_rate=DEFAULTS['learning_rate'],
         value_coef=DEFAULTS['value_coef'],
         entropy_coef=DEFAULTS['entropy_coef'],
@@ -46,31 +48,36 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         clip_grads_norm=DEFAULTS['clip_grads_norm'],
         normalize_advantages=DEFAULTS['normalize_advantages'],
     ):
-        self.n_updates = n_updates
+        kwargs = {k: v for k, v in locals().items() if k in DEFAULTS and DEFAULTS[k] != v}
+
+        self.n_epochs = n_epochs
         self.minibatch_sz = minibatch_sz
         self.clip_ratio = clip_ratio
-
-        kwargs = {k: v for k, v in locals().items() if k in DEFAULTS and DEFAULTS[k] != v}
+        self.clip_value = clip_value
 
         SyncRunningAgent.__init__(self, n_envs)
         ActorCriticAgent.__init__(self, obs_spec, act_spec, sess_mgr=sess_mgr, **kwargs)
 
-        self.start_step = self.start_step // self.n_updates
+        self.start_step = self.start_step // self.n_epochs
 
     def minimize(self, advantages, returns):
         inputs = [a.reshape(-1, *a.shape[2:]) for a in self.obs + self.acts]
         tf_inputs = self.model.inputs + self.policy.inputs
         logli_old = self.sess_mgr.run(self.policy.logli, tf_inputs, inputs)
 
-        inputs += [advantages.flatten(), returns.flatten(), logli_old]
+        inputs += [advantages.flatten(), returns.flatten(), logli_old, self.values.flatten()]
         tf_inputs += self.loss_inputs
 
-        loss_terms = grads_norm = None
         # TODO: rewrite this with persistent tensors to load data only once into the graph
-        for _ in range(self.n_updates):
-            idx = np.random.permutation(self.batch_sz * self.traj_len)[:self.minibatch_sz]
-            minibatch = [inpt[idx] for inpt in inputs]
-            loss_terms, grads_norm, *_ = self.sess_mgr.run(self.minimize_ops, tf_inputs, minibatch)
+        loss_terms = grads_norm = None
+        n_samples = self.traj_len * self.batch_sz
+        indices = np.arange(n_samples)
+        for _ in range(self.n_epochs):
+            np.random.shuffle(indices)
+            for i in range(n_samples // self.minibatch_sz):
+                idxs, idxe = i*self.minibatch_sz, (i+1)*self.minibatch_sz
+                minibatch = [inpt[indices[idxs:idxe]] for inpt in inputs]
+                loss_terms, grads_norm, *_ = self.sess_mgr.run(self.minimize_ops, tf_inputs, minibatch)
 
         return loss_terms, grads_norm
 
@@ -78,16 +85,22 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
         adv = tf.placeholder(tf.float32, [None], name="advantages")
         returns = tf.placeholder(tf.float32, [None], name="returns")
         logli_old = tf.placeholder(tf.float32, [None], name="logli_old")
+        value_old = tf.placeholder(tf.float32, [None], name="value_old")
 
         ratio = tf.exp(self.policy.logli - logli_old)
         clipped_ratio = tf.clip_by_value(ratio, 1-self.clip_ratio, 1+self.clip_ratio)
 
+        value_err = (self.value - returns)**2
+        if self.clip_value > 0.0:
+            clipped_value = tf.clip_by_value(self.value, value_old-self.clip_value, value_old+self.clip_value)
+            clipped_value_err = (clipped_value - returns)**2
+            value_err = tf.maximum(value_err, clipped_value_err)
+
         policy_loss = -tf.reduce_mean(tf.minimum(adv * ratio, adv * clipped_ratio))
-        # TODO clip value loss
-        value_loss = tf.reduce_mean((self.value - returns)**2) * self.value_coef
+        value_loss = tf.reduce_mean(value_err) * self.value_coef
         entropy_loss = tf.reduce_mean(self.policy.entropy) * self.entropy_coef
         # we want to reduce policy and value errors, and maximize entropy
         # but since optimizer is minimizing the signs are opposite
         full_loss = policy_loss + value_loss - entropy_loss
 
-        return full_loss, [policy_loss, value_loss, entropy_loss], [adv, returns, logli_old]
+        return full_loss, [policy_loss, value_loss, entropy_loss], [adv, returns, logli_old, value_old]

@@ -6,7 +6,7 @@ class RunningStatsNorm(Layer):
     """
     Normalizes inputs by running mean / std.dev statistics
     """
-    def __init__(self, and_shift=True, and_scale=True, **kwargs):
+    def __init__(self, and_shift=True, and_scale=False, **kwargs):
         self.and_shift, self.and_scale = and_shift, and_scale
         self._ct = self._mu = self._var = None
         super().__init__(**kwargs)

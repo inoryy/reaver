@@ -26,6 +26,7 @@ ACAgent.normalize_advantages = True
 # ==========================================
 PPOAgent.batch_sz = 64
 
-PPOAgent.n_updates = 3
+PPOAgent.n_epochs = 3
 PPOAgent.minibatch_sz = 512
 PPOAgent.clip_ratio = 0.2
+PPOAgent.clip_value = 0.0
