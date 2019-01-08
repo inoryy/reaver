@@ -4,6 +4,7 @@ gin.external_configurable(tf.train.AdamOptimizer, module='tf.train')
 gin.external_configurable(tf.train.get_global_step, module='tf.train')
 gin.external_configurable(tf.train.piecewise_constant, module='tf.train')
 gin.external_configurable(tf.train.polynomial_decay, module='tf.train')
+gin.external_configurable(tf.initializers.orthogonal, 'tf.initializers.orthogonal')
 
 
 class SessionManager:
