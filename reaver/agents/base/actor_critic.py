@@ -20,8 +20,9 @@ DEFAULTS = dict(
     discount=0.99,
     gae_lambda=0.95,
     clip_rewards=0.0,
-    normalize_advantages=True,
     clip_grads_norm=0.0,
+    normalize_returns=False,
+    normalize_advantages=False,
 )
 
 
@@ -50,6 +51,7 @@ class ActorCriticAgent(MemoryAgent):
         gae_lambda=DEFAULTS['gae_lambda'],
         clip_rewards=DEFAULTS['clip_rewards'],
         clip_grads_norm=DEFAULTS['clip_grads_norm'],
+        normalize_returns=DEFAULTS['normalize_returns'],
         normalize_advantages=DEFAULTS['normalize_advantages'],
     ):
         MemoryAgent.__init__(self, obs_spec, act_spec, traj_len, batch_sz)
@@ -66,6 +68,7 @@ class ActorCriticAgent(MemoryAgent):
         self.discount = discount
         self.gae_lambda = gae_lambda
         self.clip_rewards = clip_rewards
+        self.normalize_returns = normalize_returns
         self.normalize_advantages = normalize_advantages
 
         self.model = model_fn(obs_spec, act_spec)
@@ -137,6 +140,9 @@ class ActorCriticAgent(MemoryAgent):
 
         if self.normalize_advantages:
             adv = (adv - adv.mean()) / (adv.std() + 1e-10)
+
+        if self.normalize_returns:
+            returns = (returns - returns.mean()) / (returns.std() + 1e-10)
 
         return adv, returns
 
