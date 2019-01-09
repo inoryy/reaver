@@ -38,25 +38,29 @@ class ShmProcEnv(Env):
         return self._env.act_spec()
 
     def _run(self):
-        while True:
-            msg, data = self.w_conn.recv()
-            if msg == START:
-                self._env.start()
-                self.w_conn.send(DONE)
-            elif msg == STEP:
-                obs, rew, done = self._env.step(data)
-                for shm, ob in zip(self.shm, obs + [rew, done]):
-                    np.copyto(dst=shm[self.idx], src=ob)
-                self.w_conn.send(DONE)
-            elif msg == RESET:
-                obs = self._env.reset()
-                for shm, ob in zip(self.shm, obs + [0, 0]):
-                    np.copyto(dst=shm[self.idx], src=ob)
-                self.w_conn.send(DONE)
-            elif msg == STOP:
-                self._env.stop()
-                self.w_conn.close()
-                break
+        try:
+            while True:
+                msg, data = self.w_conn.recv()
+                if msg == START:
+                    self._env.start()
+                    self.w_conn.send(DONE)
+                elif msg == STEP:
+                    obs, rew, done = self._env.step(data)
+                    for shm, ob in zip(self.shm, obs + [rew, done]):
+                        np.copyto(dst=shm[self.idx], src=ob)
+                    self.w_conn.send(DONE)
+                elif msg == RESET:
+                    obs = self._env.reset()
+                    for shm, ob in zip(self.shm, obs + [0, 0]):
+                        np.copyto(dst=shm[self.idx], src=ob)
+                    self.w_conn.send(DONE)
+                elif msg == STOP:
+                    self._env.stop()
+                    self.w_conn.close()
+                    break
+        except KeyboardInterrupt:
+            self._env.stop()
+            self.w_conn.close()
 
 
 class ShmMultiProcEnv(Env):

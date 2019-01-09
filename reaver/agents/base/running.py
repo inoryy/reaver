@@ -18,6 +18,7 @@ class RunningAgent(Agent):
             self._run(env, n_steps)
         except KeyboardInterrupt:
             env.stop()
+            self.on_finish()
 
     def _run(self, env, n_steps):
         self.on_start()
