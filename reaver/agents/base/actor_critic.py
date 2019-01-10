@@ -81,6 +81,7 @@ class ActorCriticAgent(MemoryAgent):
         if clip_grads_norm > 0.:
             grads, _ = tf.clip_by_global_norm(grads, clip_grads_norm, self.grads_norm)
         self.train_op = optimizer.apply_gradients(zip(grads, vars), global_step=sess_mgr.global_step)
+        self.minimize_ops = self.make_minimize_ops()
 
         sess_mgr.restore_or_init()
         self.n_batches = sess_mgr.start_step
@@ -152,8 +153,7 @@ class ActorCriticAgent(MemoryAgent):
     def on_finish(self):
         self.logger.on_finish()
 
-    @property
-    def minimize_ops(self):
+    def make_minimize_ops(self):
         ops = [self.loss_terms, self.grads_norm]
         if self.sess_mgr.training_enabled:
             ops.append(self.train_op)

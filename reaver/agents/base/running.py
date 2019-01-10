@@ -27,7 +27,7 @@ class RunningAgent(Agent):
         for step in range(self.start_step, self.start_step + n_steps):
             action, value = self.get_action_and_value(obs)
             self.next_obs, reward, done = env.step(action)
-            self.on_step(step, [o.copy() for o in obs], action, reward, done, value)
+            self.on_step(step, obs, action, reward, done, value)
             obs = [o.copy() for o in self.next_obs]
         env.stop()
         self.on_finish()
