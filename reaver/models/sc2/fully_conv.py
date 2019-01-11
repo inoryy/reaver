@@ -8,7 +8,7 @@ from reaver.models.base.layers import Squeeze, Split, Transpose, Log, Broadcast2
 
 
 @gin.configurable
-def build_fully_conv(obs_spec, act_spec, data_format='channels_first', broadcast_non_spatial=False):
+def build_fully_conv(obs_spec, act_spec, data_format='channels_first', broadcast_non_spatial=False, fc_dim=256):
     screen, screen_input = spatial_block('screen', obs_spec.spaces[0], conv_cfg(data_format, 'relu'))
     minimap, minimap_input = spatial_block('minimap', obs_spec.spaces[1], conv_cfg(data_format, 'relu'))
 
@@ -23,7 +23,7 @@ def build_fully_conv(obs_spec, act_spec, data_format='channels_first', broadcast
         state = Concatenate(axis=1, name="state_block")([screen, minimap])
 
     fc = Flatten(name="state_flat")(state)
-    fc = Dense(256, **dense_cfg('relu'))(fc)
+    fc = Dense(fc_dim, **dense_cfg('relu'))(fc)
 
     value = Dense(1, name="value_out", **dense_cfg(scale=0.1))(fc)
     value = Squeeze(axis=-1)(value)
