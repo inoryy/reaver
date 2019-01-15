@@ -88,7 +88,6 @@ class ActorCriticAgent(MemoryAgent):
         self.n_batches = sess_mgr.start_step
         self.start_step = sess_mgr.start_step * traj_len
 
-        # this is basically /dev/null, see run.py on how to configure StreamLogger() instead
         self.logger = Logger()
 
     def get_action_and_value(self, obs):

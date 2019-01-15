@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from reaver.envs.base import Spec
+from reaver.utils import StreamLogger
 from reaver.utils.tensorflow import SessionManager
 from reaver.utils.typing import ModelBuilder, PolicyType
 from reaver.agents.base import SyncRunningAgent, ActorCriticAgent, DEFAULTS
@@ -58,6 +59,7 @@ class ProximalPolicyOptimizationAgent(SyncRunningAgent, ActorCriticAgent):
 
         SyncRunningAgent.__init__(self, n_envs)
         ActorCriticAgent.__init__(self, obs_spec, act_spec, sess_mgr=sess_mgr, **kwargs)
+        self.logger = StreamLogger(n_envs=n_envs, log_freq=10, sess_mgr=self.sess_mgr)
 
         self.start_step = self.start_step // self.n_epochs
 
