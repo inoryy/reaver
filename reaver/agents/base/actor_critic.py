@@ -5,6 +5,7 @@ from abc import abstractmethod
 
 from reaver.envs.base import Spec
 from reaver.agents.base import MemoryAgent
+from reaver.utils import Logger
 from reaver.utils.tensorflow import SessionManager
 from reaver.utils.typing import ModelBuilder, PolicyType
 
@@ -86,6 +87,9 @@ class ActorCriticAgent(MemoryAgent):
         sess_mgr.restore_or_init()
         self.n_batches = sess_mgr.start_step
         self.start_step = sess_mgr.start_step * traj_len
+
+        # this is basically /dev/null, see run.py on how to configure StreamLogger() instead
+        self.logger = Logger()
 
     def get_action_and_value(self, obs):
         return self.sess_mgr.run([self.policy.sample, self.value], self.model.inputs, obs)
