@@ -1,5 +1,15 @@
 import os
 
+SC2_MINIGAMES_ALIASES = {
+    'beacon': 'MoveToBeacon',
+    'shards': 'CollectMineralShards',
+    'roaches': 'DefeatRoaches',
+    'blings': 'DefeatZerglingsAndBanelings',
+    'lings': 'FindAndDefeatZerglings',
+    'minerals': 'CollectMineralsAndGas',
+    'marines': 'BuildMarines',
+}
+
 GYM_CONTINUOUS = [
     'LunarLanderContinuous-v2',
     'BipedalWalker-v2',

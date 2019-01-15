@@ -49,6 +49,9 @@ def main(argv):
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
+    if args.env in rvr.utils.config.SC2_MINIGAMES_ALIASES:
+        args.env = rvr.utils.config.SC2_MINIGAMES_ALIASES[args.env]
+
     if args.test:
         args.n_envs = 1
         args.log_freq = 1
