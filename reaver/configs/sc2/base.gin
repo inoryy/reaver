@@ -4,9 +4,9 @@ ACAgent.model_fn = @build_fully_conv
 ACAgent.policy_cls = @SC2MultiPolicy
 
 ACAgent.optimizer = @tf.train.AdamOptimizer()
-tf.train.AdamOptimizer.learning_rate = 0.0005
+tf.train.AdamOptimizer.learning_rate = 0.0007
 
-ACAgent.value_coef = 0.1
+ACAgent.value_coef = 0.5
 ACAgent.entropy_coef = 0.001
 
 ACAgent.batch_sz = 32
@@ -18,7 +18,8 @@ ACAgent.gae_lambda = 0.0
 ACAgent.clip_rewards = 0.0
 ACAgent.clip_grads_norm = 10.0
 
-ACAgent.normalize_advantages = True
+ACAgent.normalize_returns = False
+ACAgent.normalize_advantages = False
 
 # params for A2C:
 # ==========================================
@@ -26,9 +27,11 @@ ACAgent.normalize_advantages = True
 
 # params for PPO:
 # ==========================================
-PPOAgent.batch_sz = 64
+PPOAgent.gae_lambda = 0.95
 
 PPOAgent.n_epochs = 3
-PPOAgent.minibatch_sz = 512
+PPOAgent.minibatch_sz = 128
 PPOAgent.clip_ratio = 0.2
 PPOAgent.clip_value = 0.0
+
+PPOAgent.normalize_advantages = True
