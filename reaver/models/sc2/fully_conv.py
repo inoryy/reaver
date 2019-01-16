@@ -54,8 +54,8 @@ def spatial_block(name, space, cfg):
 
     for i, (name, dim) in enumerate(zip(space.spatial_feats, space.spatial_dims)):
         if dim > 1:
-            # Embedding dim 10 as per https://arxiv.org/pdf/1806.01830.pdf
             block[i] = Squeeze(axis=1)(block[i])
+            # Embedding dim 10 as per https://arxiv.org/pdf/1806.01830.pdf
             block[i] = Embedding(input_dim=dim, output_dim=10)(block[i])
             # [N, H, W, C] -> [N, C, H, W]
             block[i] = Transpose([0, 3, 1, 2])(block[i])

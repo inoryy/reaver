@@ -137,10 +137,15 @@ class ObservationWrapper:
     def __init__(self, _features=None, action_ids=None):
         self.spec = None
         self.features = _features
-        self.feature_masks = {
-            'screen': [i for i, f in enumerate(features.SCREEN_FEATURES._fields) if f in _features['screen']],
-            'minimap': [i for i, f in enumerate(features.MINIMAP_FEATURES._fields) if f in _features['minimap']],}
         self.action_ids = action_ids
+
+        screen_feature_to_idx = {feat: idx for idx, feat in enumerate(features.SCREEN_FEATURES._fields)}
+        minimap_feature_to_idx = {feat: idx for idx, feat in enumerate(features.MINIMAP_FEATURES._fields)}
+
+        self.feature_masks = {
+            'screen': [screen_feature_to_idx[f] for f in _features['screen']],
+            'minimap': [minimap_feature_to_idx[f] for f in _features['minimap']]
+        }
 
     def __call__(self, timestep):
         ts = timestep[0]
