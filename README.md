@@ -1,4 +1,4 @@
-# Reaver: StarCraft II Deep Reinforcement Learning Agent
+# Reaver: Modular Deep Reinforcement Learning Framework
 
 [![MoveToBeacon](https://user-images.githubusercontent.com/195271/48730921-66b6fe00-ec44-11e8-9954-9f4891ff9672.gif)](https://youtu.be/gEyBzcPU5-w)
 [![CollectMineralShards](https://user-images.githubusercontent.com/195271/48730941-70d8fc80-ec44-11e8-95ae-acff6f5a9add.gif)](https://youtu.be/gEyBzcPU5-w)
@@ -19,10 +19,9 @@
 
 ## Introduction
 
-Reaver is a deep reinforcement learning agent designed for training on various StarCraft II based tasks.
-Main focus of Reaver is following in DeepMind's footsteps, pushing state-of-the-art of the field through the lens
-of playing a modern video game with human-like interface and limitations. This includes observing visual features similar
-(though not identical) to what a human player would perceive and choosing actions from similar pool of options a human player would have.
+Reaver is a modular deep reinforcement learning framework with a focus on various StarCraft II based tasks, following in DeepMind's footsteps 
+who are pushing state-of-the-art of the field through the lens of playing a modern video game with human-like interface and limitations. 
+This includes observing visual features similar (though not identical) to what a human player would perceive and choosing actions from similar pool of options a human player would have.
 See [StarCraft II: A New Challenge for Reinforcement Learning](https://arxiv.org/abs/1708.04782) article for more details.
 
 Though development is research-driven, the philosophy behind Reaver API is akin to StarCraft II game itself - 
@@ -30,6 +29,10 @@ it has something to offer both for novices and experts in the field. For hobbyis
 necessary to train DRL agents by modifying only a small and isolated part of the agent (e.g. hyperparameters).
 For veteran researchers Reaver offers simple, but performance-optimized codebase with modular architecture: 
 agent, model, and environment are decoupled and can be swapped at will.
+
+While the focus of Reaver is on StarCraft II, it also has full support for other popular environments, notably Atari and MuJoCo. 
+Reaver agent algorithms are validated against reference results, e.g. PPO agent is able to match [
+Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347). Please see [below](#but-wait-theres-more) for more details.
 
 ## Installation
 
