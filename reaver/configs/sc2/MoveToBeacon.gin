@@ -1,0 +1,7 @@
+tf.train.AdamOptimizer.learning_rate = 0.0005
+
+ACAgent.entropy_coef = 0.0005
+ACAgent.clip_grads_norm = 100.0
+
+ACAgent.normalize_returns = False
+ACAgent.normalize_advantages = False
