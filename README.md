@@ -117,7 +117,7 @@ agent.run(env)
 Moreover, Reaver comes with highly configurable commandline tools, so this task can be reduced to a short one-liner!
 
 ```bash
-python -m reaver.run --env MoveToBeacon --agent a2c --envs 4 2> stderr.log
+python -m reaver.run --env MoveToBeacon --agent a2c --n_envs 4 2> stderr.log
 ```
 
 With the line above Reaver will initialize the training procedure with a set of pre-defined hyperparameters, optimized
@@ -354,7 +354,7 @@ If you have found Reaver useful in your research, please consider citing it with
 ```
 @misc{reaver,
   author = {Ring, Roman},
-  title = {Reaver: StarCraft II Deep Reinforcement Learning Agent},
+  title = {Reaver: Modular Deep Reinforcement Learning Framework},
   year = {2018},
   publisher = {GitHub},
   journal = {GitHub repository},
