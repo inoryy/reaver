@@ -36,8 +36,6 @@ Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347). Plea
 
 ## Installation
 
-**NB!** As of 25/11/18 you must install **PySC2** [from source](https://github.com/deepmind/pysc2#git) since PIP version is outdated.
-
 ### Requirements
 
 * numpy >= 1.13
@@ -46,7 +44,13 @@ Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347). Plea
 * TensorFlow >= 1.10
 * TensorFlow Probability >= 0.4
 * StarCraft II >= 4.1.2 ([instructions](https://github.com/Blizzard/s2client-proto#downloads))
-* PySC2 > 2.0.1 (**NB!** PIP version is outdated)
+* PySC2 > 2.0.1
+
+**NB!** As of 25/11/18 you must install **PySC2** [from source](https://github.com/deepmind/pysc2#git) since PIP version is outdated:
+
+```
+pip install --upgrade https://github.com/deepmind/pysc2/archive/master.zip
+```
 
 #### Optional Extras
 If you would like to use Reaver with other supported environments, you must install relevant packages as well:
