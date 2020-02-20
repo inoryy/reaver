@@ -23,10 +23,10 @@ setuptools.setup(
     ],
     extras_require={
         'tf-cpu': [
-            'tensorflow >= 1.10, < 1.13',
+            'tensorflow >= 1.10, < 1.14',
         ],
         'tf-gpu': [
-            'tensorflow-gpu >= 1.10, < 1.13',
+            'tensorflow-gpu >= 1.10, < 1.14',
         ],
         'gym': [
             'PyOpenGL',

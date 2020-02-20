@@ -36,37 +36,22 @@ Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347). Plea
 
 ## Installation
 
-### Requirements
+**NB!** As of 20/02/20, Reaver relies on relatively outdated TensorFlow, which in turn relies on older CUDA/CuDNN dependencies.
+To avoid having this affect your global environment, I recommend setting up a separate virtual env. For example, with Anaconda:
 
-* numpy >= 1.13
-* absl-py >= 0.2.2
-* gin-config >= 0.1.1
-* TensorFlow >= 1.10
-* TensorFlow Probability >= 0.4
-* StarCraft II >= 4.1.2 ([instructions](https://github.com/Blizzard/s2client-proto#downloads))
-* PySC2 > 2.0.1
-
-**NB!** As of 25/11/18 you must install **PySC2** [from source](https://github.com/deepmind/pysc2#git) since PIP version is outdated:
-
+```bash
+$ conda create -n rvr python=3.7
+$ conda activate rvr
+$ conda install cudatoolkit=10.0
+$ conda install -c anaconda cudnn
+$ pip install tensorflow-gpu==1.13.2
 ```
-pip install --upgrade https://github.com/deepmind/pysc2/archive/master.zip
-```
-
-#### Optional Extras
-If you would like to use Reaver with other supported environments, you must install relevant packages as well:
-
-* gym >= 0.10.0
-* atari-py >= 0.1.5
-* mujoco-py >= 1.50.0
-  * roboschool >= 1.0 (alternative)
 
 ### PIP Package
 
 Easiest way to install Reaver is through the `PIP` package manager:
  
     pip install reaver
-
-**NB!** PySC2 PIP version is outdated, so you will need to install it from source as described above.
 
 **NB!** Reaver specifies `TensorFlow` only as a soft dependency and it will not be installed by default. This is to avoid
 `tensorflow` overwriting `tensorflow-gpu` and vise-versa. You can install `tensorflow` along with Reaver by specifying either
@@ -89,14 +74,6 @@ $ pip install -e reaver-pysc2/
 
 By installing with `-e` flag `Python` will now look for `reaver` in the specified folder, rather than `site-packages` storage.
 
-### Optimized TensorFlow
-
-The `TensorFlow` that is distributed through `PIP` is built to target as many architectures / devices as possible, which
-means that various optimization flags are disabled by default. For example, if your CPU supports `AVX2` (is newer than 5 years),
-it is highly recommended to use a custom built TensorFlow instead. If building from source is not an option for you,
-then [this repository](https://github.com/inoryy/tensorflow-optimized-wheels) might be useful - it contains newest `TensorFlow`
-releases built for newest CUDA / CuDNN versions, which often come with performance boosts even for older GPUs.
-
 ### Windows
 
 Please see the [wiki](https://github.com/inoryy/reaver-pysc2/wiki/Windows) page for detailed instructions on setting up Reaver on Windows.
@@ -104,6 +81,24 @@ Please see the [wiki](https://github.com/inoryy/reaver-pysc2/wiki/Windows) page 
 However, if possible please consider using `Linux OS` instead - due to performance and stability considerations.
 If you would like to see your agent perform with full graphics enabled you can save a replay of the agent on Linux and open it on Windows.
 This is how the video recording listed below was made.
+
+### Requirements
+
+* numpy >= 1.13
+* absl-py >= 0.2.2
+* gin-config >= 0.1.1
+* TensorFlow <= 1.13
+* TensorFlow Probability <= 0.5
+* StarCraft II >= 4.1.2 ([instructions](https://github.com/Blizzard/s2client-proto#downloads))
+* PySC2 > 2.0.1
+
+#### Optional Extras
+If you would like to use Reaver with other supported environments, you must install relevant packages as well:
+
+* gym >= 0.10.0
+* atari-py >= 0.1.5
+* mujoco-py >= 1.50.0
+  * roboschool >= 1.0 (alternative)
 
 
 ## Quick Start
@@ -290,44 +285,6 @@ You can use pre-trained weights by appending `--experiment` flag to `reaver.run`
 
 Tensorboard logs are available if you launch `tensorboard --logidr=results/summaries`.  
 You can also view them [directly online](https://boards.aughie.org/board/HWi4xmuvuOSuw09QBfyDD-oNF1U) via [Aughie Boards](https://boards.aughie.org/).
-
-## Roadmap
-
-In this section you can get a birdseye overview of my plans for the project in no particular order. You can also follow 
-what I'm currently working on in the [projects tab](https://github.com/inoryy/reaver-pysc2/projects). 
-Any help with development is of course highly appreciated, assuming contributed codebase license matches (MIT).
-
-* [ ] Documentation
-  * [ ] Codebase documentation
-  * [ ] Extending to custom environments
-  * [ ] Extending to custom agents
-  * [x] Setup on [Google Colab](https://colab.research.google.com)
-* [ ] Unit tests
-  * [x] For critical features such as advantage estimation
-  * [ ] General basic convergence guarantees of agents / models combinations
-* [ ] LSTM support
-  * [ ] for simpler gym environments
-  * [ ] for full StarCraft II environment
-* [ ] Asynchronous multiprocessing
-* [ ] Additional agents
-  * [ ] Behavior Cloning / Imitation Learning
-  * [ ] IMPALA + PopArt
-  * [ ] Ape-X
-  * [ ] ACKTR
-* [ ] Quality of Life improvements
-  * [x] Plotting utility for generating research article friendly plots
-  * [ ] Running & comparing experiments across many random seeds
-  * [ ] Copying previously executed experiment
-* [ ] StarCraft II [raw API](https://github.com/Blizzard/s2client-proto/blob/master/docs/protocol.md#raw-data) support
-* [ ] Support for more environments
-  * [ ] [VizDoom](https://github.com/mwydmuch/ViZDoom)
-  * [ ] [DeepMind Lab](https://github.com/deepmind/lab)
-  * [ ] [Gym Retro](https://github.com/openai/retro)
-  * [ ] [CARLA](https://github.com/carla-simulator/carla)
-* [ ] Multi-Agent setup support
-  * [ ] as a proof of concept on `Pong` environment through [Gym Retro](https://github.com/openai/retro)
-  * [ ] for StarCraft II through raw API
-  * [ ] for StarCraft II through featured layer API
 
 ## Why "Reaver"?
 

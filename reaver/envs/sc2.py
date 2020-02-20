@@ -79,7 +79,8 @@ class SC2Env(Env):
                 rgb_screen=None,
                 rgb_minimap=None
             )],
-            step_mul=self.step_mul,)
+            step_mul=self.step_mul,
+            players=[sc2_env.Agent(sc2_env.Race.terran)])
 
     def step(self, action):
         try:
