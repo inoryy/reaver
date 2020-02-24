@@ -1,5 +1,5 @@
 import gin.tf
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from reaver.envs.base import Spec
 from reaver.utils import StreamLogger

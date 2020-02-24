@@ -5,29 +5,22 @@ with open("README.md", 'r') as f:
 
 setuptools.setup(
     name='reaver',
-    version='2.1.8',
+    version='2.1.9',
     author='Roman Ring',
     author_email='inoryy@gmail.com',
     description='Reaver: Modular Deep Reinforcement Learning Framework. Focused on StarCraft II. '
                 'Supports Gym, Atari, and MuJoCo. Matches reference results.',
     long_description=long_description,
-    keywords='reaver starcraft gym atari mujoco tensorflow machine reinforcement learning neural network',
+    keywords='reaver starcraft2 gym atari mujoco tensorflow reinforcement learning neural network',
     include_package_data=True,
     packages=setuptools.find_packages(),
     install_requires=[
-        'numpy >= 1.13',
-        'PySC2 >= 2.0',
-        'absl-py >= 0.2.2',
-        'gin-config == 0.1.2',
-        'tensorflow-probability >= 0.4, <= 0.5'
+        'PySC2 >= 3.0.0',
+        'gin-config >= 0.3.0',
+        'tensorflow >= 2.1.0',
+        'tensorflow-probability >= 0.9.0'
     ],
     extras_require={
-        'tf-cpu': [
-            'tensorflow >= 1.10, < 1.14',
-        ],
-        'tf-gpu': [
-            'tensorflow-gpu >= 1.10, < 1.14',
-        ],
         'gym': [
             'PyOpenGL',
             'gym >= 0.9',

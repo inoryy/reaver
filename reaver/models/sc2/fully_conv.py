@@ -1,9 +1,9 @@
 import gin
 import numpy as np
-import tensorflow as tf
-from tensorflow.keras import Model
-from tensorflow.keras.initializers import VarianceScaling
-from tensorflow.keras.layers import Input, Concatenate, Dense, Embedding, Conv2D, Flatten, Lambda
+import tensorflow.compat.v1 as tf
+from tensorflow.compat.v1.keras import Model
+from tensorflow.compat.v1.keras.initializers import VarianceScaling
+from tensorflow.compat.v1.keras.layers import Input, Concatenate, Dense, Embedding, Conv2D, Flatten, Lambda
 from reaver.models.base.layers import Squeeze, Split, Transpose, Log, Broadcast2D
 
 
@@ -16,17 +16,17 @@ def build_fully_conv(obs_spec, act_spec, data_format='channels_first', broadcast
 
     if broadcast_non_spatial:
         non_spatial, spatial_dim = non_spatial_inputs[1], obs_spec.spaces[0].shape[1]
-        non_spatial = Log()(non_spatial)
+        non_spatial = tf.log(non_spatial + 1e-5)
         broadcasted_non_spatial = Broadcast2D(spatial_dim)(non_spatial)
-        state = Concatenate(axis=1, name="state_block")([screen, minimap, broadcasted_non_spatial])
+        state = tf.concat([screen, minimap, broadcasted_non_spatial], axis=1)
     else:
-        state = Concatenate(axis=1, name="state_block")([screen, minimap])
+        state = tf.concat([screen, minimap], axis=1)
 
     fc = Flatten(name="state_flat")(state)
     fc = Dense(fc_dim, **dense_cfg('relu'))(fc)
 
     value = Dense(1, name="value_out", **dense_cfg(scale=0.1))(fc)
-    value = Squeeze(axis=-1)(value)
+    value = tf.squeeze(value, axis=-1)
 
     logits = []
     for space in act_spec:
@@ -50,19 +50,19 @@ def build_fully_conv(obs_spec, act_spec, data_format='channels_first', broadcast
 
 def spatial_block(name, space, cfg):
     inpt = Input(space.shape, name=name + '_input')
-    block = Split(space.shape[0], axis=1)(inpt)
+    block = tf.split(inpt, space.shape[0], axis=1)
 
     for i, (name, dim) in enumerate(zip(space.spatial_feats, space.spatial_dims)):
         if dim > 1:
-            block[i] = Squeeze(axis=1)(block[i])
+            block[i] = tf.squeeze(block[i], axis=1)
             # Embedding dim 10 as per https://arxiv.org/pdf/1806.01830.pdf
             block[i] = Embedding(input_dim=dim, output_dim=10)(block[i])
             # [N, H, W, C] -> [N, C, H, W]
-            block[i] = Transpose([0, 3, 1, 2])(block[i])
+            block[i] = tf.transpose(block[i], perm=[0, 3, 1, 2])
         else:
-            block[i] = Log()(block[i])
+            block[i] = tf.log(block[i] + 1e-5)
 
-    block = Concatenate(axis=1)(block)
+    block = tf.concat(block, axis=1)
     block = Conv2D(16, 5, **cfg)(block)
     block = Conv2D(32, 3, **cfg)(block)
 

@@ -1,6 +1,6 @@
 import gin
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Input, Concatenate, Dense, Conv2D, Flatten
+from tensorflow.compat.v1.keras import Model
+from tensorflow.compat.v1.keras.layers import Input, Concatenate, Dense, Conv2D, Flatten
 from reaver.models.base.layers import Squeeze, Rescale, Transpose, RunningStatsNorm
 
 

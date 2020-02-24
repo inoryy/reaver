@@ -1,5 +1,5 @@
 import gin
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 gin.external_configurable(tf.train.AdamOptimizer, module='tf.train')
 gin.external_configurable(tf.train.RMSPropOptimizer, module='tf.train')
 gin.external_configurable(tf.train.get_global_step, module='tf.train')

@@ -1,6 +1,6 @@
 import os
 import gin
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from absl import app, flags
 
 import reaver as rvr
@@ -45,6 +45,9 @@ flags.DEFINE_alias('g', 'gin_bindings')
 
 
 def main(argv):
+    tf.disable_eager_execution()
+    tf.disable_v2_behavior()
+
     args = flags.FLAGS
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu

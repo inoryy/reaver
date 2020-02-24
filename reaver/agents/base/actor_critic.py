@@ -1,6 +1,6 @@
 import gin.tf
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from abc import abstractmethod
 
 from reaver.envs.base import Spec

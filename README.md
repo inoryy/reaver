@@ -36,32 +36,15 @@ Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347). Plea
 
 ## Installation
 
-**NB!** As of 20/02/20, Reaver relies on relatively outdated TensorFlow, which in turn relies on older CUDA/CuDNN dependencies.
-To avoid having this affect your global environment, I recommend setting up a separate virtual env. For example, with Anaconda:
-
-```bash
-$ conda create -n rvr python=3.7
-$ conda activate rvr
-$ conda install cudatoolkit=10.0
-$ conda install -c anaconda cudnn
-$ pip install tensorflow-gpu==1.13.2
-```
-
 ### PIP Package
 
 Easiest way to install Reaver is through the `PIP` package manager:
  
     pip install reaver
 
-**NB!** Reaver specifies `TensorFlow` only as a soft dependency and it will not be installed by default. This is to avoid
-`tensorflow` overwriting `tensorflow-gpu` and vise-versa. You can install `tensorflow` along with Reaver by specifying either
-`tf-cpu` or `tf-gpu` flag with `pip install` command: 
+You can also install additional extras (e.g. `gym` support) through the helper flags:
 
-    pip install reaver[tf-gpu]
-
-You can also install additional extras (e.g. `gym`) through the helper flags: 
-
-    pip install reaver[tf-gpu,gym,atari,mujoco]
+    pip install reaver[gym,atari,mujoco]
 
 ### Manual Installation
 
@@ -84,13 +67,11 @@ This is how the video recording listed below was made.
 
 ### Requirements
 
-* numpy >= 1.13
-* absl-py >= 0.2.2
-* gin-config >= 0.1.1
-* TensorFlow <= 1.13
-* TensorFlow Probability <= 0.5
+* PySC2 >= 3.0.0
 * StarCraft II >= 4.1.2 ([instructions](https://github.com/Blizzard/s2client-proto#downloads))
-* PySC2 > 2.0.1
+* gin-config >= 0.3.0
+* TensorFlow >= 2.0.0
+* TensorFlow Probability >= 0.9
 
 #### Optional Extras
 If you would like to use Reaver with other supported environments, you must install relevant packages as well:

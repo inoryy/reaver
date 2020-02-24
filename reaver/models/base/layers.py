@@ -1,5 +1,5 @@
-import tensorflow as tf
-from tensorflow.keras.layers import Lambda, Layer
+import tensorflow.compat.v1 as tf
+from tensorflow.compat.v1.keras.layers import Lambda, Layer
 
 
 class RunningStatsNorm(Layer):
@@ -68,13 +68,13 @@ class Variable(Layer):
 
 
 class Squeeze(Lambda):
-    def __init__(self, axis=-1):
-        Lambda.__init__(self, lambda x: tf.squeeze(x, axis=axis))
+    def __init__(self, axis=-1, name=None):
+        Lambda.__init__(self, lambda x: tf.squeeze(x, axis=axis), name=name)
 
 
 class Split(Lambda):
-    def __init__(self, num_splits=2, axis=-1):
-        Lambda.__init__(self, lambda x: tf.split(x, num_splits, axis=axis))
+    def __init__(self, num_splits=2, axis=-1, name=None):
+        Lambda.__init__(self, lambda x: tf.split(x, num_splits, axis=axis), name=name)
 
 
 class Transpose(Lambda):
