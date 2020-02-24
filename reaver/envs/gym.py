@@ -1,6 +1,5 @@
 import numpy as np
 from . import Env, Spec, Space
-from reaver.envs.atari import AtariPreprocessing
 
 
 class GymEnv(Env):
@@ -19,6 +18,7 @@ class GymEnv(Env):
 
         try:
             import atari_py
+            from reaver.envs.atari import AtariPreprocessing
         except ImportError:
             return
 
