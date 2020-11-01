@@ -16,6 +16,7 @@
 [![CollectMineralsAndGas](https://user-images.githubusercontent.com/195271/37241521-29594b48-2463-11e8-8b43-04ad0af6ff3e.gif)](https://youtu.be/gEyBzcPU5-w)
 [![BuildMarines](https://user-images.githubusercontent.com/195271/37241515-1a2a5c8e-2463-11e8-8ac4-588d7826e374.gif)](https://youtu.be/gEyBzcPU5-w)
 
+**Project status:** No longer maintained! Unfortunately, I am no longer able to develop further or provide support to the Reaver project.
 
 ## Introduction
 
